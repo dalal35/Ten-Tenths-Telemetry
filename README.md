@@ -123,7 +123,9 @@ The application resolves its library through Tauri's app-data API, normally `%AP
 
 ## Develop
 
-Requires Node 20+ and stable Rust. macOS development also requires Apple's Command Line Tools (`xcode-select --install`).
+For shared agent instructions and a clean Windows Codex setup, see [AGENTS.md](AGENTS.md) and the [Windows setup checklist](docs/codex/windows-setup.md).
+
+Requires Node 20+ and stable Rust. Apple Silicon development also requires Apple's Command Line Tools (`xcode-select --install`), CMake and curl. Before running `npm run tauri dev` or native Rust tests, run `node scripts/prepare-opencv.mjs` once; this builds the bundled OpenCV libraries.
 
 ```sh
 npm ci
@@ -151,20 +153,30 @@ cargo test --manifest-path src-tauri/Cargo.toml
 npm run build:mac
 ```
 
-`npm run build:mac` embeds the production frontend and builds only Apple Silicon, using the existing icons. Artifacts are `src-tauri/target/aarch64-apple-darwin/release/bundle/macos/Ten Tenths Telemetry.app` and `src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/Ten Tenths Telemetry_0.1.3_aarch64.dmg` (the filename version follows the app version). Apple's Command Line Tools are build-time dependencies only; the app uses system WebKit and AVFoundation at runtime.
+`npm run build:mac` embeds the production frontend and builds only Apple Silicon, using the existing icons. Artifacts are `src-tauri/target/aarch64-apple-darwin/release/bundle/macos/Ten Tenths Telemetry.app` and `src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/Ten Tenths Telemetry_0.1.3_aarch64.dmg` (the filename version follows the app version). Apple's Command Line Tools, CMake, curl and Node.js are build-time dependencies only; the app uses system WebKit and AVFoundation at runtime.
 Telemetry belongs in ignored `data/`; it is never committed. Importing reads files locally without changing them. The session library stores references and workspace preferences on this computer, with atomic saves and a recoverable backup; parsed samples are cached in memory rather than duplicated on disk.
+
+### Offline AI Driving Coach
+
+Open **AI Driving Coach** in a recording for **How to Improve Your Fastest Lap**. The coach automatically targets the fastest complete valid lap, reviews its corners and straights, and uses other spatially aligned laps as supporting examples. No manual lap-time target is needed. The main view shows fastest lap, enhanced theoretical best and automatic improvement potential, with up to three concise experiments. Rust calculates demonstrated or defensible hypothetical gain ranges using timing uncertainty, recorded acceleration capacity, GPS geometry and compatible boundary states; unsupported ideas say “Gain not yet quantifiable.” The full-lap budget counts each section once, using a measured or modeled alternative rather than adding overlapping gains. Traditional sector stitching remains separately inspectable. Inspect a finding to focus the fastest lap in the synchronized plots and track; compatible attached video seeks to the same interval. Missing video never blocks telemetry inspection.
+
+The bundled Gemma 3 1B model runs through embedded llama.cpp, without Ollama, Python, accounts, API keys or network access. Review and accept the bundled model terms in the coach to enable local explanations. All measurements, gain ranges and confidence classifications remain deterministic. Gemma compares and orders bounded telemetry-grounded interpretations; Rust supplies approved wording and all numerical estimates. These are coaching hypotheses, not validated causal diagnoses. Cancellation, progress, bounded caching and a computed-report fallback keep inspection available. Cross-recording merged coaching is currently unsupported; select an original recording.
+
+Build hosts additionally need CMake, libclang and a C/C++ compiler. Provision the pinned model once using `node scripts/prepare-coach-model.mjs --download`; packaging verifies its digest and includes the model and redistribution terms. End users need none of these build tools and perform no model download. See [architecture, model distribution and benchmarks](docs/offline-coach-runtime.md) and run `npm run test:coach` for the real-recording-backed browser workflow.
 
 ### Windows development and production builds
 
-Use a native Windows x64 environment with stable Rust's **MSVC** toolchain, Node 20+ (CI uses Node 22), Microsoft C++ Build Tools with **Desktop development with C++** and a Windows SDK, plus the Evergreen WebView2 runtime. Windows N also requires Media Feature Pack. Follow [Tauri's prerequisites](https://v2.tauri.app/start/prerequisites/) for source builds. No Python or externally installed FFmpeg is used.
+Use a native Windows x64 environment with stable Rust's **MSVC** toolchain, Node 20+ (CI uses Node 22), Microsoft C++ Build Tools with **Desktop development with C++** and a Windows SDK, CMake/libclang, plus the Evergreen WebView2 runtime. Windows N also requires Media Feature Pack. Build hosts also need Python and MSYS2 UCRT64 tools to provision the pinned bundled media helpers; a separate FFmpeg installation is unnecessary. Follow the [Windows setup checklist](docs/codex/windows-setup.md) and [Tauri's prerequisites](https://v2.tauri.app/start/prerequisites/).
 
 ```powershell
 npm ci
+# First provision media helpers in MSYS2 UCRT64 as described in the setup guide.
 npm run tauri dev
 # In a separate terminal, or after stopping dev:
 npm test
 npm run test:release
 cargo test --locked --manifest-path src-tauri/Cargo.toml --lib --test persistence --test video --test video_analysis
+node scripts/prepare-coach-model.mjs --download
 npm run build:windows
 ```
 
@@ -225,5 +237,14 @@ The demo reuses the desktop `App`, session explorer, uPlot charts, track map, Ad
 </details>
 
 ---
+
+## Managed YouTube downloads
+
+Native YouTube downloads use bundled yt-dlp, Deno and narrow FFmpeg/FFprobe helpers;
+users do not install media tools. Build hosts run `npm run prepare:youtube` before
+native builds and `npm run test:youtube-tools` to verify them. See
+[toolchain packaging, versions, sizes and redistribution status](docs/youtube-toolchain.md).
+Local builds are supported; tagged publication remains gated on completion of
+the standalone dependencies' corresponding-source and notice audit.
 
 <p align="center"><sub>TEN TENTHS TELEMETRY · BUILT TO READ THE LAP</sub></p>

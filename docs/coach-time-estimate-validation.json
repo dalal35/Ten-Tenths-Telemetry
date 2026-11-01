@@ -1,0 +1,105 @@
+{
+  "date": "2026-10-21",
+  "interpretation": "Conditional scenarios explicitly approved by user. These ranges are hypothetical input choices, not confidence intervals or guaranteed achievable gains. Do not add them or use them as recorded target support.",
+  "recordings": [
+    {
+      "recording": "yash dalal_59_PURDUE GP IN_Warm-up_a_0361.xrk",
+      "analysisVersion": "coach-5",
+      "bestLapSeconds": 26.675999999999988,
+      "validLaps": 10,
+      "compatibleTheoreticalImprovementSeconds": 0.0,
+      "computedTopThree": [
+        {
+          "section": "Straight 2: exit momentum",
+          "kind": "exit-tradeoff",
+          "confidence": "medium",
+          "measuredGainSeconds": null,
+          "modeledGain": {
+            "assumption": "If half to all of the reference speed advantage is recovered, without losing speed elsewhere.",
+            "lowerSeconds": 0.017133434938232196,
+            "method": "Conditional fixed-distance integral of 1/v over this section using aligned recorded GPS speed (m/s). Only positive support speed differences are applied; slower support regions are held at your baseline. This hybrid speed envelope is not a demonstrated lap, confidence interval or achievable forecast. Line, traction, acceleration feasibility and effects on adjacent sections are unverified; scenarios overlap and must not be added.",
+            "referenceLapId": "lap-10",
+            "upperSeconds": 0.033390760423587386
+          }
+        },
+        {
+          "section": "Corner 2: apex recovery experiment",
+          "kind": "apex-recovery",
+          "confidence": "low",
+          "measuredGainSeconds": null,
+          "modeledGain": {
+            "assumption": "If recovery to +1 m/s needs 25\u201350% less distance, assuming sufficient acceleration/traction.",
+            "lowerSeconds": 0.012035146066808167,
+            "method": "Hypothetical recovery distance 5.3\u20137.9 m instead of 10.6 m. Conditional fixed-distance integral of 1/v over the measured minimum-to-+1 m/s window. Compress the recorded speed-versus-distance shape into 75% and 50% of that window, then hold its recorded final speed to the original endpoint. Minimum speed, final speed and all speeds outside the window are preserved; no profile extrapolation. No faster lap validates this scenario, and the recovery duration is not time saved. Scenario choices are not confidence bounds or an achievable forecast; dynamics and adjacent-section effects are unverified. Do not add to other scenarios.",
+            "upperSeconds": 0.024070370238799366
+          }
+        }
+      ]
+    },
+    {
+      "recording": "yash dalal_59_PURDUE GP IN_Warm-up_a_0362.xrk",
+      "analysisVersion": "coach-5",
+      "bestLapSeconds": 26.585000000000008,
+      "validLaps": 10,
+      "compatibleTheoreticalImprovementSeconds": 0.0,
+      "computedTopThree": [
+        {
+          "section": "Corner 6: minimum-speed tradeoff",
+          "kind": "apex-tradeoff",
+          "confidence": "medium",
+          "measuredGainSeconds": null,
+          "modeledGain": {
+            "assumption": "If half to all of the reference speed advantage is recovered, without losing speed elsewhere.",
+            "lowerSeconds": 0.021719755089917872,
+            "method": "Conditional fixed-distance integral of 1/v over this section using aligned recorded GPS speed (m/s). Only positive support speed differences are applied; slower support regions are held at your baseline. This hybrid speed envelope is not a demonstrated lap, confidence interval or achievable forecast. Line, traction, acceleration feasibility and effects on adjacent sections are unverified; scenarios overlap and must not be added.",
+            "referenceLapId": "lap-6",
+            "upperSeconds": 0.04225980157912772
+          }
+        },
+        {
+          "section": "Straight 1: exit momentum",
+          "kind": "exit-tradeoff",
+          "confidence": "low",
+          "measuredGainSeconds": null,
+          "modeledGain": {
+            "assumption": "If half to all of the reference speed advantage is recovered, without losing speed elsewhere.",
+            "lowerSeconds": 0.016193405659990737,
+            "method": "Conditional fixed-distance integral of 1/v over this section using aligned recorded GPS speed (m/s). Only positive support speed differences are applied; slower support regions are held at your baseline. This hybrid speed envelope is not a demonstrated lap, confidence interval or achievable forecast. Line, traction, acceleration feasibility and effects on adjacent sections are unverified; scenarios overlap and must not be added.",
+            "referenceLapId": "lap-1",
+            "upperSeconds": 0.03183145801400202
+          }
+        },
+        {
+          "section": "Corner 5: apex recovery experiment",
+          "kind": "apex-recovery",
+          "confidence": "low",
+          "measuredGainSeconds": null,
+          "modeledGain": {
+            "assumption": "If recovery to +1 m/s needs 25\u201350% less distance, assuming sufficient acceleration/traction.",
+            "lowerSeconds": 0.010153425032446933,
+            "method": "Hypothetical recovery distance 5.4\u20138.1 m instead of 10.8 m. Conditional fixed-distance integral of 1/v over the measured minimum-to-+1 m/s window. Compress the recorded speed-versus-distance shape into 75% and 50% of that window, then hold its recorded final speed to the original endpoint. Minimum speed, final speed and all speeds outside the window are preserved; no profile extrapolation. No faster lap validates this scenario, and the recovery duration is not time saved. Scenario choices are not confidence bounds or an achievable forecast; dynamics and adjacent-section effects are unverified. Do not add to other scenarios.",
+            "upperSeconds": 0.020306864856627325
+          }
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "rustLibraryTests": {
+      "passed": 133,
+      "failed": 0
+    },
+    "focusedCoachFrontendTests": {
+      "passed": 33,
+      "failed": 0
+    },
+    "fullFrontendTests": {
+      "passed": 310,
+      "failed": 8,
+      "failureScope": "Unchanged tests/website-download.test.ts: hero markup and VM ES module handling."
+    },
+    "productionBuild": "passed",
+    "independentNumericalReview": "ship after exact threshold, gap overlap and duration guards",
+    "browser": "Passed against final exact-threshold real-XRK fixture: all three ranges/assumptions, navigation, cancellation, provenance, target edits and responsive dark/light layouts."
+  }
+}

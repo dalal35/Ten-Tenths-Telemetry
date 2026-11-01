@@ -1,0 +1,408 @@
+{
+  "date": "2026-10-20",
+  "reasoningVersion": "qualitative-evidence-v3",
+  "hardware": "Apple M3, 16 GiB; development build; native Metal allowed for final candidate comparison",
+  "selection": "Keep packaged Gemma3 1B initially; no weight replacement. Engineering interpretation reliability remains unproven; strict validation uses deterministic fallback.",
+  "methodology": "Identical adversarial whole-lap context and candidate findings; greedy grammar-constrained JSON; no external network or recording changes. Schema/numeric guards are mechanical and cannot prove qualitative causal truth. Review raw responses for interpretation quality. Single runs; development load and OS caching affect timings.",
+  "initialDiagnostics": [
+    {
+      "variant": "initial_unqualified_guard",
+      "runs": [
+        {
+          "inputEvidence": [
+            {
+              "evidenceId": "exit",
+              "summary": "Likely improvement. Alpha: reference has slower entry but higher exit speed and shorter combined alpha-beta time. Investigate entry-exit compromise; do not suggest raising all speeds."
+            },
+            {
+              "evidenceId": "normal_braking",
+              "summary": "Area to investigate only. Gamma: smooth speed reduction before apex and consistent acceleration after apex. No reference advantage, no anomalous deceleration. Normal braking is not evidence of wasted time."
+            },
+            {
+              "evidenceId": "calculated_gear",
+              "summary": "Area to investigate only. Delta: inferred gears oscillate while raw RPM and speed remain smooth. Calculated gear unreliable. No actual shift event is established."
+            },
+            {
+              "evidenceId": "rpm",
+              "summary": "Likely improvement. Alpha exit: lower RPM with slow speed recovery. Engine powerband, gear, throttle and clutch are unknown. Low RPM cannot establish engine bogging or a missed shift."
+            },
+            {
+              "evidenceId": "repeatable",
+              "summary": "Measured opportunity. Beta: repeated spatially aligned faster section examples, higher entry speed from alpha exit. The section difference overlaps exit finding: do not add separate gains. Repeat exit approach and compare combined sections."
+            }
+          ],
+          "model": "src-tauri/resources/coach/model.gguf",
+          "qualityAssessment": "Requires qualitative review; schema validity alone is not a coaching quality score.",
+          "result": {
+            "metrics": {
+              "backendInitMs": 223,
+              "generatedTokens": 439,
+              "gpu": true,
+              "inferenceMs": 45581,
+              "integrityMs": 3122,
+              "modelLoadMs": 565
+            },
+            "outputs": [
+              {
+                "evidenceId": "exit",
+                "experiment": "Repeat the lap section, focusing on the exit point and comparing the combined time to the previous lap.",
+                "hypothesis": "Alpha-beta time ratio improves with exit speed, but not with entry speed.",
+                "relatedEvidenceIds": [],
+                "validation": "Analyze the difference in time between the exit point and the previous lap section."
+              },
+              {
+                "evidenceId": "normal_braking",
+                "experiment": "Repeat the lap section, focusing on the Gamma section and comparing the speed reduction to the previous lap.",
+                "hypothesis": "Gamma braking maintains consistent speed reduction, without noticeable deceleration.",
+                "relatedEvidenceIds": [],
+                "validation": "Assess the consistency of speed reduction across the Gamma section."
+              },
+              {
+                "evidenceId": "calculated_gear",
+                "experiment": "Repeat the lap section, focusing on the gear data and comparing the RPM and speed data.",
+                "hypothesis": "Gear oscillation indicates a flawed calculation of gear ratios.",
+                "relatedEvidenceIds": [],
+                "validation": "Analyze the RPM and speed data for any irregularities or inconsistencies."
+              },
+              {
+                "evidenceId": "rpm",
+                "experiment": "Repeat the lap section, focusing on the RPM data and comparing the speed recovery during the exit point.",
+                "hypothesis": "Lower RPM recovery during exit improves overall lap time.",
+                "relatedEvidenceIds": [],
+                "validation": "Assess the speed recovery during the exit point compared to the previous lap."
+              },
+              {
+                "evidenceId": "repeatable",
+                "experiment": "Repeat the lap section, focusing on the exit point and comparing the combined time to the previous lap.",
+                "hypothesis": "Repeating the section with a higher exit speed results in a more consistent overlap.",
+                "relatedEvidenceIds": [],
+                "validation": "Analyze the overlap between the exit point and the previous lap section."
+              }
+            ],
+            "schemaAndNumericBoundaryPass": true
+          },
+          "reviewCriteria": [
+            "Prioritize combined exit/straight over normal braking",
+            "Explain entry-exit compromise rather than raise every speed",
+            "Do not assert gear changes or engine faults",
+            "No fabricated target allocation or numerical claims",
+            "Specific experiment and validation tied to evidence"
+          ],
+          "sectionContext": "Fastest lap 26.585s. Requested target 25.500s. Measured nonoverlapping support 0.300s; unexplained gap 0.785s. Target feasibility and arithmetic are computed outside model. Section alpha corner feeds long straight beta. Section gamma is normal hairpin braking. Section delta has GPS-derived gear only, no measured gear. All controls absent.",
+          "suite": "tradeoffs_and_uncertain_signals",
+          "wallMs": 49562
+        },
+        {
+          "inputEvidence": [
+            {
+              "evidenceId": "entry",
+              "summary": "Area to investigate. Higher entry speed coincides with lower exit speed and slow following-straight recovery; cannot determine best compromise from single lap. Compare combined corner and straight, not minimum speed alone."
+            },
+            {
+              "evidenceId": "line",
+              "summary": "Area to investigate. Apparent apex position changes within estimated GPS uncertainty; precise line differences are unresolved. Do not prescribe moving apex as established fix."
+            },
+            {
+              "evidenceId": "rpm",
+              "summary": "Area to investigate. RPM and speed recover smoothly after apex without repeated RPM drops. Engine fault or shift interruption not supported. Additional measured controls needed for causal attribution."
+            }
+          ],
+          "model": "src-tauri/resources/coach/model.gguf",
+          "qualityAssessment": "Requires qualitative review; schema validity alone is not a coaching quality score.",
+          "result": {
+            "error": "Model output failed evidence validation",
+            "outputs": null,
+            "schemaAndNumericBoundaryPass": false
+          },
+          "reviewCriteria": [
+            "Acknowledge insufficient evidence",
+            "Do not invent faster reference",
+            "No precise GPS prescription",
+            "No fault/shift diagnosis",
+            "Validate combined corner/straight tradeoff"
+          ],
+          "sectionContext": "Single valid lap. Every section examined. No aligned faster section, no defensible gain or theoretical best. Target far beyond recorded evidence. No throttle, brake, clutch or measured gear. GPS line uncertainty substantial.",
+          "suite": "counterevidence_and_limited_session",
+          "wallMs": 57992
+        }
+      ]
+    }
+  ],
+  "finalCandidateComparison": [
+    {
+      "model": "Gemma3 1B Q4_K_M",
+      "gpu": "Metal confirmed in runtime log",
+      "peakRssBytes": 1217036288,
+      "peakMemoryFootprintBytes": 454231672,
+      "notes": "Rejected generations retain raw response and wall time; inference-token breakdown unavailable on error. Peak RSS covers both suite cases and is distinct from Metal device allocation.",
+      "runs": [
+        {
+          "inputEvidence": [
+            {
+              "evidenceId": "exit",
+              "summary": "Likely improvement. Alpha: reference has slower entry but higher exit speed and shorter combined alpha-beta time. Investigate entry-exit compromise; do not suggest raising all speeds."
+            },
+            {
+              "evidenceId": "normal_braking",
+              "summary": "Area to investigate only. Gamma: smooth speed reduction before apex and consistent acceleration after apex. No reference advantage, no anomalous deceleration. Normal braking is not evidence of wasted time."
+            },
+            {
+              "evidenceId": "calculated_gear",
+              "summary": "Area to investigate only. Delta: inferred gears oscillate while raw RPM and speed remain smooth. Calculated gear unreliable. No actual shift event is established."
+            },
+            {
+              "evidenceId": "rpm",
+              "summary": "Likely improvement. Alpha exit: lower RPM with slow speed recovery. Engine powerband, gear, throttle and clutch are unknown. Low RPM cannot establish engine bogging or a missed shift."
+            },
+            {
+              "evidenceId": "repeatable",
+              "summary": "Measured opportunity. Beta: repeated spatially aligned faster section examples, higher entry speed from alpha exit. The section difference overlaps exit finding: do not add separate gains. Repeat exit approach and compare combined sections."
+            }
+          ],
+          "model": "src-tauri/resources/coach/model.gguf",
+          "qualityAssessment": "Requires qualitative review; schema validity alone is not a coaching quality score.",
+          "result": {
+            "error": "Model reasoning rejected: schema or qualitative boundary",
+            "outputs": null,
+            "rawRejectedOutput": "[\n  {\n    \"evidenceId\": \"exit\",\n    \"hypothesis\": \"Alpha exit speed might enhance the exit's overall pace.\",\n    \"experiment\": \"Attempt a slower entry and a quicker exit line.\",\n    \"validation\": \"Analyze combined corner and straight time alongside exit speed.\",\n    \"relatedEvidenceIds\": []\n  },\n  {\n    \"evidenceId\": \"normal_braking\",\n    \"hypothesis\": \"Smooth braking reduces the gap in the corner.\",\n    \"experiment\": \"Implement a calmer entry and an open exit line.\",\n    \"validation\": \"Compare combined corner and straight time alongside exit speed.\",\n    \"relatedEvidenceIds\": []\n  },\n  {\n    \"evidenceId\": \"calculated_gear\",\n    \"hypothesis\": \"Gear oscillation disrupts smooth speed.\",\n    \"experiment\": \"Observe gear oscillation while raw RPM and speed remain consistent.\",\n    \"validation\": \"Assess gear stability and speed consistency.\",\n    \"relatedEvidenceIds\": []\n  }\n]",
+            "schemaAndNumericBoundaryPass": false
+          },
+          "reviewCriteria": [
+            "Prioritize combined exit/straight over normal braking",
+            "Explain entry-exit compromise rather than raise every speed",
+            "Do not assert gear changes or engine faults",
+            "No fabricated target allocation or numerical claims",
+            "Specific experiment and validation tied to evidence"
+          ],
+          "sectionContext": "Fastest lap 26.585s. Requested target 25.500s. Measured nonoverlapping support 0.300s; unexplained gap 0.785s. Target feasibility and arithmetic are computed outside model. Section alpha corner feeds long straight beta. Section gamma is normal hairpin braking. Section delta has GPS-derived gear only, no measured gear. All controls absent.",
+          "suite": "tradeoffs_and_uncertain_signals",
+          "wallMs": 20000,
+          "manualQualityReview": {
+            "engineeringQuality": "failed",
+            "grounding": "normal braking and inferred gear noise incorrectly promoted; unqualified causal claims rejected",
+            "specificity": "exit experiment is concrete; later candidates weak",
+            "ranking": "failed; normal braking and calculated gear placed above measured repeatability"
+          }
+        },
+        {
+          "inputEvidence": [
+            {
+              "evidenceId": "entry",
+              "summary": "Area to investigate. Higher entry speed coincides with lower exit speed and slow following-straight recovery; cannot determine best compromise from single lap. Compare combined corner and straight, not minimum speed alone."
+            },
+            {
+              "evidenceId": "line",
+              "summary": "Area to investigate. Apparent apex position changes within estimated GPS uncertainty; precise line differences are unresolved. Do not prescribe moving apex as established fix."
+            },
+            {
+              "evidenceId": "rpm",
+              "summary": "Area to investigate. RPM and speed recover smoothly after apex without repeated RPM drops. Engine fault or shift interruption not supported. Additional measured controls needed for causal attribution."
+            }
+          ],
+          "model": "src-tauri/resources/coach/model.gguf",
+          "qualityAssessment": "Requires qualitative review; schema validity alone is not a coaching quality score.",
+          "result": {
+            "error": "Model reasoning rejected: schema or qualitative boundary",
+            "outputs": null,
+            "rawRejectedOutput": "[\n  {\n    \"evidenceId\": \"entry\",\n    \"hypothesis\": \"A faster entry may result in slower exit speed and recovery.\",\n    \"experiment\": \"Conduct a series of entry speeds, observing exit trajectories.\",\n    \"validation\": \"Analyze combined corner and straight time, focusing on exit speed consistency.\",\n    \"relatedEvidenceIds\": []\n  },\n  {\n    \"evidenceId\": \"line\",\n    \"hypothesis\": \"Apex position changes are inconsistent with expected GPS data.\",\n    \"experiment\": \"Repeat the lap, meticulously comparing GPS data with visual apex position.\",\n    \"validation\": \"Assess the accuracy of the visual apex position against the GPS data, considering potential drift.\",\n    \"relatedEvidenceIds\": []\n  },\n  {\n    \"evidenceId\": \"rpm\",\n    \"hypothesis\": \"RPM recovery is smooth, without abrupt drops.\",\n    \"experiment\": \"Monitor RPM during the lap, observing consistent speed stability.\",\n    \"validation\": \"Record RPM data throughout the lap, checking for abrupt speed fluctuations.\",\n    \"relatedEvidenceIds\": []\n  }\n]",
+            "schemaAndNumericBoundaryPass": false
+          },
+          "reviewCriteria": [
+            "Acknowledge insufficient evidence",
+            "Do not invent faster reference",
+            "No precise GPS prescription",
+            "No fault/shift diagnosis",
+            "Validate combined corner/straight tradeoff"
+          ],
+          "sectionContext": "Single valid lap. Every section examined. No aligned faster section, no defensible gain or theoretical best. Target far beyond recorded evidence. No throttle, brake, clutch or measured gear. GPS line uncertainty substantial.",
+          "suite": "counterevidence_and_limited_session",
+          "wallMs": 22999,
+          "manualQualityReview": {
+            "engineeringQuality": "failed",
+            "grounding": "entry tradeoff useful; later rows unqualified and lack testable improvement hypothesis",
+            "specificity": "entry speed experiment useful; GPS and RPM reviews generic",
+            "ranking": "not established"
+          }
+        }
+      ]
+    },
+    {
+      "model": "Gemma3 4B Q4_K_M",
+      "gpu": "Metal confirmed in runtime log",
+      "peakRssBytes": 3529113600,
+      "peakMemoryFootprintBytes": 1154682264,
+      "notes": "Rejected generations retain raw response and wall time; inference-token breakdown unavailable on error. Peak RSS covers both suite cases and is distinct from Metal device allocation.",
+      "runs": [
+        {
+          "inputEvidence": [
+            {
+              "evidenceId": "exit",
+              "summary": "Likely improvement. Alpha: reference has slower entry but higher exit speed and shorter combined alpha-beta time. Investigate entry-exit compromise; do not suggest raising all speeds."
+            },
+            {
+              "evidenceId": "normal_braking",
+              "summary": "Area to investigate only. Gamma: smooth speed reduction before apex and consistent acceleration after apex. No reference advantage, no anomalous deceleration. Normal braking is not evidence of wasted time."
+            },
+            {
+              "evidenceId": "calculated_gear",
+              "summary": "Area to investigate only. Delta: inferred gears oscillate while raw RPM and speed remain smooth. Calculated gear unreliable. No actual shift event is established."
+            },
+            {
+              "evidenceId": "rpm",
+              "summary": "Likely improvement. Alpha exit: lower RPM with slow speed recovery. Engine powerband, gear, throttle and clutch are unknown. Low RPM cannot establish engine bogging or a missed shift."
+            },
+            {
+              "evidenceId": "repeatable",
+              "summary": "Measured opportunity. Beta: repeated spatially aligned faster section examples, higher entry speed from alpha exit. The section difference overlaps exit finding: do not add separate gains. Repeat exit approach and compare combined sections."
+            }
+          ],
+          "model": "/private/tmp/coach-gemma-4b-Q4_K_M.gguf",
+          "qualityAssessment": "Requires qualitative review; schema validity alone is not a coaching quality score.",
+          "result": {
+            "metrics": {
+              "backendInitMs": 224,
+              "generatedTokens": 246,
+              "gpu": true,
+              "inferenceMs": 30787,
+              "integrityMs": 0,
+              "modelLoadMs": 2749
+            },
+            "outputs": [
+              {
+                "evidenceId": "exit",
+                "experiment": "Attempt a bolder entry into Alpha, focusing on maintaining a consistent exit line.",
+                "hypothesis": "A more aggressive entry into Alpha may allow for a faster exit speed.",
+                "relatedEvidenceIds": [],
+                "validation": "Assess the combined time through Alpha and Beta alongside the final exit speed."
+              },
+              {
+                "evidenceId": "rpm",
+                "experiment": "Prioritize maintaining a lower RPM during the Alpha exit maneuver.",
+                "hypothesis": "Lower RPM at Alpha exit may correlate with a smoother, faster exit.",
+                "relatedEvidenceIds": [],
+                "validation": "Observe the exit speed and corner exit time relative to the RPM."
+              },
+              {
+                "evidenceId": "repeatable",
+                "experiment": "Repeat the faster Beta section approach with a focused entry speed.",
+                "hypothesis": "Consistent faster sections in Beta may indicate an optimal entry approach.",
+                "relatedEvidenceIds": [],
+                "validation": "Compare the lap time with the repeated Beta section entry and exit."
+              }
+            ],
+            "schemaAndNumericBoundaryPass": true
+          },
+          "reviewCriteria": [
+            "Prioritize combined exit/straight over normal braking",
+            "Explain entry-exit compromise rather than raise every speed",
+            "Do not assert gear changes or engine faults",
+            "No fabricated target allocation or numerical claims",
+            "Specific experiment and validation tied to evidence"
+          ],
+          "sectionContext": "Fastest lap 26.585s. Requested target 25.500s. Measured nonoverlapping support 0.300s; unexplained gap 0.785s. Target feasibility and arithmetic are computed outside model. Section alpha corner feeds long straight beta. Section gamma is normal hairpin braking. Section delta has GPS-derived gear only, no measured gear. All controls absent.",
+          "suite": "tradeoffs_and_uncertain_signals",
+          "wallMs": 33843,
+          "manualQualityReview": {
+            "engineeringQuality": "failed despite schema pass",
+            "grounding": "recommends more aggressive entry and deliberately lower RPM contrary to supplied reference pattern",
+            "specificity": "concrete experiments but directional coaching unjustified",
+            "ranking": "omits normal braking and gear noise; measured repeatability remains last"
+          }
+        },
+        {
+          "inputEvidence": [
+            {
+              "evidenceId": "entry",
+              "summary": "Area to investigate. Higher entry speed coincides with lower exit speed and slow following-straight recovery; cannot determine best compromise from single lap. Compare combined corner and straight, not minimum speed alone."
+            },
+            {
+              "evidenceId": "line",
+              "summary": "Area to investigate. Apparent apex position changes within estimated GPS uncertainty; precise line differences are unresolved. Do not prescribe moving apex as established fix."
+            },
+            {
+              "evidenceId": "rpm",
+              "summary": "Area to investigate. RPM and speed recover smoothly after apex without repeated RPM drops. Engine fault or shift interruption not supported. Additional measured controls needed for causal attribution."
+            }
+          ],
+          "model": "/private/tmp/coach-gemma-4b-Q4_K_M.gguf",
+          "qualityAssessment": "Requires qualitative review; schema validity alone is not a coaching quality score.",
+          "result": {
+            "error": "Model reasoning rejected: schema or qualitative boundary",
+            "outputs": null,
+            "rawRejectedOutput": "[\n  {\n    \"evidenceId\": \"entry\",\n    \"hypothesis\": \"A more aggressive entry may initially increase corner speed, potentially impacting subsequent straight-line recovery.\",\n    \"experiment\": \"Attempt a slightly faster entry while maintaining consistent steering inputs throughout the corner.\",\n    \"validation\": \"Assess the subsequent corner exit speed and the recovery rate on the following straight.\"\n  ,\n    \"relatedEvidenceIds\": []\n  },\n  {\n    \"evidenceId\": \"line\",\n    \"hypothesis\": \"A subtle shift in the apex position could improve the flow through the corner.\",\n    \"experiment\": \"Experiment with a slightly different line, focusing on maintaining a consistent trajectory.\",\n    \"validation\": \"Observe the overall lap time and the feeling of momentum through the corner.\"\n  ,\n    \"relatedEvidenceIds\": []\n  },\n  {\n    \"evidenceId\": \"rpm\",\n    \"hypothesis\": \"Smooth RPM recovery after the apex suggests a consistent engine response and power delivery.\",\n    \"experiment\": \"Maintain a steady throttle application through the corner to observe the engine's behavior.\",\n    \"validation\": \"Evaluate the lap time and the driver's subjective feedback regarding engine smoothness.\"\n  ,\n    \"relatedEvidenceIds\": []\n  }\n]",
+            "schemaAndNumericBoundaryPass": false
+          },
+          "reviewCriteria": [
+            "Acknowledge insufficient evidence",
+            "Do not invent faster reference",
+            "No precise GPS prescription",
+            "No fault/shift diagnosis",
+            "Validate combined corner/straight tradeoff"
+          ],
+          "sectionContext": "Single valid lap. Every section examined. No aligned faster section, no defensible gain or theoretical best. Target far beyond recorded evidence. No throttle, brake, clutch or measured gear. GPS line uncertainty substantial.",
+          "suite": "counterevidence_and_limited_session",
+          "wallMs": 35001,
+          "manualQualityReview": {
+            "engineeringQuality": "failed",
+            "grounding": "RPM declarative causal conclusion rejected; GPS hypothesis not supported by resolved line evidence",
+            "specificity": "broad line and throttle experiments without sufficient evidence",
+            "ranking": "not established"
+          }
+        }
+      ]
+    }
+  ],
+  "realRecordingCheck": {
+    "recording": "data/yash dalal_59_PURDUE GP IN_Warm-up_a_0362.xrk",
+    "mode": "localModel",
+    "validLapCount": 10,
+    "sectionCount": 11,
+    "fastestLapSeconds": 26.585000000000008,
+    "deterministicFindingCount": 5,
+    "elapsedMs": 13710,
+    "notice": null,
+    "validatedExplanations": [
+      {
+        "action": "Try a calmer entry and an open exit line.",
+        "hypothesis": "A tighter entry may compromise exit momentum into the following straight.",
+        "opportunityId": "lap-7:segment-8:tradeoff",
+        "relatedEvidenceIds": [],
+        "validation": "Compare combined corner and straight time alongside exit speed."
+      }
+    ],
+    "qualityAssessment": "One grounded qualified exit-entry experiment; wording closely copies prompt example, so this is integration evidence and limited usefulness rather than proof of robust original engineering interpretation. No gain emitted. All11 sections fit compact package."
+  },
+  "conclusion": "Neither candidate passed both coaching-quality tests. Gemma1B strict fallback rejected both final workloads. Gemma4B passed schema on one but gave directionally unjustified coaching, then failed uncertainty validation on the other. Keep bundled 1B as requested; do not claim reliable engineer reasoning or upgrade based on these results. Deterministic evidence and qualified coaching remain authoritative; local prose must remain explicitly unverified.",
+  "checks": {
+    "rustCoachTests": "38 passed",
+    "failureFirst": "New valid qualitative output test first observed failing against old enum-only schema; passed after implementation.",
+    "densePromptBudget": "11sections and12findings bounded together to8500 serialized bytes; each section retained."
+  },
+  "nativeCancellationCheck": {
+    "requestedMs": 7000,
+    "mode": "CPU only, managed network-restricted sandbox",
+    "runs": [
+      {
+        "suite": "tradeoffs_and_uncertain_signals",
+        "wallMs": 7160,
+        "result": {
+          "error": "Cancelled",
+          "outputs": null,
+          "rawRejectedOutput": null,
+          "schemaAndNumericBoundaryPass": false
+        }
+      },
+      {
+        "suite": "counterevidence_and_limited_session",
+        "wallMs": 9205,
+        "result": {
+          "error": "Cancelled",
+          "outputs": null,
+          "rawRejectedOutput": null,
+          "schemaAndNumericBoundaryPass": false
+        }
+      }
+    ],
+    "note": "Observed cooperative cancellation latency; individual native calls are not hard-interruptible."
+  }
+}

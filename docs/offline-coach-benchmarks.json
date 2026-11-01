@@ -1,0 +1,271 @@
+{
+  "hardware": "Apple M3, 16 GiB unified memory",
+  "date": "2026-10-19",
+  "notes": [
+    "Single-run development benchmarks, not statistical latency guarantees. Initial 1B wall times include unoptimized checksum; current development SHA is optimized.",
+    "Initial CPU-labeled run still offloaded context operations to Metal: retain as hybrid historical data, not CPU fallback evidence.",
+    "The corrected offline CPU run explicitly disables devices and context offload; it ran in the network-restricted sandbox under concurrent build load.",
+    "Initial sample-recording evaluation predates stricter low-RPM/shift opportunity gates. Runtime action grammar remains the same."
+  ],
+  "runs": [
+    {
+      "run": "coach-1b-metal",
+      "caseCount": 5,
+      "expectedSpecificActionMatches": 5,
+      "metrics": {
+        "generatedTokens": 92,
+        "gpu": true,
+        "inferenceMs": 7252,
+        "modelLoadMs": 840
+      },
+      "outputs": [
+        {
+          "action": "compare_exit",
+          "evidenceId": "exit"
+        },
+        {
+          "action": "compare_rpm_recovery",
+          "evidenceId": "rpm"
+        },
+        {
+          "action": "compare_shift_timing",
+          "evidenceId": "shift"
+        },
+        {
+          "action": "compare_entry",
+          "evidenceId": "entry"
+        },
+        {
+          "action": "repeat_reference",
+          "evidenceId": "repeat"
+        }
+      ],
+      "rankingPreserved": true,
+      "schemaAndEvidencePass": true,
+      "wallMs": 58047,
+      "peakRssBytes": 1018544128
+    },
+    {
+      "run": "coach-1b-cpu",
+      "caseCount": 5,
+      "expectedSpecificActionMatches": 5,
+      "metrics": {
+        "generatedTokens": 92,
+        "gpu": false,
+        "inferenceMs": 6897,
+        "modelLoadMs": 1495
+      },
+      "outputs": [
+        {
+          "action": "compare_exit",
+          "evidenceId": "exit"
+        },
+        {
+          "action": "compare_rpm_recovery",
+          "evidenceId": "rpm"
+        },
+        {
+          "action": "compare_shift_timing",
+          "evidenceId": "shift"
+        },
+        {
+          "action": "compare_entry",
+          "evidenceId": "entry"
+        },
+        {
+          "action": "repeat_reference",
+          "evidenceId": "repeat"
+        }
+      ],
+      "rankingPreserved": true,
+      "schemaAndEvidencePass": true,
+      "wallMs": 8613,
+      "peakRssBytes": 1511079936
+    },
+    {
+      "run": "coach-1b-xrk",
+      "caseCount": 5,
+      "expectedSpecificActionMatches": 5,
+      "metrics": {
+        "backendInitMs": 288,
+        "generatedTokens": 174,
+        "gpu": true,
+        "inferenceMs": 12089,
+        "integrityMs": 48734,
+        "modelLoadMs": 1323
+      },
+      "outputs": [
+        {
+          "action": "inspect_trace",
+          "evidenceId": "lap-4:segment-6"
+        },
+        {
+          "action": "compare_rpm_recovery",
+          "evidenceId": "lap-10:lap-10:low-rpm-recovery:299.059626"
+        },
+        {
+          "action": "compare_rpm_recovery",
+          "evidenceId": "lap-10:lap-10:low-rpm-recovery:308.046973"
+        },
+        {
+          "action": "compare_rpm_recovery",
+          "evidenceId": "lap-1:lap-1:low-rpm-recovery:57.184382"
+        },
+        {
+          "action": "compare_rpm_recovery",
+          "evidenceId": "lap-2:lap-2:low-rpm-recovery:73.507158"
+        }
+      ],
+      "rankingPreserved": true,
+      "schemaAndEvidencePass": true,
+      "wallMs": 62497,
+      "peakRssBytes": 1014808576
+    },
+    {
+      "run": "coach-4b-metal",
+      "caseCount": 5,
+      "expectedSpecificActionMatches": 5,
+      "metrics": {
+        "backendInitMs": 157,
+        "generatedTokens": 83,
+        "gpu": true,
+        "inferenceMs": 7834,
+        "integrityMs": 0,
+        "modelLoadMs": 2029
+      },
+      "outputs": [
+        {
+          "action": "compare_exit",
+          "evidenceId": "exit"
+        },
+        {
+          "action": "compare_rpm_recovery",
+          "evidenceId": "rpm"
+        },
+        {
+          "action": "compare_shift_timing",
+          "evidenceId": "shift"
+        },
+        {
+          "action": "compare_entry",
+          "evidenceId": "entry"
+        },
+        {
+          "action": "repeat_reference",
+          "evidenceId": "repeat"
+        }
+      ],
+      "rankingPreserved": true,
+      "schemaAndEvidencePass": true,
+      "wallMs": 10108,
+      "peakRssBytes": 2905784320
+    },
+    {
+      "run": "coach-4b-xrk",
+      "caseCount": 5,
+      "expectedSpecificActionMatches": 5,
+      "metrics": {
+        "backendInitMs": 246,
+        "generatedTokens": 181,
+        "gpu": true,
+        "inferenceMs": 30901,
+        "integrityMs": 0,
+        "modelLoadMs": 2551
+      },
+      "outputs": [
+        {
+          "action": "inspect_trace",
+          "evidenceId": "lap-4:segment-6"
+        },
+        {
+          "action": "compare_rpm_recovery",
+          "evidenceId": "lap-10:lap-10:low-rpm-recovery:299.059626"
+        },
+        {
+          "action": "compare_rpm_recovery",
+          "evidenceId": "lap-10:lap-10:low-rpm-recovery:308.046973"
+        },
+        {
+          "action": "compare_rpm_recovery",
+          "evidenceId": "lap-1:lap-1:low-rpm-recovery:57.184382"
+        },
+        {
+          "action": "compare_rpm_recovery",
+          "evidenceId": "lap-2:lap-2:low-rpm-recovery:73.507158"
+        }
+      ],
+      "rankingPreserved": true,
+      "schemaAndEvidencePass": true,
+      "wallMs": 33777,
+      "peakRssBytes": 2885386240
+    },
+    {
+      "run": "coach-1b-offline-cpu",
+      "caseCount": 5,
+      "expectedSpecificActionMatches": 5,
+      "metrics": {
+        "backendInitMs": 85,
+        "generatedTokens": 92,
+        "gpu": false,
+        "inferenceMs": 17427,
+        "integrityMs": 3393,
+        "modelLoadMs": 1676
+      },
+      "outputs": [
+        {
+          "action": "compare_exit",
+          "evidenceId": "exit"
+        },
+        {
+          "action": "compare_rpm_recovery",
+          "evidenceId": "rpm"
+        },
+        {
+          "action": "compare_shift_timing",
+          "evidenceId": "shift"
+        },
+        {
+          "action": "compare_entry",
+          "evidenceId": "entry"
+        },
+        {
+          "action": "repeat_reference",
+          "evidenceId": "repeat"
+        }
+      ],
+      "rankingPreserved": true,
+      "schemaAndEvidencePass": true,
+      "wallMs": 22675
+    }
+  ],
+  "cancellation": {
+    "cancelRequestedMs": 7000,
+    "cancelled": true,
+    "wallMs": 7051
+  },
+  "packagedSelfCheck": {
+    "elapsedMs": 11342,
+    "findings": 2,
+    "mode": "localModel",
+    "modelResourceFound": true,
+    "modelVersion": "gemma-3-1b-it-Q4_K_M-f9c28bcd",
+    "validLaps": 10,
+    "validatedExplanations": 2
+  },
+  "finalAPFSInstallerSelfCheck": {
+    "elapsedMs": 9103,
+    "findings": 2,
+    "mode": "localModel",
+    "modelResourceFound": true,
+    "modelVersion": "gemma-3-1b-it-Q4_K_M-f9c28bcd",
+    "validLaps": 10,
+    "validatedExplanations": 2
+  },
+  "finalInstallerVerification": {
+    "filesystem": "APFS",
+    "mountedAppStrictSignatureVerified": true,
+    "sourceAppStrictSignatureVerified": true,
+    "minimumMacOS": "13.0",
+    "imageBytes": 798640129
+  }
+}

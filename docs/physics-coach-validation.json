@@ -1,0 +1,630 @@
+{
+  "analysisVersion": "coach-7",
+  "date": "2026-10-22",
+  "method": "Conditional capability scenarios; no lap record, arbitrary gain floor or uplift. Propulsion/braking q75/q90 across nonoverlapping sustained windows; median lap q90/q95 lateral demand.",
+  "rootCause": "Previous recovery model timed only minimum-to-plus-1m/s over roughly6\u201311m, compressed by at most15%, using fastest-lap-only acceleration. New scenarios time full corner-to-straight tradeoffs with capabilities across valid laps.",
+  "tests": {
+    "fullCoachSuite": "66 passed; 0 failed (cargo test --manifest-path src-tauri/Cargo.toml --lib coach:: -- --nocapture)",
+    "coverage": [
+      "known exact constant acceleration timing",
+      "analytic bang-bang timing within2ms",
+      "already optimized no-gain",
+      "per-cell acceleration braking lateral and friction ellipse",
+      "fixed shared boundary speeds",
+      "capability sensitivity",
+      "sparse speed bands and isolated maximum robustness",
+      "actual XRK inferred envelope after isolated speed glitch",
+      "speed coverage gaps withhold envelope/profiles",
+      "baseline time/distance mismatch rejection",
+      "corner-complex model replaces all touched measured sections",
+      "overlapping competing complexes never added"
+    ]
+  },
+  "recordings": [
+    {
+      "file": "0361",
+      "bestLapId": "lap-8",
+      "bestLapSeconds": 26.675999999999988,
+      "recordedTheoreticalImprovementSeconds": 0.0,
+      "wholeLapGainRange": {
+        "assumption": "Combine compatible alternatives over disjoint spatial intervals; corner-to-straight models replace every overlapping section. Validate boundary state, downstream sections and the complete lap.",
+        "basis": "hypothesis",
+        "lowerSeconds": 0.1483935895264661,
+        "method": "Sum the full-lap section budget once, independently of the three displayed recommendations. Seed each section from its exact compatible traditional source. An endpoint-preserving corner-complex model replaces all touched sections only if both scenario bounds dominate their combined budget; overlapping alternatives are never added. Additional supported sections may contribute beyond the three cards.",
+        "upperSeconds": 0.21243283639833602
+      },
+      "bestLapOnlyGainRange": {
+        "assumption": "Combine compatible alternatives over disjoint spatial intervals; corner-to-straight models replace every overlapping section. Validate boundary state, downstream sections and the complete lap.",
+        "basis": "hypothesis",
+        "lowerSeconds": 0.005125248006791392,
+        "method": "Sum the full-lap section budget once, independently of the three displayed recommendations. Seed each section from its exact compatible traditional source. An endpoint-preserving corner-complex model replaces all touched sections only if both scenario bounds dominate their combined budget; overlapping alternatives are never added. Additional supported sections may contribute beyond the three cards.",
+        "upperSeconds": 0.011533670119110365
+      },
+      "bestLapOnlyProfileCount": 0,
+      "validEnvelopeLaps": 10,
+      "lateralConservativeNominalMps2": [
+        15.46980464410172,
+        15.717735097386035
+      ],
+      "speedBands": [
+        {
+          "conservativeAccelerationMps2": 2.9268340989878503,
+          "conservativeBrakingMps2": 1.6522068496318867,
+          "maxSpeedMps": 12.0,
+          "minSpeedMps": 8.0,
+          "nominalAccelerationMps2": 3.3910855539712514,
+          "nominalBrakingMps2": 1.7845441570037954,
+          "observedAccelerationMps2": 3.3910855539712514,
+          "observedBrakingMps2": 1.7845441570037954,
+          "sampleCount": 90
+        },
+        {
+          "conservativeAccelerationMps2": 2.465457615142867,
+          "conservativeBrakingMps2": 2.872992590199325,
+          "maxSpeedMps": 16.0,
+          "minSpeedMps": 12.0,
+          "nominalAccelerationMps2": 2.83074625117888,
+          "nominalBrakingMps2": 3.8165669882715254,
+          "observedAccelerationMps2": 2.83074625117888,
+          "observedBrakingMps2": 3.8165669882715254,
+          "sampleCount": 287
+        },
+        {
+          "conservativeAccelerationMps2": 1.8826853026125234,
+          "conservativeBrakingMps2": 3.441046264505649,
+          "maxSpeedMps": 20.0,
+          "minSpeedMps": 16.0,
+          "nominalAccelerationMps2": 2.282944621394246,
+          "nominalBrakingMps2": 5.89120794610821,
+          "observedAccelerationMps2": 2.282944621394246,
+          "observedBrakingMps2": 5.89120794610821,
+          "sampleCount": 170
+        },
+        {
+          "conservativeAccelerationMps2": 1.3995726514975075,
+          "conservativeBrakingMps2": 5.8347436011705796,
+          "maxSpeedMps": 24.0,
+          "minSpeedMps": 20.0,
+          "nominalAccelerationMps2": 1.6342971119414913,
+          "nominalBrakingMps2": 6.72986591947484,
+          "observedAccelerationMps2": 1.6342971119414913,
+          "observedBrakingMps2": 6.72986591947484,
+          "sampleCount": 34
+        }
+      ],
+      "rpmEvidence": [
+        "RPM does not identify torque, throttle, engine powerband or a recoverable shift duration; no numerical shifting gain is inferred.",
+        "Valid-lap RPM central 80%: 9305\u201312270; RPM interruption and recovery evidence is available in section assessments.",
+        "At 8\u201312 m/s: 63 independent propulsion windows; median acceleration below/above 9770 RPM = 1.69/2.58 m/s\u00b2. Association is confounded by throttle, gear and corner grip; no torque curve or shift saving is inferred.",
+        "At 12\u201316 m/s: 145 independent propulsion windows; median acceleration below/above 10867 RPM = 1.70/2.04 m/s\u00b2. Association is confounded by throttle, gear and corner grip; no torque curve or shift saving is inferred.",
+        "At 16\u201320 m/s: 106 independent propulsion windows; median acceleration below/above 11360 RPM = 1.56/1.47 m/s\u00b2. Association is confounded by throttle, gear and corner grip; no torque curve or shift saving is inferred.",
+        "At 20\u201324 m/s: 15 independent propulsion windows; median acceleration below/above 11604 RPM = 1.40/1.05 m/s\u00b2. Association is confounded by throttle, gear and corner grip; no torque curve or shift saving is inferred."
+      ],
+      "primaryRecommendations": [
+        {
+          "id": "lap-8:segment-1:physics",
+          "label": "Corner 1: corner-to-straight momentum",
+          "kind": "physics-counterfactual",
+          "startMeters": 17.999009970358813,
+          "endMeters": 121.99328979909863,
+          "gainRange": {
+            "assumption": "balanced-corner: sustain session q75\u2013q90 speed-dependent propulsion/braking and median per-lap q90\u2013q95 lateral capability, with fixed entry/end speed and unchanged GPS line. Conditional sensitivity, not confidence bounds.",
+            "basis": "hypothesis",
+            "lowerSeconds": 0.1432683415196747,
+            "method": "Forward/backward distance-domain v\u00b2 simulation at \u22642 m cells; friction ellipse checked using maximum cell speed and curvature; integrate 2\u0394s/(v\u2080+v\u2081). Full corner-to-straight interval; baseline speed-time alignment checked within 4% or 50 ms. No gain floor or recorded-sector cap.",
+            "upperSeconds": 0.20089916627922566
+          },
+          "observation": "The balanced-corner capability scenario saves 0.143\u20130.201 s across the complete corner and downstream interval. Its largest conservative contribution is minimum through corner exit; competing entry and exit profiles preserve shared boundary speeds.",
+          "action": "Keep the entry repeatable and test a more settled minimum-to-exit speed recovery. Compare the minimum-speed location and exit trace, then time the complete corner and following straight over repeated laps.",
+          "evidence": [
+            {
+              "channelIds": [
+                "gps-speed"
+              ],
+              "id": "lap-8:segment-1:physics:timing",
+              "lapValue": 5.279808161149275,
+              "metric": "speedIntegralSeconds",
+              "referenceValue": 5.280647831141827,
+              "unit": "s"
+            },
+            {
+              "channelIds": [
+                "gps-speed"
+              ],
+              "id": "lap-8:segment-1:physics:scenarioMinimumSpeed",
+              "lapValue": 18.592889563266755,
+              "metric": "scenarioMinimumSpeed",
+              "referenceValue": 19.79716268409652,
+              "unit": "m/s"
+            },
+            {
+              "channelIds": [
+                "gps-speed"
+              ],
+              "id": "lap-8:segment-1:physics:scenarioMaximumSpeedAdvantage",
+              "lapValue": 1.3865045761427162,
+              "metric": "scenarioMaximumSpeedAdvantage",
+              "referenceValue": null,
+              "unit": "m/s"
+            },
+            {
+              "channelIds": [
+                "gps-speed"
+              ],
+              "id": "lap-8:segment-1:physics:scenarioMaximumAdvantagePosition",
+              "lapValue": 41.99768993083723,
+              "metric": "scenarioMaximumAdvantagePosition",
+              "referenceValue": null,
+              "unit": "m"
+            },
+            {
+              "channelIds": [
+                "gps-speed"
+              ],
+              "id": "lap-8:segment-1:physics:scenarioEntryGain",
+              "lapValue": 0.05303015247299411,
+              "metric": "scenarioEntryGain",
+              "referenceValue": null,
+              "unit": "s"
+            },
+            {
+              "channelIds": [
+                "gps-speed"
+              ],
+              "id": "lap-8:segment-1:physics:scenarioExitGain",
+              "lapValue": 0.10524656101604035,
+              "metric": "scenarioExitGain",
+              "referenceValue": null,
+              "unit": "s"
+            },
+            {
+              "channelIds": [
+                "gps-speed"
+              ],
+              "id": "lap-8:segment-1:physics:scenarioDownstreamGain",
+              "lapValue": -0.015008371969360501,
+              "metric": "scenarioDownstreamGain",
+              "referenceValue": null,
+              "unit": "s"
+            }
+          ]
+        },
+        {
+          "id": "lap-8:segment-3:apex-recovery",
+          "label": "Corner 2: apex recovery experiment",
+          "kind": "apex-recovery",
+          "startMeters": 121.99328979909863,
+          "endMeters": 159.9911997365228,
+          "gainRange": {
+            "assumption": "If a settled exit recovers to +1 m/s over a modestly shorter distance, capped by sustained same-speed acceleration already recorded on the fastest lap; available traction remains unverified.",
+            "basis": "hypothesis",
+            "lowerSeconds": 0.0027308463823582704,
+            "method": "Measured recovery window 10.6 m; a desired recovery shape compressed by up to15% is capped by the recorded acceleration and lateral-demand envelopes before computing any saving. Conditional fixed-distance integral of 1/v over the measured minimum-to-+1 m/s window. Compress the recorded speed-versus-distance shape by at most 15%, using the recorded same-speed acceleration envelope as a cap, then hold its recorded final speed to the original endpoint. Minimum speed, final speed and all speeds outside the window are preserved; no profile extrapolation. No faster lap validates this scenario, and the recovery duration is not time saved. Scenario choices are not confidence bounds or an achievable forecast; coarse GPS curvature must ease or remain stable; candidate lateral demand cannot exceed the recorded window maximum and longitudinal acceleration cannot exceed sustained same-speed measured capacity. Grip and control causes remain unverified; this is not a safe-speed instruction. Aggregation uses only disjoint endpoint-preserving scenarios.",
+            "upperSeconds": 0.0058281234498438065
+          },
+          "observation": "Your fastest lap has a sustained low-speed phase after an interior corner minimum. Review the entry, minimum-speed location and exit together: earlier stable recovery may be worth testing, but this profile alone does not establish an inefficiency.",
+          "action": "Inspect the GPS arc and RPM at the minimum. Test a settled entry and one smooth exit arc, then compare recovery onset, full corner time and the following section over repeated laps. Keep entry speed controlled while testing.",
+          "evidence": [
+            {
+              "channelIds": [
+                "gps-speed"
+              ],
+              "id": "lap-8:segment-3:apex-recovery:minimumSpeed",
+              "lapValue": 11.14509757696181,
+              "metric": "minimumSpeed",
+              "referenceValue": null,
+              "unit": "m/s"
+            },
+            {
+              "channelIds": [
+                "gps-speed"
+              ],
+              "id": "lap-8:segment-3:apex-recovery:recoveryToOneMeterPerSecond",
+              "lapValue": 0.9000000000000057,
+              "metric": "recoveryToOneMeterPerSecond",
+              "referenceValue": null,
+              "unit": "s"
+            },
+            {
+              "channelIds": [
+                "gps-speed"
+              ],
+              "id": "lap-8:segment-3:apex-recovery:minimumSpeedLocation",
+              "lapValue": 62.05588133839178,
+              "metric": "minimumSpeedLocation",
+              "referenceValue": null,
+              "unit": "%"
+            }
+          ]
+        }
+      ],
+      "alternatives": [
+        {
+          "strategy": "exit-focus",
+          "startMeters": 17.999009970358813,
+          "endMeters": 121.99328979909863,
+          "baselineSeconds": 5.279808161149275,
+          "recordedSeconds": 5.280647831141827,
+          "conservativeSeconds": 5.278419233905124,
+          "nominalSeconds": 5.2207329427026785,
+          "timingResidualSeconds": -0.0008396699925512507,
+          "conservativeGainSeconds": 0.0013889272441511835,
+          "nominalGainSeconds": 0.0590752184465968
+        },
+        {
+          "strategy": "entry-momentum",
+          "startMeters": 17.999009970358813,
+          "endMeters": 121.99328979909863,
+          "baselineSeconds": 5.279808161149275,
+          "recordedSeconds": 5.280647831141827,
+          "conservativeSeconds": 5.176599008521034,
+          "nominalSeconds": 5.1195528623924496,
+          "timingResidualSeconds": -0.0008396699925512507,
+          "conservativeGainSeconds": 0.10320915262824126,
+          "nominalGainSeconds": 0.16025529875682576
+        },
+        {
+          "strategy": "balanced-corner",
+          "startMeters": 17.999009970358813,
+          "endMeters": 121.99328979909863,
+          "baselineSeconds": 5.279808161149275,
+          "recordedSeconds": 5.280647831141827,
+          "conservativeSeconds": 5.136539819629601,
+          "nominalSeconds": 5.07890899487005,
+          "timingResidualSeconds": -0.0008396699925512507,
+          "conservativeGainSeconds": 0.1432683415196747,
+          "nominalGainSeconds": 0.20089916627922566
+        }
+      ]
+    },
+    {
+      "file": "0362",
+      "bestLapId": "lap-7",
+      "bestLapSeconds": 26.585000000000008,
+      "recordedTheoreticalImprovementSeconds": 0.0,
+      "wholeLapGainRange": {
+        "assumption": "Combine compatible alternatives over disjoint spatial intervals; corner-to-straight models replace every overlapping section. Validate boundary state, downstream sections and the complete lap.",
+        "basis": "hypothesis",
+        "lowerSeconds": 0.055859856433783335,
+        "method": "Sum the full-lap section budget once, independently of the three displayed recommendations. Seed each section from its exact compatible traditional source. An endpoint-preserving corner-complex model replaces all touched sections only if both scenario bounds dominate their combined budget; overlapping alternatives are never added. Additional supported sections may contribute beyond the three cards.",
+        "upperSeconds": 0.12611980541148787
+      },
+      "bestLapOnlyGainRange": {
+        "assumption": "Combine compatible alternatives over disjoint spatial intervals; corner-to-straight models replace every overlapping section. Validate boundary state, downstream sections and the complete lap.",
+        "basis": "hypothesis",
+        "lowerSeconds": 0.0004850934052269604,
+        "method": "Sum the full-lap section budget once, independently of the three displayed recommendations. Seed each section from its exact compatible traditional source. An endpoint-preserving corner-complex model replaces all touched sections only if both scenario bounds dominate their combined budget; overlapping alternatives are never added. Additional supported sections may contribute beyond the three cards.",
+        "upperSeconds": 0.0016116095191938688
+      },
+      "bestLapOnlyProfileCount": 0,
+      "validEnvelopeLaps": 10,
+      "lateralConservativeNominalMps2": [
+        15.822683586926882,
+        16.410650552079478
+      ],
+      "speedBands": [
+        {
+          "conservativeAccelerationMps2": 2.6124974292391308,
+          "conservativeBrakingMps2": 1.3696744742335838,
+          "maxSpeedMps": 12.0,
+          "minSpeedMps": 8.0,
+          "nominalAccelerationMps2": 3.108203666403174,
+          "nominalBrakingMps2": 2.439134385283708,
+          "observedAccelerationMps2": 3.108203666403174,
+          "observedBrakingMps2": 2.439134385283708,
+          "sampleCount": 89
+        },
+        {
+          "conservativeAccelerationMps2": 2.460709814536166,
+          "conservativeBrakingMps2": 2.6312758760584103,
+          "maxSpeedMps": 16.0,
+          "minSpeedMps": 12.0,
+          "nominalAccelerationMps2": 2.8890360465318565,
+          "nominalBrakingMps2": 3.5163383656886005,
+          "observedAccelerationMps2": 2.8890360465318565,
+          "observedBrakingMps2": 3.5163383656886005,
+          "sampleCount": 277
+        },
+        {
+          "conservativeAccelerationMps2": 1.8182114321925584,
+          "conservativeBrakingMps2": 3.78492742604696,
+          "maxSpeedMps": 20.0,
+          "minSpeedMps": 16.0,
+          "nominalAccelerationMps2": 2.091431655687458,
+          "nominalBrakingMps2": 6.638015673398221,
+          "observedAccelerationMps2": 2.091431655687458,
+          "observedBrakingMps2": 6.638015673398221,
+          "sampleCount": 167
+        },
+        {
+          "conservativeAccelerationMps2": 1.2765472508003213,
+          "conservativeBrakingMps2": 4.323116972919529,
+          "maxSpeedMps": 24.0,
+          "minSpeedMps": 20.0,
+          "nominalAccelerationMps2": 1.3916796504377587,
+          "nominalBrakingMps2": 6.306265416656323,
+          "observedAccelerationMps2": 1.3916796504377587,
+          "observedBrakingMps2": 6.306265416656323,
+          "sampleCount": 44
+        }
+      ],
+      "rpmEvidence": [
+        "RPM does not identify torque, throttle, engine powerband or a recoverable shift duration; no numerical shifting gain is inferred.",
+        "Valid-lap RPM central 80%: 8373\u201311377; RPM interruption and recovery evidence is available in section assessments.",
+        "At 8\u201312 m/s: 59 independent propulsion windows; median acceleration below/above 9661 RPM = 2.14/2.02 m/s\u00b2. Association is confounded by throttle, gear and corner grip; no torque curve or shift saving is inferred.",
+        "At 12\u201316 m/s: 145 independent propulsion windows; median acceleration below/above 10607 RPM = 1.48/2.08 m/s\u00b2. Association is confounded by throttle, gear and corner grip; no torque curve or shift saving is inferred.",
+        "At 16\u201320 m/s: 102 independent propulsion windows; median acceleration below/above 10970 RPM = 1.35/1.51 m/s\u00b2. Association is confounded by throttle, gear and corner grip; no torque curve or shift saving is inferred.",
+        "At 20\u201324 m/s: 24 independent propulsion windows; median acceleration below/above 10479 RPM = 1.17/1.19 m/s\u00b2. Association is confounded by throttle, gear and corner grip; no torque curve or shift saving is inferred."
+      ],
+      "primaryRecommendations": [
+        {
+          "id": "lap-7:segment-1:physics",
+          "label": "Corner 1: corner-to-straight momentum",
+          "kind": "physics-counterfactual",
+          "startMeters": 17.957859649675335,
+          "endMeters": 123.70969980887455,
+          "gainRange": {
+            "assumption": "balanced-corner: sustain session q75\u2013q90 speed-dependent propulsion/braking and median per-lap q90\u2013q95 lateral capability, with fixed entry/end speed and unchanged GPS line. Conditional sensitivity, not confidence bounds.",
+            "basis": "hypothesis",
+            "lowerSeconds": 0.05537476302855637,
+            "method": "Forward/backward distance-domain v\u00b2 simulation at \u22642 m cells; friction ellipse checked using maximum cell speed and curvature; integrate 2\u0394s/(v\u2080+v\u2081). Full corner-to-straight interval; baseline speed-time alignment checked within 4% or 50 ms. No gain floor or recorded-sector cap.",
+            "upperSeconds": 0.124508195892294
+          },
+          "observation": "The balanced-corner capability scenario saves 0.055\u20130.125 s across the complete corner and downstream interval. Its largest conservative contribution is minimum through corner exit; competing entry and exit profiles preserve shared boundary speeds.",
+          "action": "Keep the entry repeatable and test a more settled minimum-to-exit speed recovery. Compare the minimum-speed location and exit trace, then time the complete corner and following straight over repeated laps.",
+          "evidence": [
+            {
+              "channelIds": [
+                "gps-speed"
+              ],
+              "id": "lap-7:segment-1:physics:timing",
+              "lapValue": 5.2505033072158085,
+              "metric": "speedIntegralSeconds",
+              "referenceValue": 5.245287010298825,
+              "unit": "s"
+            },
+            {
+              "channelIds": [
+                "gps-speed"
+              ],
+              "id": "lap-7:segment-1:physics:scenarioMinimumSpeed",
+              "lapValue": 19.15441049171117,
+              "metric": "scenarioMinimumSpeed",
+              "referenceValue": 19.60476963238954,
+              "unit": "m/s"
+            },
+            {
+              "channelIds": [
+                "gps-speed"
+              ],
+              "id": "lap-7:segment-1:physics:scenarioMaximumSpeedAdvantage",
+              "lapValue": 0.7790891132651794,
+              "metric": "scenarioMaximumSpeedAdvantage",
+              "referenceValue": null,
+              "unit": "m/s"
+            },
+            {
+              "channelIds": [
+                "gps-speed"
+              ],
+              "id": "lap-7:segment-1:physics:scenarioMaximumAdvantagePosition",
+              "lapValue": 75.82207407640698,
+              "metric": "scenarioMaximumAdvantagePosition",
+              "referenceValue": null,
+              "unit": "m"
+            },
+            {
+              "channelIds": [
+                "gps-speed"
+              ],
+              "id": "lap-7:segment-1:physics:scenarioEntryGain",
+              "lapValue": 0.02350723654392571,
+              "metric": "scenarioEntryGain",
+              "referenceValue": null,
+              "unit": "s"
+            },
+            {
+              "channelIds": [
+                "gps-speed"
+              ],
+              "id": "lap-7:segment-1:physics:scenarioExitGain",
+              "lapValue": 0.031512726335082133,
+              "metric": "scenarioExitGain",
+              "referenceValue": null,
+              "unit": "s"
+            },
+            {
+              "channelIds": [
+                "gps-speed"
+              ],
+              "id": "lap-7:segment-1:physics:scenarioDownstreamGain",
+              "lapValue": 0.00035480014954554495,
+              "metric": "scenarioDownstreamGain",
+              "referenceValue": null,
+              "unit": "s"
+            }
+          ]
+        },
+        {
+          "id": "lap-7:segment-5:apex-recovery",
+          "label": "Corner 3: apex recovery experiment",
+          "kind": "apex-recovery",
+          "startMeters": 177.58327875790056,
+          "endMeters": 196.5387972770023,
+          "gainRange": {
+            "assumption": "If a settled exit recovers to +1 m/s over a modestly shorter distance, capped by sustained same-speed acceleration already recorded on the fastest lap; available traction remains unverified.",
+            "basis": "hypothesis",
+            "lowerSeconds": 0.0004850934052269604,
+            "method": "Measured recovery window 6.4 m; a desired recovery shape compressed by up to15% is capped by the recorded acceleration and lateral-demand envelopes before computing any saving. Conditional fixed-distance integral of 1/v over the measured minimum-to-+1 m/s window. Compress the recorded speed-versus-distance shape by at most 15%, using the recorded same-speed acceleration envelope as a cap, then hold its recorded final speed to the original endpoint. Minimum speed, final speed and all speeds outside the window are preserved; no profile extrapolation. No faster lap validates this scenario, and the recovery duration is not time saved. Scenario choices are not confidence bounds or an achievable forecast; coarse GPS curvature must ease or remain stable; candidate lateral demand cannot exceed the recorded window maximum and longitudinal acceleration cannot exceed sustained same-speed measured capacity. Grip and control causes remain unverified; this is not a safe-speed instruction. Aggregation uses only disjoint endpoint-preserving scenarios.",
+            "upperSeconds": 0.0016116095191938688
+          },
+          "observation": "Your fastest lap has a sustained low-speed phase after an interior corner minimum. Review the entry, minimum-speed location and exit together: earlier stable recovery may be worth testing, but this profile alone does not establish an inefficiency.",
+          "action": "Inspect the GPS arc and RPM at the minimum. Test a settled entry and one smooth exit arc, then compare recovery onset, full corner time and the following section over repeated laps. Keep entry speed controlled while testing.",
+          "evidence": [
+            {
+              "channelIds": [
+                "gps-speed"
+              ],
+              "id": "lap-7:segment-5:apex-recovery:minimumSpeed",
+              "lapValue": 11.772183314916568,
+              "metric": "minimumSpeed",
+              "referenceValue": null,
+              "unit": "m/s"
+            },
+            {
+              "channelIds": [
+                "gps-speed"
+              ],
+              "id": "lap-7:segment-5:apex-recovery:recoveryToOneMeterPerSecond",
+              "lapValue": 0.6000000000000227,
+              "metric": "recoveryToOneMeterPerSecond",
+              "referenceValue": null,
+              "unit": "s"
+            },
+            {
+              "channelIds": [
+                "gps-speed"
+              ],
+              "id": "lap-7:segment-5:apex-recovery:minimumSpeedLocation",
+              "lapValue": 49.999999999998984,
+              "metric": "minimumSpeedLocation",
+              "referenceValue": null,
+              "unit": "%"
+            }
+          ]
+        },
+        {
+          "id": "lap-7:segment-8:tradeoff",
+          "label": "Corner 6: minimum-speed tradeoff",
+          "kind": "apex-tradeoff",
+          "startMeters": 331.2227446495673,
+          "endMeters": 354.1688986463747,
+          "gainRange": null,
+          "observation": "A supporting lap maintains a higher minimum speed without a substantially faster entry or materially poorer exit. This suggests a different apex approach worth testing; section timing does not establish a time saving.",
+          "action": "Compare the supporting lap\u2019s minimum-speed location and GPS arc. Try reducing mid-corner corrections while preserving exit speed; validate full section time and repeatability before increasing entry speed.",
+          "evidence": [
+            {
+              "channelIds": [
+                "gps-latitude",
+                "gps-longitude"
+              ],
+              "id": "lap-7:segment-8:tradeoff:sectionElapsed",
+              "lapValue": 1.7232825755699537,
+              "metric": "sectionElapsed",
+              "referenceValue": 1.744847627864715,
+              "unit": "s"
+            },
+            {
+              "channelIds": [
+                "gps-speed"
+              ],
+              "id": "lap-7:segment-8:tradeoff:entrySpeed",
+              "lapValue": 15.299821723675741,
+              "metric": "entrySpeed",
+              "referenceValue": 15.234430746618685,
+              "unit": "m/s"
+            },
+            {
+              "channelIds": [
+                "gps-speed"
+              ],
+              "id": "lap-7:segment-8:tradeoff:minimumSpeed",
+              "lapValue": 11.857967785417534,
+              "metric": "minimumSpeed",
+              "referenceValue": 12.977538287364057,
+              "unit": "m/s"
+            },
+            {
+              "channelIds": [
+                "gps-speed"
+              ],
+              "id": "lap-7:segment-8:tradeoff:exitSpeed",
+              "lapValue": 13.275454790729109,
+              "metric": "exitSpeed",
+              "referenceValue": 13.472010870716028,
+              "unit": "m/s"
+            },
+            {
+              "channelIds": [
+                "gps-latitude",
+                "gps-longitude"
+              ],
+              "id": "lap-7:segment-8:tradeoff:timingResolution",
+              "lapValue": 0.6639928712276643,
+              "metric": "timingResolution",
+              "referenceValue": null,
+              "unit": "s"
+            },
+            {
+              "channelIds": [
+                "gps-latitude",
+                "gps-longitude"
+              ],
+              "id": "lap-7:segment-8:tradeoff:recordedPathLength",
+              "lapValue": 22.611090377184638,
+              "metric": "recordedPathLength",
+              "referenceValue": 22.48536648335311,
+              "unit": "m"
+            }
+          ]
+        }
+      ],
+      "alternatives": [
+        {
+          "strategy": "exit-focus",
+          "startMeters": 17.957859649675335,
+          "endMeters": 123.70969980887455,
+          "baselineSeconds": 5.2505033072158085,
+          "recordedSeconds": 5.245287010298825,
+          "conservativeSeconds": 5.267973390824332,
+          "nominalSeconds": 5.234625752367621,
+          "timingResidualSeconds": 0.005216296916983332,
+          "conservativeGainSeconds": -0.01747008360852309,
+          "nominalGainSeconds": 0.015877554848187536
+        },
+        {
+          "strategy": "entry-momentum",
+          "startMeters": 17.957859649675335,
+          "endMeters": 123.70969980887455,
+          "baselineSeconds": 5.2505033072158085,
+          "recordedSeconds": 5.245287010298825,
+          "conservativeSeconds": 5.232727350886202,
+          "nominalSeconds": 5.172798625196257,
+          "timingResidualSeconds": 0.005216296916983332,
+          "conservativeGainSeconds": 0.017775956329606935,
+          "nominalGainSeconds": 0.07770468201955172
+        },
+        {
+          "strategy": "balanced-corner",
+          "startMeters": 17.957859649675335,
+          "endMeters": 123.70969980887455,
+          "baselineSeconds": 5.2505033072158085,
+          "recordedSeconds": 5.245287010298825,
+          "conservativeSeconds": 5.195128544187252,
+          "nominalSeconds": 5.1259951113235145,
+          "timingResidualSeconds": 0.005216296916983332,
+          "conservativeGainSeconds": 0.05537476302855637,
+          "nominalGainSeconds": 0.124508195892294
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "Conditional engineering sensitivity, not confidence intervals or guaranteed gains.",
+    "Recorded line retained; track width, tire forces, wind and control inputs are unmeasured.",
+    "Top speed limited to session99th percentile; absolute vehicle potential remains unknown.",
+    "Only the first corner-to-straight interval supports all tested boundary, timing, signal and feasibility constraints on these recordings. Other areas remain qualitative or retain prior small scenarios.",
+    "A single fastest lap cannot populate all speed bands robustly; larger modeled gains require the complete valid session.",
+    "Baseline integration residual is reported separately as alignment/model bias; scenario bounds do not cover all model error.",
+    "RPM-conditioned acceleration is observational and confounded; no numerical shifting benefit or engine torque curve is inferred."
+  ],
+  "verification": {
+    "rustLibrary": "152 passed; 0 failed",
+    "coachSubset": "66 passed; 0 failed",
+    "frontendFocused": "187 passed; coach/workspace/video synchronization",
+    "frontendBuild": "passed",
+    "browser": "Real-XRK simulated-IPC workflow passed once; later reruns encountered intermittent Chrome locator/click timeouts. No native WebView or Windows GUI pass claimed.",
+    "frontendBroad": "319 passed, 8 failures in unchanged tests/website-download.test.ts",
+    "independentReview": "Accepted solver, shared boundary states, timing, overlap aggregation and robust capability support; actual gap/spike regression confirmed."
+  }
+}
