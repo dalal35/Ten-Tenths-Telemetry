@@ -116,7 +116,12 @@ fn origin(s: &Session) -> Option<(f64, f64)> {
         }
     })
 }
-fn fixes(s: &Session, l: &Lap, origin: (f64, f64)) -> Result<(Vec<Fix>, usize, bool), String> {
+fn fixes(
+    s: &Session,
+    l: &Lap,
+    origin: (f64, f64),
+    preserve_gaps: bool,
+) -> Result<(Vec<Fix>, usize, bool), String> {
     let lat = channel_by_id(s, "gps-latitude")
         .ok_or("Spatial alignment unavailable: no GPS latitude.")?;
     let lon = channel_by_id(s, "gps-longitude")
@@ -139,7 +144,12 @@ fn fixes(s: &Session, l: &Lap, origin: (f64, f64)) -> Result<(Vec<Fix>, usize, b
     let mut rejected = 0;
     let mut unknown = false;
     let lon_gaps = source_gaps(lon);
+    let lat_gaps = source_gaps(lat);
     for (t, a) in times.into_iter().zip(values) {
+        if preserve_gaps && lat_gaps.iter().any(|g| t > g[0] && t < g[1]) {
+            rejected += 1;
+            continue;
+        }
         let Some(b) = sample_without_gaps(lon, t, &lon_gaps) else {
             rejected += 1;
             continue;
@@ -222,7 +232,23 @@ fn fixes(s: &Session, l: &Lap, origin: (f64, f64)) -> Result<(Vec<Fix>, usize, b
     // their measured crossings; the reference is this lap's line, not a surveyed centreline.
     let raw = points.clone();
     for i in 1..points.len() - 1 {
-        let radius = 2.min(i).min(points.len() - 1 - i);
+        let mut radius = 2.min(i).min(points.len() - 1 - i);
+        if preserve_gaps {
+            while radius > 0
+                && raw[i - radius..=i + radius].windows(2).any(|w| {
+                    let a = lat.times.partition_point(|t| *t < w[0].t - 1e-8);
+                    let b = lat.times.partition_point(|t| *t <= w[1].t + 1e-8);
+                    b.saturating_sub(a) > 2
+                        || w[1].t - w[0].t > cadence * 1.5 + 1e-8
+                        || lat_gaps
+                            .iter()
+                            .chain(lon_gaps.iter())
+                            .any(|g| g[0] < w[1].t && g[1] > w[0].t)
+                })
+            {
+                radius -= 1;
+            }
+        }
         let lo = i - radius;
         let hi = i + radius;
         points[i].x = raw[lo..=hi].iter().map(|p| p.x).sum::<f64>() / (hi - lo + 1) as f64;
@@ -363,7 +389,7 @@ pub(super) fn align_sources(
         );
     }
     let origin = origin(s).ok_or("Spatial alignment unavailable: GPS coordinates are absent.")?;
-    let (reference, mut rejected, mut unknown) = fixes(s, p, origin)?;
+    let (reference, mut rejected, mut unknown) = fixes(s, p, origin, false)?;
     let meters = cumulative(&reference);
     let length = *meters.last().unwrap();
     if !(100. ..100_000.).contains(&length) {
@@ -393,7 +419,7 @@ pub(super) fn align_sources(
     let mut accepted = reference.len();
     let mut residual = 0.;
     if let Some(c) = c {
-        let (points, r, u) = fixes(cs, c, origin)?;
+        let (points, r, u) = fixes(cs, c, origin, false)?;
         rejected += r;
         unknown |= u;
         accepted += points.len();
@@ -799,4 +825,18 @@ fn metrics(s: &Session, d: &Distance, a: f64, b: f64, ids: &[String]) -> Option<
         exit_speed,
         channels,
     })
+}
+
+/// Validated lap positions in the session-local tangent plane, in session seconds.
+pub fn validated_lap_fixes(session: &Session, lap: &Lap) -> Result<Vec<(f64, f64, f64)>, String> {
+    if !lap.complete {
+        return Err(
+            "Spatial alignment unavailable: complete validated lap crossings are required.".into(),
+        );
+    }
+    align_sources(LapSource { session, lap }, None)?;
+    let origin =
+        origin(session).ok_or("Spatial alignment unavailable: GPS coordinates are absent.")?;
+    let (points, _, _) = fixes(session, lap, origin, true)?;
+    Ok(points.into_iter().map(|p| (p.t, p.x, p.y)).collect())
 }

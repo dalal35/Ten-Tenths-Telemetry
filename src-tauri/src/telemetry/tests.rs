@@ -101,6 +101,26 @@ fn speed_gaps_disable_distance() {
     assert!(analyze(&s, "a", None, "distance", &[]).is_err());
 }
 #[test]
+fn rejected_speed_sample_disables_distance_and_delta() {
+    let mut s = sample();
+    let mut warnings = vec![];
+    s.channels[0] = channel(
+        "gps-speed".into(),
+        "GPS Speed".into(),
+        "m/s".into(),
+        (0..=200).map(|i| i * 100).collect(),
+        (0..=200)
+            .map(|i| if i == 2 { f64::NAN } else { 10. })
+            .collect(),
+        &mut warnings,
+    );
+    assert_eq!(s.channels[0].gaps, vec![[0.1, 0.3]]);
+    let time = analyze(&s, "a", Some("b"), "time", &[]).unwrap();
+    assert!(time.primary.length.is_none());
+    assert!(time.delta.is_none());
+    assert!(analyze(&s, "a", Some("b"), "distance", &[]).is_err());
+}
+#[test]
 fn incomplete_laps_disable_delta() {
     let mut s = sample();
     s.laps[0].complete = false;
@@ -751,4 +771,248 @@ fn cross_source_equivalent_selected_channels_keep_distinct_output_ids() {
     assert_eq!(a.primary.series.len(), 2);
     assert_eq!(a.primary.series[0].channel_id, "p-rpm");
     assert_eq!(a.primary.series[1].channel_id, "c-rpm");
+}
+
+#[test]
+fn video_sync_circle_signature_preserves_times_and_units() {
+    let mut s = gps_session();
+    s.laps.truncate(1);
+    let speed = s.channels.iter_mut().find(|c| c.id == "gps-speed").unwrap();
+    speed.unit = "km/h".into();
+    speed.values.iter_mut().for_each(|v| *v *= 3.6);
+    let samples = crate::video_sync::telemetry::telemetry_signature(&s).unwrap();
+    let p = samples
+        .iter()
+        .find(|p| (p.time - 10.).abs() < 1e-6)
+        .unwrap();
+    assert!((p.yaw.unwrap() - std::f64::consts::TAU / 20.).abs() < 0.02);
+    assert!((p.curvature.unwrap() - 1. / 60.).abs() < 0.002);
+    assert!((p.speed.unwrap() - 60. * std::f64::consts::TAU / 20.).abs() < 0.01);
+    assert!(p.acceleration.unwrap().abs() < 1e-6);
+}
+
+#[test]
+fn video_sync_rejects_bad_fixes_and_low_speed_without_bridging() {
+    let mut s = gps_session();
+    s.laps.truncate(1);
+    s.channels
+        .iter_mut()
+        .find(|c| c.id == "gps-fix")
+        .unwrap()
+        .values[100] = 2.;
+    let speed = s.channels.iter_mut().find(|c| c.id == "gps-speed").unwrap();
+    speed.values[150] = 1.;
+    let samples = crate::video_sync::telemetry::telemetry_signature(&s).unwrap();
+    let bad = samples
+        .iter()
+        .find(|p| (p.time - 10.).abs() < 1e-6)
+        .unwrap();
+    assert!(bad.yaw.is_none() && bad.curvature.is_none() && bad.speed.is_none());
+    let slow = samples
+        .iter()
+        .find(|p| (p.time - 15.).abs() < 1e-6)
+        .unwrap();
+    assert!(slow.yaw.is_none() && slow.curvature.is_none());
+    assert!(samples
+        .iter()
+        .filter(|p| (p.time - 10.).abs() < 0.25)
+        .all(|p| p.yaw.is_none()));
+}
+
+#[test]
+fn video_sync_rejects_long_gps_gaps_and_preserves_spatial_validation() {
+    let mut s = gps_session();
+    s.laps.truncate(1);
+    for c in s
+        .channels
+        .iter_mut()
+        .filter(|c| c.id == "gps-latitude" || c.id == "gps-longitude")
+    {
+        c.times.drain(90..100);
+        c.values.drain(90..100);
+    }
+    assert!(validated_lap_fixes(&s, &s.laps[0]).is_err());
+    assert!(crate::video_sync::telemetry::telemetry_signature(&s).is_err());
+}
+
+#[test]
+fn video_sync_acceleration_and_heading_wrap_are_signed() {
+    let mut s = gps_session();
+    s.laps.truncate(1);
+    let speed = s.channels.iter_mut().find(|c| c.id == "gps-speed").unwrap();
+    speed.unit = "mph".into();
+    speed.values = speed.times.iter().map(|t| (10. + t) / 0.44704).collect();
+    let samples = crate::video_sync::telemetry::telemetry_signature(&s).unwrap();
+    for t in [5., 10., 15.] {
+        let p = samples.iter().find(|p| (p.time - t).abs() < 1e-6).unwrap();
+        assert!((p.acceleration.unwrap() - 1.).abs() < 1e-6);
+        assert!((p.yaw.unwrap() - std::f64::consts::TAU / 20.).abs() < 0.02);
+    }
+    for c in s.channels.iter_mut().filter(|c| c.id == "gps-latitude") {
+        c.values.iter_mut().for_each(|lat| *lat = 80. - *lat);
+    }
+    let samples = crate::video_sync::telemetry::telemetry_signature(&s).unwrap();
+    let p = samples
+        .iter()
+        .find(|p| (p.time - 10.).abs() < 1e-6)
+        .unwrap();
+    assert!(p.yaw.unwrap() < 0. && p.curvature.unwrap() < 0.);
+}
+
+#[test]
+fn video_sync_real_xrk_signatures_keep_session_timestamps() {
+    for file in ["0361", "0362"] {
+        let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(format!(
+            "../data/yash dalal_59_PURDUE GP IN_Warm-up_a_{file}.xrk"
+        ));
+        let s = parse_session(&path).unwrap();
+        let samples = crate::video_sync::telemetry::telemetry_signature(&s).unwrap();
+        assert!(samples.iter().any(|p| p.yaw.is_some()));
+        assert!(samples
+            .iter()
+            .all(|p| p.time.is_finite()
+                && s.laps.iter().any(|l| p.time >= l.start && p.time <= l.end)));
+        assert!(samples.windows(2).all(|w| w[0].time <= w[1].time));
+        for p in &samples {
+            for value in [p.yaw, p.curvature, p.speed, p.acceleration]
+                .into_iter()
+                .flatten()
+            {
+                assert!(value.is_finite());
+            }
+            if let (Some(yaw), Some(curvature), Some(speed)) = (p.yaw, p.curvature, p.speed) {
+                assert!(speed >= 2. && (curvature - yaw / speed).abs() < 1e-12);
+            }
+        }
+        for lap in s.laps.iter().filter(|lap| lap.complete) {
+            for t in [lap.start, lap.end] {
+                assert!(samples.iter().any(|p| (p.time - t).abs() < 1e-7
+                    && p.yaw.is_none()
+                    && p.curvature.is_none()));
+            }
+        }
+    }
+}
+
+#[test]
+fn video_sync_explicit_short_gps_gap_is_invalid() {
+    let mut s = gps_session();
+    s.laps.truncate(1);
+    s.channels
+        .iter_mut()
+        .find(|c| c.id == "gps-latitude")
+        .unwrap()
+        .gaps
+        .push([9.9, 10.1]);
+    let samples = crate::video_sync::telemetry::telemetry_signature(&s).unwrap();
+    let p = samples
+        .iter()
+        .find(|p| (p.time - 10.).abs() < 1e-6)
+        .unwrap();
+    assert!(p.yaw.is_none() && p.speed.is_none());
+}
+
+#[test]
+fn video_sync_requires_all_spatial_lap_quality_gates() {
+    let mut s = gps_session();
+    s.laps.truncate(1);
+    let speed = s.channels.iter_mut().find(|c| c.id == "gps-speed").unwrap();
+    speed.values.fill(2.);
+    assert!(spatial::align_sources(
+        LapSource {
+            session: &s,
+            lap: &s.laps[0]
+        },
+        None
+    )
+    .is_err());
+    assert!(validated_lap_fixes(&s, &s.laps[0]).is_err());
+}
+
+#[test]
+fn video_sync_invalid_lap_has_explicit_boundary_between_valid_laps() {
+    let mut s = gps_session();
+    for c in s.channels.iter_mut().filter(|c| c.id == "gps-fix") {
+        c.values[300] = 2.;
+        c.values[301] = 2.;
+        c.values[302] = 2.;
+        c.values[303] = 2.;
+        c.values[304] = 2.;
+        c.values[305] = 2.;
+    }
+    let samples = crate::video_sync::telemetry::telemetry_signature(&s).unwrap();
+    assert!(samples
+        .iter()
+        .any(|p| p.time > 1. && p.time < 19. && p.yaw.is_some()));
+    assert!(samples
+        .iter()
+        .any(|p| (p.time - 42.).abs() < 1e-8 && p.yaw.is_none() && p.speed.is_none()));
+}
+
+#[test]
+fn video_sync_straight_section_has_zero_yaw_and_curvature() {
+    let mut s = gps_session();
+    s.laps.truncate(1);
+    // Stretch the circle into a closed stadium with a 100 m straight section.
+    for c in s
+        .channels
+        .iter_mut()
+        .filter(|c| c.id == "gps-latitude" || c.id == "gps-longitude")
+    {
+        for (i, value) in c.values.iter_mut().enumerate() {
+            let t = i as f64 / 10.;
+            let (x, y) = if t <= 5. {
+                (20. * t, 0.)
+            } else if t <= 10. {
+                (100., 20. * (t - 5.))
+            } else if t <= 15. {
+                (100. - 20. * (t - 10.), 100.)
+            } else {
+                (0., 100. - 20. * (t - 15.))
+            };
+            *value = if c.id == "gps-latitude" {
+                40. + (y / 6371000.).to_degrees()
+            } else {
+                -86. + (x / (6371000. * 40_f64.to_radians().cos())).to_degrees()
+            };
+        }
+    }
+    s.channels
+        .iter_mut()
+        .find(|c| c.id == "gps-speed")
+        .unwrap()
+        .values
+        .fill(20.);
+    let samples = crate::video_sync::telemetry::telemetry_signature(&s).unwrap();
+    let p = samples
+        .iter()
+        .find(|p| (p.time - 2.5).abs() < 1e-8)
+        .unwrap();
+    assert!(p.yaw.unwrap().abs() < 1e-7 && p.curvature.unwrap().abs() < 1e-7);
+}
+
+#[test]
+fn video_sync_matcher_accepts_real_signature_boundaries() {
+    let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../data/yash dalal_59_PURDUE GP IN_Warm-up_a_0361.xrk");
+    let session = parse_session(&path).unwrap();
+    let samples = crate::video_sync::telemetry::telemetry_signature(&session).unwrap();
+    let start = samples.iter().find(|s| s.yaw.is_some()).unwrap().time;
+    let video: Vec<_> = samples
+        .iter()
+        .filter(|s| s.time >= start && s.time < start + 30.)
+        .map(|s| crate::video_analysis::motion::MotionSample {
+            time: s.time,
+            yaw: s.yaw,
+            quality: 1.,
+        })
+        .collect();
+    let result = crate::video_sync::matching::match_signatures(&video, &samples);
+    assert!(
+        result
+            .candidates
+            .iter()
+            .any(|c| c.offset_seconds.abs() < 0.15),
+        "{result:?}"
+    );
 }

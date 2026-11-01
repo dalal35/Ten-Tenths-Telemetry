@@ -467,3 +467,181 @@ fn cancellation_during_skipped_scan_releases_reader() {
     assert_eq!(error.kind, ErrorKind::Cancelled);
     std::fs::remove_file(path).unwrap();
 }
+
+#[cfg(target_os = "macos")]
+#[test]
+fn late_seek_matches_sequential_frames_for_vfr_and_h264() {
+    for mode in ["seek-vfr", "seek-bframes"] {
+        let path = fixture_mode(mode);
+        let cancel = CancellationToken::default();
+        let mut baseline = vec![];
+        sample_frames(
+            &path,
+            SamplingOptions {
+                interval_seconds: 0.001,
+                ..Default::default()
+            },
+            &cancel,
+            |frame| {
+                baseline.push(frame);
+                Ok(())
+            },
+            |_| {},
+        )
+        .unwrap();
+        assert!(baseline.len() >= 290, "{mode}: {}", baseline.len());
+        for target in [
+            20.0,
+            baseline[200].timestamp_seconds,
+            baseline[200].timestamp_seconds + 0.001,
+            baseline[baseline.len() - 2].timestamp_seconds + 0.001,
+            baseline.last().unwrap().timestamp_seconds,
+        ] {
+            let expected = baseline
+                .iter()
+                .find(|frame| frame.timestamp_seconds >= target)
+                .unwrap();
+            let actual = extract_frame(
+                &path,
+                target,
+                ResizeOptions::default(),
+                PixelFormat::Rgb8,
+                &cancel,
+            )
+            .unwrap();
+            assert_eq!(
+                (actual.timestamp_value, actual.timestamp_timescale),
+                (expected.timestamp_value, expected.timestamp_timescale),
+                "{mode} target {target}"
+            );
+            assert_eq!(actual.pixels, expected.pixels, "{mode} target {target}");
+        }
+        let start = baseline[200].timestamp_seconds + 0.001;
+        let end = baseline[220].timestamp_seconds;
+        let mut sampled = vec![];
+        sample_frames(
+            &path,
+            SamplingOptions {
+                start_seconds: start,
+                end_seconds: Some(end),
+                interval_seconds: 0.001,
+                ..Default::default()
+            },
+            &cancel,
+            |frame| {
+                sampled.push((
+                    frame.timestamp_value,
+                    frame.timestamp_timescale,
+                    frame.pixels,
+                ));
+                Ok(())
+            },
+            |_| {},
+        )
+        .unwrap();
+        let expected: Vec<_> = baseline
+            .iter()
+            .filter(|frame| frame.timestamp_seconds >= start && frame.timestamp_seconds < end)
+            .map(|frame| {
+                (
+                    frame.timestamp_value,
+                    frame.timestamp_timescale,
+                    frame.pixels.clone(),
+                )
+            })
+            .collect();
+        assert_eq!(sampled, expected, "{mode}");
+        let cancelled = CancellationToken::default();
+        let result = sample_frames(
+            &path,
+            SamplingOptions {
+                start_seconds: start,
+                ..Default::default()
+            },
+            &cancelled,
+            |_| {
+                cancelled.cancel();
+                Ok(())
+            },
+            |_| {},
+        );
+        assert_eq!(result.unwrap_err().kind, ErrorKind::Cancelled);
+        assert_eq!(
+            extract_frame(
+                &path,
+                1000.0,
+                ResizeOptions::default(),
+                PixelFormat::Rgb8,
+                &cancel
+            )
+            .unwrap_err()
+            .kind,
+            ErrorKind::FrameUnavailable
+        );
+        std::fs::remove_file(path).unwrap();
+    }
+}
+
+#[cfg(target_os = "macos")]
+#[test]
+fn seek_on_subsecond_clip_matches_sequential_frames() {
+    let path = fixture_mode("cfr");
+    let cancel = CancellationToken::default();
+    assert!(inspect(&path, &cancel).unwrap().duration_seconds < 1.0);
+    let mut baseline = vec![];
+    sample_frames(
+        &path,
+        SamplingOptions {
+            interval_seconds: 0.001,
+            ..Default::default()
+        },
+        &cancel,
+        |frame| {
+            baseline.push(frame);
+            Ok(())
+        },
+        |_| {},
+    )
+    .unwrap();
+    assert_eq!(baseline.len(), 8);
+    for target in [0.0, 0.3, 0.301, 0.7] {
+        let expected = baseline
+            .iter()
+            .find(|frame| frame.timestamp_seconds >= target)
+            .unwrap();
+        let actual = extract_frame(
+            &path,
+            target,
+            ResizeOptions::default(),
+            PixelFormat::Rgb8,
+            &cancel,
+        )
+        .unwrap();
+        assert_eq!(
+            (
+                actual.timestamp_value,
+                actual.timestamp_timescale,
+                actual.pixels
+            ),
+            (
+                expected.timestamp_value,
+                expected.timestamp_timescale,
+                expected.pixels.clone()
+            ),
+            "target {target}"
+        );
+    }
+    assert_eq!(
+        extract_frame(
+            &path,
+            0.8,
+            ResizeOptions::default(),
+            PixelFormat::Rgb8,
+            &cancel
+        )
+        .unwrap_err()
+        .kind,
+        ErrorKind::FrameUnavailable
+    );
+    std::fs::remove_file(path).unwrap();
+}

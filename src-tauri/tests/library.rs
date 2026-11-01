@@ -331,3 +331,82 @@ fn video_workspace_round_trips_atomically_with_advanced_state_and_version_guards
     );
     fs::remove_dir_all(p).unwrap();
 }
+
+#[test]
+fn edited_details_survive_cache_reopen_reimport_locate_and_refresh() {
+    let p = sandbox("details");
+    let file = p.join("source.xrk");
+    fs::copy(fixture(), &file).unwrap();
+    let original_bytes = fs::read(&file).unwrap();
+    let mut lib = Library::open(p.join("store")).unwrap();
+    let session = lib.import(&file).unwrap();
+    let workspace = serde_json::json!({"axis":"time"});
+    lib.save_workspace(&session.id, workspace.clone()).unwrap();
+    let before = lib.snapshot().unwrap().entries[0].clone();
+    let updated = lib
+        .update_details(&session.id, "  Practice  ", "  Alex  ", "2024-02-29")
+        .unwrap();
+    assert_eq!(updated.name, "Practice");
+    assert_eq!(updated.driver, "Alex");
+    assert_eq!(updated.content_version, before.content_version);
+    assert_eq!(updated.last_used, before.last_used);
+    assert_eq!(updated.workspace, Some(workspace.clone()));
+    assert_eq!(lib.load(&session.id).unwrap().name, "Practice");
+    assert_eq!(lib.import(&file).unwrap().recorded_at, "2024-02-29");
+    assert_eq!(fs::read(&file).unwrap(), original_bytes);
+    drop(lib);
+    let mut lib = Library::open(p.join("store")).unwrap();
+    assert_eq!(lib.load(&session.id).unwrap().driver, "Alex");
+    assert_eq!(lib.refresh(&session.id).unwrap().recorded_at, "2024-02-29");
+    fs::remove_file(&file).unwrap();
+    lib.update_details(&session.id, "Missing run", "", "2026-10-23")
+        .unwrap();
+    fs::write(&file, &original_bytes).unwrap();
+    assert_eq!(lib.locate(&session.id, &file).unwrap().name, "Missing run");
+    fs::copy(
+        PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("../data/yash dalal_59_PURDUE GP IN_Warm-up_a_0362.xrk"),
+        &file,
+    )
+    .unwrap();
+    let refreshed = lib.refresh(&session.id).unwrap();
+    assert_eq!(refreshed.name, "Missing run");
+    assert_eq!(refreshed.recorded_at, "2026-10-23");
+    assert_eq!(refreshed.id, session.id);
+    fs::remove_dir_all(p).unwrap();
+}
+
+#[test]
+fn invalid_details_leave_manifest_and_cached_session_unchanged() {
+    let p = sandbox("details-invalid");
+    let mut lib = Library::open(p.join("store")).unwrap();
+    let session = lib.import(&fixture()).unwrap();
+    let before = fs::read(p.join("store/library.json")).unwrap();
+    for (name, driver, date) in [
+        (" ", "", "2026-10-23"),
+        ("New", "", "2023-02-29"),
+        ("New", "bad\nname", "2026-10-23"),
+        ("New", "", ""),
+        ("New", "", "2026-13-01"),
+    ] {
+        assert!(lib.update_details(&session.id, name, driver, date).is_err());
+    }
+    assert!(lib
+        .update_details("unknown", "New", "", "2026-10-23")
+        .is_err());
+    assert_eq!(fs::read(p.join("store/library.json")).unwrap(), before);
+    assert_eq!(lib.load(&session.id).unwrap().name, session.name);
+    // Editing another field preserves the full existing recording timestamp.
+    lib.update_details(
+        &session.id,
+        "Name only",
+        &session.driver,
+        &session.recorded_at,
+    )
+    .unwrap();
+    assert_eq!(
+        lib.load(&session.id).unwrap().recorded_at,
+        session.recorded_at
+    );
+    fs::remove_dir_all(p).unwrap();
+}

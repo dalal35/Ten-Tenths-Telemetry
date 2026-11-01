@@ -123,8 +123,21 @@ fn rebrand_reopens_existing_library_without_migrating_workspace_data() {
     let original = serde_json::to_vec(&legacy).unwrap();
     fs::write(root.0.join("library.json"), &original).unwrap();
     let mut library = Library::open(root.0.clone()).unwrap();
-    assert_eq!(library.snapshot().unwrap().entries[0].workspace, Some(workspace.clone()));
+    assert_eq!(
+        library.snapshot().unwrap().entries[0].workspace,
+        Some(workspace.clone())
+    );
     assert_eq!(fs::read(root.0.join("library.json")).unwrap(), original);
-    library.save_workspace("synthetic", workspace.clone()).unwrap();
-    assert_eq!(Library::open(root.0.clone()).unwrap().snapshot().unwrap().entries[0].workspace, Some(workspace));
+    library
+        .save_workspace("synthetic", workspace.clone())
+        .unwrap();
+    assert_eq!(
+        Library::open(root.0.clone())
+            .unwrap()
+            .snapshot()
+            .unwrap()
+            .entries[0]
+            .workspace,
+        Some(workspace)
+    );
 }

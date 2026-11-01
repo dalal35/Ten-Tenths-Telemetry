@@ -66,10 +66,10 @@ pub fn split_id(id: &str) -> Result<(String, String), String> {
 // from logger-power-on milliseconds; exported Lap.start is already session-relative.
 pub fn parse_recording_stamp(value: &str) -> Result<RecordingStamp, String> {
     let invalid = || {
-        "Recording date/time is missing, invalid or ambiguous. Merging requires an unambiguous XRK recording timestamp; filenames are not used.".to_string()
+        "Recording date/time is missing, invalid or ambiguous. Filenames are not used to infer recording timestamps.".to_string()
     };
     let parts: Vec<_> = value.split_whitespace().collect();
-    if parts.len() != 2 {
+    if parts.is_empty() || parts.len() > 2 {
         return Err(invalid());
     }
     let date = parts[0];
@@ -116,7 +116,13 @@ pub fn parse_recording_stamp(value: &str) -> Result<RecordingStamp, String> {
     if !(1970..=9999).contains(&year) || day == 0 || day > limit {
         return Err(invalid());
     }
-    let t: Vec<_> = parts[1].split(':').collect();
+    // A user-entered recording day has date precision; sort it at midnight.
+    let t: Vec<_> = parts
+        .get(1)
+        .copied()
+        .unwrap_or("00:00:00")
+        .split(':')
+        .collect();
     if t.len() != 3 || t.iter().any(|s| s.len() != 2) {
         return Err(invalid());
     }
@@ -151,18 +157,29 @@ pub fn preview_sources(sources: &[&Session], refs: &[SourceRef]) -> Result<Merge
             ordered.push((
                 *source,
                 reference.clone(),
-                parse_recording_stamp(&source.recorded_at)?,
+                parse_recording_stamp(&source.recorded_at).ok(),
             ));
         }
     }
     if ordered.len() < 2 {
         return Err("Select at least two distinct original sessions.".into());
     }
-    ordered.sort_by(|a, b| a.0.id.cmp(&b.0.id));
-    let day = ordered[0].2.day.clone();
-    if ordered.iter().any(|s| s.2.day != day) {
-        return Err("Sessions must have the same verified recording day.".into());
-    }
+    ordered.sort_by(|a, b| {
+        match (&a.2, &b.2) {
+            (Some(a), Some(b)) => a
+                .day
+                .cmp(&b.day)
+                .then(a.seconds_from_midnight.cmp(&b.seconds_from_midnight)),
+            (Some(_), None) => std::cmp::Ordering::Less,
+            (None, Some(_)) => std::cmp::Ordering::Greater,
+            (None, None) => std::cmp::Ordering::Equal,
+        }
+        .then(a.0.id.cmp(&b.0.id))
+    });
+    let day = ordered
+        .iter()
+        .find_map(|s| s.2.as_ref().map(|stamp| stamp.day.clone()))
+        .unwrap_or_default();
     let mut warnings=vec!["Recording times use the logger's local clock; timezone and clock accuracy are not independently verified.".into()];
     for (label, values) in [
         (
@@ -191,6 +208,9 @@ pub fn preview_sources(sources: &[&Session], refs: &[SourceRef]) -> Result<Merge
     let mut timed = vec![];
     let mut channels = vec![];
     for (s, _, stamp) in &ordered {
+        if stamp.is_none() {
+            warnings.push(format!("{}: Recording timestamp is missing, invalid or ambiguous; this recording is appended after dated recordings, ordered by session ID.", s.name));
+        }
         warnings.extend(s.warnings.iter().map(|w| format!("{}: {w}", s.name)));
         for l in &s.laps {
             if ![l.start, l.end, l.duration].iter().all(|x| x.is_finite())
@@ -202,8 +222,7 @@ pub fn preview_sources(sources: &[&Session], refs: &[SourceRef]) -> Result<Merge
             let mut lap = l.clone();
             lap.id = qualified_lap_id(&s.id, &l.id);
             timed.push((
-                stamp.seconds_from_midnight as f64 + l.start,
-                stamp.seconds_from_midnight as f64 + l.end,
+                stamp.as_ref(),
                 MergedLap {
                     lap,
                     source_session_id: s.id.clone(),
@@ -227,22 +246,27 @@ pub fn preview_sources(sources: &[&Session], refs: &[SourceRef]) -> Result<Merge
             });
         }
     }
-    timed.sort_by(|a, b| {
-        a.0.total_cmp(&b.0)
-            .then(a.2.source_session_id.cmp(&b.2.source_session_id))
-            .then(a.2.source_lap_id.cmp(&b.2.source_lap_id))
-    });
+    // Keep each recording's laps together, in their original order. Compare timestamps
+    // only where both logger dates are known; unknown dates cannot establish overlap.
     for i in 0..timed.len() {
         for j in i + 1..timed.len() {
-            let a = &timed[i];
-            let b = &timed[j];
-            if a.2.source_session_id == b.2.source_session_id {
+            let (Some(a_stamp), Some(b_stamp)) = (timed[i].0, timed[j].0) else {
+                continue;
+            };
+            let a = &timed[i].1;
+            let b = &timed[j].1;
+            if a.source_session_id == b.source_session_id || a_stamp.day != b_stamp.day {
                 continue;
             }
-            if b.0 < a.1 && a.0 < b.1 {
+            let a_start = a_stamp.seconds_from_midnight as f64 + a.lap.start;
+            let a_end = a_stamp.seconds_from_midnight as f64 + a.lap.end;
+            let b_start = b_stamp.seconds_from_midnight as f64 + b.lap.start;
+            let b_end = b_stamp.seconds_from_midnight as f64 + b.lap.end;
+            if b_start < a_end && a_start < b_end {
                 warnings.push("Source lap timestamps overlap; all laps are retained and analyzed in their own source.".into());
             }
-            if (a.0 - b.0).abs() < 0.001 && (a.2.lap.duration - b.2.lap.duration).abs() < 0.001 {
+            if (a_start - b_start).abs() < 0.001 && (a.lap.duration - b.lap.duration).abs() < 0.001
+            {
                 warnings.push("Possible duplicate laps have matching start times and durations; both source identities are retained.".into());
             }
         }
@@ -250,7 +274,7 @@ pub fn preview_sources(sources: &[&Session], refs: &[SourceRef]) -> Result<Merge
     // Bound repeated warnings while preserving distinct parser/source explanations.
     let mut unique = HashSet::new();
     warnings.retain(|w| unique.insert(w.clone()));
-    let mut laps: Vec<_> = timed.into_iter().map(|(_, _, l)| l).collect();
+    let mut laps: Vec<_> = timed.into_iter().map(|(_, l)| l).collect();
     for (i, l) in laps.iter_mut().enumerate() {
         l.display_number = i + 1;
     }
@@ -315,13 +339,15 @@ mod tests {
         let stamp = parse_recording_stamp("2024-02-29 18:26:09").unwrap();
         assert_eq!(stamp.day, "2024-02-29");
         assert_eq!(stamp.seconds_from_midnight, 66369);
+        let day = parse_recording_stamp("2024-02-29").unwrap();
+        assert_eq!(day.day, "2024-02-29");
+        assert_eq!(day.seconds_from_midnight, 0);
         for bad in [
             "",
             "2023-02-29 12:00:00",
             "2024-04-31 12:00:00",
             "2024-02-29 24:00:00",
             "07/10/2026 18:26:09",
-            "2024-02-29",
         ] {
             assert!(parse_recording_stamp(bad).is_err(), "{bad}");
         }
@@ -351,9 +377,81 @@ mod tests {
         assert_ne!(p.channels[0].channel.id, p.channels[1].channel.id);
         let reverse = preview_sources(&[&b, &a], &refs(&[&b, &a])).unwrap();
         assert_eq!(p.preview_version, reverse.preview_version);
-        let other = source("c", "2026-10-08 17:00:00");
-        assert!(preview_sources(&[&a, &other], &refs(&[&a, &other])).is_err());
         assert!(preview_sources(&[&a, &a], &refs(&[&a, &a])).is_err());
+    }
+    #[test]
+    fn preview_appends_recording_blocks_in_full_timestamp_order() {
+        let mut a = source("a", "2026-10-08 01:00:00");
+        let mut b = source("b", "2026-10-07 23:59:59");
+        b.laps.push(Lap {
+            id: "lap-2".into(),
+            number: 8,
+            start: 120.,
+            end: 180.,
+            duration: 60.,
+            complete: true,
+        });
+        a.laps[0].start = 1.;
+        a.laps[0].end = 2.;
+        let p = preview_sources(&[&a, &b], &refs(&[&a, &b])).unwrap();
+        assert_eq!(
+            p.sources
+                .iter()
+                .map(|s| s.session_id.as_str())
+                .collect::<Vec<_>>(),
+            ["b", "a"]
+        );
+        assert_eq!(
+            p.laps
+                .iter()
+                .map(|l| (l.source_session_id.as_str(), l.source_lap_id.as_str()))
+                .collect::<Vec<_>>(),
+            [("b", "lap-1"), ("b", "lap-2"), ("a", "lap-1")]
+        );
+        assert_eq!(p.day, "2026-10-07");
+        assert_eq!(p.laps[1].lap.start, 120.);
+        // Same-day overlapping recordings also stay in blocks.
+        a.recorded_at = "2026-10-07 23:59:59".into();
+        b.recorded_at = "2026-10-07 23:59:58".into();
+        let p = preview_sources(&[&a, &b], &refs(&[&a, &b])).unwrap();
+        assert_eq!(
+            p.laps
+                .iter()
+                .map(|l| l.source_session_id.as_str())
+                .collect::<Vec<_>>(),
+            ["b", "b", "a"]
+        );
+    }
+    #[test]
+    fn preview_places_unknown_recordings_last_with_a_warning() {
+        let a = source("a", "");
+        let b = source("b", "07/10/2026 18:26:09");
+        let c = source("c", "2026-10-07 18:00:00");
+        let sources = [&b, &c, &a];
+        let p = preview_sources(&sources, &refs(&sources)).unwrap();
+        assert_eq!(
+            p.sources
+                .iter()
+                .map(|s| s.session_id.as_str())
+                .collect::<Vec<_>>(),
+            ["c", "a", "b"]
+        );
+        assert!(p
+            .warnings
+            .iter()
+            .any(|w| w.contains("timestamp") && w.contains("a")));
+        assert!(p
+            .warnings
+            .iter()
+            .any(|w| w.contains("timestamp") && w.contains("b")));
+        assert_eq!(
+            p.preview_version,
+            preview_sources(&[&a, &b, &c], &refs(&sources))
+                .unwrap()
+                .preview_version
+        );
+        let unknown = preview_sources(&[&b, &a], &refs(&[&a, &b])).unwrap();
+        assert_eq!(unknown.sources[0].session_id, "a");
     }
     #[test]
     fn preview_warns_without_deduplication() {

@@ -36,6 +36,10 @@ pub(crate) fn atomic_write(path: &Path, bytes: &[u8]) -> Result<(), String> {
         #[cfg(all(windows, test))]
         fail_replacement(path)?;
         fs::rename(&temp, path)?;
+        #[cfg(all(not(windows), test))]
+        if FAIL_DIRECTORY_SYNC.with(|failure| failure.borrow().as_deref() == Some(path)) {
+            return Err(std::io::Error::other("injected directory sync failure"));
+        }
         #[cfg(not(windows))]
         File::open(path.parent().unwrap())?.sync_all()?;
         Ok(())
@@ -50,6 +54,9 @@ pub(crate) fn atomic_write(path: &Path, bytes: &[u8]) -> Result<(), String> {
         format!("Could not save local library: {e}. Your telemetry file is unchanged.")
     })
 }
+
+#[cfg(all(not(windows), test))]
+thread_local! { pub(crate) static FAIL_DIRECTORY_SYNC: std::cell::RefCell<Option<std::path::PathBuf>> = const { std::cell::RefCell::new(None) }; }
 
 #[cfg(all(windows, test))]
 thread_local! { pub(crate) static FAIL_REPLACE: std::cell::RefCell<Option<std::path::PathBuf>> = const { std::cell::RefCell::new(None) }; }

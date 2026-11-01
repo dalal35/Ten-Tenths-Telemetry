@@ -6,6 +6,7 @@ import {join,resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {verifyArtifacts,writeChecksums,releasePlatforms} from './verify-release-artifacts.mjs';
 import {verifyVersion} from './verify-release-version.mjs';
+import {assertYoutubeRedistribution} from './check-youtube-redistribution.mjs';
 
 export function publishRelease(root,version,env=process.env,run=args=>execFileSync('gh',args,{encoding:'utf8',stdio:['ignore','pipe','inherit']})){
  assert(env.GITHUB_EVENT_NAME==='push'&&env.GITHUB_REF===`refs/tags/v${version}`&&env.GITHUB_REF_NAME===`v${version}`,'Publication requires the matching tag push');
@@ -30,4 +31,7 @@ export function publishRelease(root,version,env=process.env,run=args=>execFileSy
  assert.deepEqual(actual,expected,'Remote upload is incomplete; retaining draft');
  run(['release','edit',tag,'--draft=false','--prerelease=false','--latest=true',...repo]);
 }
-if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url))publishRelease(process.argv[2],verifyVersion());
+if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
+ assertYoutubeRedistribution(JSON.parse(readFileSync(new URL('../src-tauri/resources/youtube/redistribution.json',import.meta.url),'utf8')));
+ publishRelease(process.argv[2],verifyVersion());
+}

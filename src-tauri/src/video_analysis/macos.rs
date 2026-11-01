@@ -18,8 +18,12 @@ struct Timestamp {
     timescale: i32,
 }
 extern "C" {
-    fn apex_video_open(path: *const c_char, meta: *mut Metadata, error: *mut c_char)
-        -> *mut c_void;
+    fn apex_video_open(
+        path: *const c_char,
+        start: f64,
+        meta: *mut Metadata,
+        error: *mut c_char,
+    ) -> *mut c_void;
     fn apex_video_next(
         handle: *mut c_void,
         minimum: f64,
@@ -43,7 +47,7 @@ pub(super) struct Decoder {
     meta: VideoAnalysisMetadata,
 }
 impl Decoder {
-    pub fn open(path: &Path) -> Result<Self> {
+    pub fn open(path: &Path, start: f64) -> Result<Self> {
         let path =
             CString::new(path.to_str().ok_or_else(|| {
                 VideoAnalysisError::new(ErrorKind::InvalidInput, "Non-Unicode path")
@@ -51,7 +55,8 @@ impl Decoder {
             .map_err(|_| VideoAnalysisError::new(ErrorKind::InvalidInput, "Path contains NUL"))?;
         let mut meta = Metadata::default();
         let mut error = [0; 1024];
-        let handle = unsafe { apex_video_open(path.as_ptr(), &mut meta, error.as_mut_ptr()) };
+        let handle =
+            unsafe { apex_video_open(path.as_ptr(), start, &mut meta, error.as_mut_ptr()) };
         if handle.is_null() {
             return Err(native_error(&error));
         }

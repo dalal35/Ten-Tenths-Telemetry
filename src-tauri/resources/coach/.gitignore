@@ -1,0 +1,3 @@
+# Release prerequisite; provision with scripts/prepare-coach-model.mjs.
+model.gguf
+*.partial

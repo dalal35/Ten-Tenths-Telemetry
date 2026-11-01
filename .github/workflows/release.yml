@@ -59,9 +59,15 @@ jobs:
         run: |
           npm test
           npm run test:release
+      - name: Provision and verify self-contained YouTube helpers
+        run: |
+          npm run prepare:youtube
+          npm run test:youtube-tools
       # Private ignored XRKs are deliberately not uploaded into CI.
       - name: Native Rust, persistence and real media tests
         run: |
+          node scripts/prepare-opencv.mjs
+          node --test scripts/opencv-provision-tests.mjs
           node scripts/verify-native-video-tests.mjs
           cargo test --locked --manifest-path src-tauri/Cargo.toml --lib --test persistence --test video --test video_analysis --test feature_parity
       - name: Browser workflows (simulated IPC, not native GUI acceptance)
@@ -74,7 +80,9 @@ jobs:
       - name: Build Apple Silicon app and DMG
         env:
           APPLE_SIGNING_IDENTITY: '-'
-        run: npm run build:mac
+        run: |
+          node scripts/prepare-coach-model.mjs --download
+          npm run build:mac
       - name: Inspect and stage native artifacts
         run: node scripts/stage-release-artifacts.mjs macos "${{ runner.temp }}/ttt-release"
       - uses: actions/upload-artifact@v4
@@ -105,6 +113,18 @@ jobs:
           workspaces: src-tauri -> target
           cache-on-failure: true
           key: windows-x64-msvc-v2
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          path-type: inherit
+          update: true
+          install: make diffutils pkgconf mingw-w64-ucrt-x86_64-gcc
+      - name: Provision native Windows YouTube helpers
+        shell: msys2 {0}
+        run: |
+          node scripts/prepare-youtube-tools.mjs --download
+          node --test scripts/youtube-tool-tests.mjs
+          node scripts/verify-youtube-tools.mjs
       - name: Verify version and install dependencies
         run: |
           node scripts/verify-release-version.mjs
@@ -127,7 +147,9 @@ jobs:
           npm run test:canvas
           npm run test:video
       - name: Build per-user Windows x64 NSIS installer
-        run: npm run build:windows
+        run: |
+          node scripts/prepare-coach-model.mjs --download
+          npm run build:windows
       - name: Inspect x64 GUI executable, NSIS contents and notices
         run: node scripts/stage-release-artifacts.mjs windows "${{ runner.temp }}/ttt-release"
       - name: Hosted WebView2 runtime with disposable synthetic recordings
@@ -173,4 +195,6 @@ jobs:
       - name: Draft, upload, verify, then publish stable release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: node scripts/publish-release.mjs release-artifacts
+        run: |
+          node scripts/check-youtube-redistribution.mjs
+          node scripts/publish-release.mjs release-artifacts

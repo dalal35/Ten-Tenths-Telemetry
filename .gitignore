@@ -37,5 +37,12 @@ playwright-report/
 *.tsbuildinfo
 src-tauri/gen/
 
+# Offline coach weights are verified release inputs, never source assets.
+src-tauri/resources/coach/*.gguf
+
+# Pinned native download tools and corresponding-source archives are provisioned inputs.
+src-tauri/binaries/
+src-tauri/resources/youtube/sources/
+
 # Browser demo / Pages build
 dist-website/

@@ -9,13 +9,16 @@
     "test": "vitest run",
     "tauri": "tauri",
     "build:windows": "tauri build --target x86_64-pc-windows-msvc --bundles nsis --no-binary-patching -- --locked",
-    "build:mac": "tauri build --target aarch64-apple-darwin --bundles app,dmg -- --locked",
+    "build:mac": "node scripts/build-macos-offline.mjs",
+    "prepare:youtube": "node scripts/prepare-youtube-tools.mjs --download",
+    "test:youtube-tools": "node --test scripts/youtube-tool-tests.mjs && node scripts/verify-youtube-tools.mjs",
     "test:release": "node --test scripts/release-tests.mjs scripts/release-policy-tests.mjs scripts/branding-tests.mjs scripts/windows-branding-tests.mjs",
     "test:branding": "node scripts/verify-branding.mjs",
     "test:plots": "node scripts/verify-plots.mjs",
     "test:sidebar": "node scripts/verify-sidebar.mjs",
     "test:workflow": "node scripts/verify-workflow.mjs",
     "test:advanced": "node scripts/verify-advanced.mjs",
+    "test:coach": "node scripts/verify-coach.mjs",
     "test:canvas": "node scripts/verify-canvas.mjs",
     "test:video": "node scripts/verify-video.mjs && node scripts/verify-video-integration.mjs",
     "build:website": "tsc -p tsconfig.website.json && node scripts/build-website.mjs",
@@ -24,10 +27,10 @@
   "dependencies": {
     "@tauri-apps/api": "^2.8.0",
     "@tauri-apps/plugin-dialog": "^2.4.0",
+    "motion": "^14.4.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "uplot": "^1.6.32",
-    "motion": "^14.4.0"
+    "uplot": "^1.6.32"
   },
   "devDependencies": {
     "@playwright/test": "^1.55.0",

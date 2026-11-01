@@ -52,6 +52,20 @@ jobs:
         run: |
           npm ci
           node scripts/verify-release-version.mjs
+      - uses: msys2/setup-msys2@v2
+        if: inputs.suite != 'browser' || inputs.packaging
+        with:
+          msystem: UCRT64
+          path-type: inherit
+          update: true
+          install: make diffutils pkgconf mingw-w64-ucrt-x86_64-gcc
+      - name: Provision and verify self-contained native YouTube helpers
+        if: inputs.suite != 'browser' || inputs.packaging
+        shell: msys2 {0}
+        run: |
+          node scripts/prepare-youtube-tools.mjs --download
+          node --test scripts/youtube-tool-tests.mjs
+          node scripts/verify-youtube-tools.mjs
       - name: Native Windows parity, persistence and Media Foundation
         if: inputs.suite == 'native' || inputs.suite == 'full'
         run: |
@@ -76,10 +90,14 @@ jobs:
           npm run test:video
       - name: Build optimized executable without packaging
         if: inputs.suite == 'runtime' && !inputs.packaging
-        run: npm run tauri -- build --target x86_64-pc-windows-msvc --no-bundle -- --locked
+        run: |
+          node scripts/prepare-coach-model.mjs --download
+          npm run tauri -- build --target x86_64-pc-windows-msvc --no-bundle -- --locked
       - name: Build Windows NSIS for packaging changes or final validation
         if: inputs.packaging || inputs.suite == 'full'
-        run: npm run build:windows
+        run: |
+          node scripts/prepare-coach-model.mjs --download
+          npm run build:windows
       - name: Inspect PE, NSIS payload and dependency notices
         if: inputs.packaging || inputs.suite == 'full'
         run: node scripts/stage-release-artifacts.mjs windows "${{ runner.temp }}/ttt-release"

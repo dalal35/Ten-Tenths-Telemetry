@@ -58,12 +58,14 @@ int main(int argc, char **argv) {
         if (argc < 2) return 1;
         NSURL *url = [NSURL fileURLWithPath:@(argv[1])];
         if (argc > 2 && !strcmp(argv[2], "audio")) return audioOnly(url);
+        BOOL seek = argc > 2 && (!strcmp(argv[2], "seek-vfr") || !strcmp(argv[2], "seek-bframes"));
+        BOOL bframes = argc > 2 && !strcmp(argv[2], "seek-bframes");
         NSError *error = nil;
         AVAssetWriter *writer = [[AVAssetWriter alloc] initWithURL:url
             fileType:AVFileTypeQuickTimeMovie error:&error];
         AVAssetWriterInput *input = [[AVAssetWriterInput alloc]
             initWithMediaType:AVMediaTypeVideo outputSettings:@{
-                AVVideoCodecKey: AVVideoCodecTypeJPEG, AVVideoWidthKey: @64, AVVideoHeightKey: @32
+                AVVideoCodecKey: bframes ? AVVideoCodecTypeH264 : AVVideoCodecTypeJPEG, AVVideoWidthKey: @64, AVVideoHeightKey: @32
             }];
         AVAssetWriterInputPixelBufferAdaptor *adaptor = [[AVAssetWriterInputPixelBufferAdaptor alloc]
             initWithAssetWriterInput:input sourcePixelBufferAttributes:@{
@@ -82,7 +84,7 @@ int main(int argc, char **argv) {
         [writer startSessionAtSourceTime:kCMTimeZero];
         int ticks[] = {20, 21, 24, 29};
         BOOL cfr = argc > 2 && !strcmp(argv[2], "cfr");
-        for (int i = 0; i < (cfr ? 8 : 4); i++) {
+        for (int i = 0; i < (seek ? 300 : (cfr ? 8 : 4)); i++) {
             while (!input.readyForMoreMediaData) [NSThread sleepForTimeInterval:0.001];
             CVPixelBufferRef pixel = NULL;
             if (CVPixelBufferPoolCreatePixelBuffer(NULL, adaptor.pixelBufferPool, &pixel)
@@ -106,7 +108,7 @@ int main(int argc, char **argv) {
             }
             CVPixelBufferUnlockBaseAddress(pixel, 0);
             BOOL ok = [adaptor appendPixelBuffer:pixel
-                withPresentationTime:CMTimeMake(cfr ? i : ticks[i], 10)];
+                withPresentationTime:CMTimeMake(seek ? (20 + i + (!bframes ? i / 3 : 0)) : (cfr ? i : ticks[i]), 10)];
             CVPixelBufferRelease(pixel);
             if (!ok) return 4;
         }

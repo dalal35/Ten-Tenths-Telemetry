@@ -7,6 +7,30 @@ import {createHash} from 'node:crypto';
 import {verifyVersion} from './verify-release-version.mjs';
 import {verifyArtifacts,verifyWindowsBinary} from './verify-release-artifacts.mjs';
 import {publishRelease} from './publish-release.mjs';
+import {detachDiskImage} from './macos-disk-image.mjs';
+
+test('disk image detach succeeds without retry or forcing the volume',async()=>{
+ let attempts=0;
+ await detachDiskImage('/mounted', (command,args)=>{attempts++;assert.equal(command,'hdiutil');assert.deepEqual(args,['detach','/mounted']);});
+ assert.equal(attempts,1);
+});
+test('disk image detach retries transient resource contention normally',async()=>{
+ let attempts=0;
+ await detachDiskImage('/mounted', (command,args)=>{assert.equal(command,'hdiutil');assert.deepEqual(args,['detach','/mounted']);if(++attempts===1)throw Object.assign(Error('busy'),{status:16,stderr:Buffer.from('hdiutil: detach failed - Resource busy')});});
+ assert.equal(attempts,2);
+});
+test('disk image detach preserves unrelated failures without retry',async()=>{
+ for(const [status,stderr] of [[1,'Resource busy'],[16,'permission denied']]){
+  let attempts=0;const failure=Object.assign(Error('detach failed'),{status,stderr});
+  await assert.rejects(detachDiskImage('/mounted',()=>{attempts++;throw failure;}),error=>error===failure);
+  assert.equal(attempts,1);
+ }
+});
+test('disk image detach stops after three busy attempts and reports the failure',async()=>{
+ let attempts=0;const failure=Object.assign(Error('still busy'),{status:16,stderr:'Resource busy'});
+ await assert.rejects(detachDiskImage('/mounted',()=>{attempts++;throw failure;}),error=>error===failure);
+ assert.equal(attempts,3);
+});
 
 function sandbox(t){const root=mkdtempSync(join(tmpdir(),'apex-release-'));t.after(()=>rmSync(root,{recursive:true,force:true}));return root;}
 function seedVersion(root){mkdirSync(join(root,'src-tauri'));writeFileSync(join(root,'package.json'),JSON.stringify({version:'0.1.0'}));writeFileSync(join(root,'package-lock.json'),JSON.stringify({version:'0.1.0',packages:{'':{version:'0.1.0'}}}));writeFileSync(join(root,'src-tauri/tauri.conf.json'),JSON.stringify({version:'0.1.0'}));writeFileSync(join(root,'src-tauri/Cargo.toml'),'[package]\nname = "apex-telemetry"\nversion = "0.1.0"\n');}
