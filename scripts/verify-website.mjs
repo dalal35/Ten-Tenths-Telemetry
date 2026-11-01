@@ -6,6 +6,7 @@ import {expect} from '@playwright/test';
 import {launchBrowser} from './browser.mjs';
 import {verifyWorkspaceRoute} from './verify-workspace-route.mjs';
 import {verifyNarrative} from './verify-website-narrative.mjs';
+import {verifyDownloads} from './verify-website-downloads.mjs';
 
 // Exercise the production artifact beneath a project prefix, as on GitHub Pages.
 const root=resolve(process.env.WEBSITE_TEST_ROOT || 'dist-website'), prefix='/Ten-Tenths-Telemetry/';
@@ -25,6 +26,7 @@ try {
   await new Promise(r=>server.listen(0,'127.0.0.1',r));
   const origin=`http://127.0.0.1:${server.address().port}`, url=origin+prefix;
   browser=await launchBrowser();
+  await verifyDownloads({browser,url});
   const page=await browser.newPage({viewport:{width:1440,height:1000}}),errors=[],badRequests=[],consoleErrors=[];
   page.on('pageerror',e=>errors.push(e.message));
   page.on('console',message=>{if(message.type()==='error')consoleErrors.push(message.text());});
@@ -102,12 +104,12 @@ try {
   await expect(frame.locator('.workspace-heading')).toContainText('Afternoon');
   await frame.locator('.session-button').filter({hasText:'Morning'}).click();
   await expect(frame.locator('.workspace-heading')).toContainText('Morning');
-  await expect(frame.locator('.plot-row')).toHaveCount(5);
+  await expect(frame.locator('.plot-row:not([hidden])')).toHaveCount(5);
   await frame.getByRole('button',{name:/Channels/}).click();
   await frame.locator('.channel-menu label').filter({hasText:'Engine RPM'}).locator('input').uncheck();
-  await expect(frame.locator('.plot-row')).toHaveCount(4);
+  await expect(frame.locator('.plot-row:not([hidden])')).toHaveCount(4);
   await frame.locator('.channel-menu label').filter({hasText:'Engine RPM'}).locator('input').check();
-  await expect(frame.locator('.plot-row')).toHaveCount(5);
+  await expect(frame.locator('.plot-row:not([hidden])')).toHaveCount(5);
   await frame.getByRole('button',{name:/Channels/}).click();
   await frame.getByRole('button',{name:'Collapse sidebar',exact:true}).click();
   await expect(frame.getByRole('button',{name:'Expand sidebar',exact:true})).toBeVisible();
@@ -124,13 +126,9 @@ try {
   await plot.hover({position:{x:100,y:50}});
   await expect(frame.locator('.readout').first()).not.toContainText('—');
   await expect(frame.locator('.primary-marker circle')).toHaveCount(1);
-  // The optional coach is supplied by the separate desktop development branch.
-  if(await frame.getByRole('button',{name:'AI Driving Coach',exact:true}).count()){
   await frame.getByRole('button',{name:'AI Driving Coach',exact:true}).click();
-  await frame.getByRole('button',{name:'Analyze session',exact:true}).click();
   await expect(frame.locator('.coach-workspace')).toContainText('synthetic');
   await expect(frame.locator('.coach-terms')).toHaveCount(0);
-  }
   await frame.getByRole('button',{name:'Advanced',exact:true}).click();
   await expect(frame.locator('.advanced-workspace')).toBeVisible();
   await expect(frame.locator('.analysis-statistics')).toContainText('samples');

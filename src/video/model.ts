@@ -2,8 +2,10 @@ import type { Axis, Lap, LapView } from '../types';
 import { interpolate } from '../telemetry';
 
 export type VideoSource =
-  | { type: 'youtube'; url: string; videoId: string }
+  | { type: 'youtube'; url: string; videoId: string; cache?: VideoCacheIdentity }
   | { type: 'local'; path: string; size: number; modifiedMs: number };
+
+export interface VideoCacheIdentity { sha256: string; size: number; durationSeconds: number; trackStartSeconds: number }
 
 export interface VideoSegment {
   id: string;
@@ -30,7 +32,7 @@ export type MappingResult =
   | { kind: 'unavailable' }
   | { kind: 'ambiguous'; segmentIds: string[] };
 
-export function parseYouTubeUrl(input: string): VideoSource | null {
+export function parseYouTubeUrl(input: string): Extract<VideoSource,{type:'youtube'}> | null {
   let url: URL;
   try { url = new URL(input.trim()); } catch { return null; }
   if (!['https:', 'http:'].includes(url.protocol) || url.username || url.password || url.port) return null;

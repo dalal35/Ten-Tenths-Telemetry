@@ -35,6 +35,9 @@ export function createHtmlPlayer(element: HTMLVideoElement, url: string): VideoP
   const events: Record<string, () => void> = {
     loadedmetadata() {
       if (failure) return;
+      if (!element.videoWidth || !element.videoHeight) {
+        fail(new Error('No playable video track was found. Re-download the video or choose a supported H.264 MP4 / MOV file.')); return;
+      }
       loaded = true; state = element.paused ? 'paused' : 'playing'; clearTimeout(readinessTimer); resolveReady(); observe();
     },
     playing() { if (!failure) { state = 'playing'; observe(); } },

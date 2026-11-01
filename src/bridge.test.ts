@@ -5,7 +5,7 @@ const native = vi.hoisted(() => ({invoke: vi.fn(), open: vi.fn(), onDragDropEven
 vi.mock('@tauri-apps/api/core', () => ({isTauri: () => true, invoke: native.invoke}));
 vi.mock('@tauri-apps/api/webview', () => ({getCurrentWebview: () => ({onDragDropEvent: native.onDragDropEvent})}));
 vi.mock('@tauri-apps/plugin-dialog', () => ({open: native.open}));
-import {importFiles, importPaths, locateSession, pickLocalVideo, subscribeFileDrop} from './bridge';
+import {cancelYouTubeDownload,cleanYouTubeCache,downloadYouTubeVideo,getYouTubeDownloadStatus,getYouTubeCacheStatus,importFiles, importPaths, locateSession, pickLocalVideo, releaseYouTubeVideo, removeYouTubeCacheEntry, resolveCachedYouTubeVideo,setYouTubeCacheLimit,subscribeFileDrop} from './bridge';
 
 const paths = [
   'C:\\Telemetry café\\走行 [final].xrk',
@@ -16,6 +16,26 @@ const session = (source: string): Session => ({id: source, source, name: 'Record
 beforeEach(() => vi.resetAllMocks());
 
 describe('Windows native file boundary', () => {
+  it('uses the frozen native YouTube cache command contracts', async () => {
+    const asset={videoId:'abcdefghijk',url:'https://www.youtube.com/watch?v=abcdefghijk',path:'/cache/video.mp4',size:1234,modifiedMs:5,sha256:'a'.repeat(64),durationSeconds:60,trackStartSeconds:0,leaseId:'lease',cached:false};
+    const status={jobId:'job',videoId:'abcdefghijk',phase:'downloading',downloadedBytes:12,totalBytes:24,speedBytesPerSecond:3,etaSeconds:4,error:null};
+    const cache={limitBytes:100,usedBytes:10,entries:[]};
+    native.invoke.mockImplementation(async command=>command==='download_youtube_video'||command==='resolve_cached_youtube_video'?asset:command==='youtube_download_status'?status:['cancel_youtube_download','release_youtube_video'].includes(command)?undefined:cache);
+    expect(await downloadYouTubeVideo(asset.url,'job')).toEqual(asset);
+    expect(await resolveCachedYouTubeVideo(asset.videoId)).toEqual(asset);
+    expect(await getYouTubeDownloadStatus('job')).toEqual(status);
+    expect(await cancelYouTubeDownload('job')).toBeUndefined();
+    expect(await releaseYouTubeVideo('lease')).toBeUndefined();
+    expect(await getYouTubeCacheStatus()).toEqual(cache);
+    expect(await setYouTubeCacheLimit(200)).toEqual(cache);
+    expect(await cleanYouTubeCache()).toEqual(cache);
+    expect(await removeYouTubeCacheEntry(asset.videoId)).toEqual(cache);
+    expect(native.invoke.mock.calls).toEqual([
+      ['download_youtube_video',{url:asset.url,jobId:'job'}],['resolve_cached_youtube_video',{videoId:asset.videoId}],['youtube_download_status',{jobId:'job'}],
+      ['cancel_youtube_download',{jobId:'job'}],['release_youtube_video',{leaseId:'lease'}],['youtube_cache_status'],['set_youtube_cache_limit',{limitBytes:200}],
+      ['clean_youtube_cache'],['remove_youtube_cache_entry',{videoId:asset.videoId}],
+    ]);
+  });
   it('imports every selected Windows path verbatim, including a long canonical path', async () => {
     expect(paths[1].length).toBeGreaterThan(260);
     native.open.mockResolvedValue(paths);
@@ -53,7 +73,7 @@ describe('Windows native file boundary', () => {
     });
     const results = await importPaths(paths);
     expect(results.map(value => value.source)).toEqual([paths[0], paths[2]]);
-    expect(results[0].warnings).toEqual(['Error: Unreadable XRK']);
+    expect(results[0].warnings).toEqual(['Import failed: 走行.xrk: Error: Unreadable XRK']);
     expect(native.invoke).toHaveBeenCalledTimes(3);
   });
   it('reports a wholly failed import instead of returning an empty successful result', async () => {

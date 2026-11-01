@@ -43,6 +43,7 @@ import { createHtmlPlayer } from './htmlPlayer';
 
 class MediaStub extends EventTarget {
   src = ''; currentTime = 0; duration = 60; readyState = 0; paused = true; ended = false; seeking = false;
+  videoWidth = 1920; videoHeight = 1080;
   playbackRate = 1; error: { code: number; message: string } | null = null;
   play = vi.fn(async () => { this.paused = false; });
   pause = vi.fn(() => { this.paused = true; });
@@ -68,6 +69,20 @@ describe('HTML video asynchronous adapter', () => {
     element.readyState = 1; element.dispatchEvent(new Event('loadedmetadata'));
     return { element, player };
   }
+
+  it.each([[0, 1080], [1920, 0], [0, 0]])('rejects metadata without a usable video track (%s × %s)', async (width, height) => {
+    const element = new MediaStub(); element.videoWidth = width; element.videoHeight = height;
+    const player = createHtmlPlayer(element.asElement(), 'asset://audio-only.mp4');
+    const readiness = expect(player.ready).rejects.toThrow(/video track/i);
+    const seek = expect(player.seek(10, new AbortController().signal)).rejects.toThrow(/video track/i);
+    element.readyState = 1; element.dispatchEvent(new Event('loadedmetadata'));
+    await Promise.all([readiness, seek]);
+    element.paused = false; element.currentTime = 5; element.dispatchEvent(new Event('playing'));
+    expect(player.snapshot()).toMatchObject({ state: 'error', error: expect.stringMatching(/video track/i) });
+    await expect(player.play()).rejects.toThrow(/video track/i);
+    expect(player.supportedRates()).toEqual([]);
+    player.dispose(); expect(vi.getTimerCount()).toBe(0);
+  });
 
   it('waits for seeked with target tolerance and resolves same-time seeks without an event', async () => {
     const { element, player } = setup(); await player.ready;

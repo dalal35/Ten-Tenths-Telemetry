@@ -23,13 +23,57 @@
 body:has(.advanced-tab){min-width:0}
 .main:has(.advanced-tab){min-width:0}
 .chart-workspace.advanced-tab{container:charts / inline-size}
-.main:has(.advanced-tab) .workspace-heading,
 .main:has(.advanced-tab) .chart-toolbar,
 .main:has(.advanced-tab) .chart-tools,
 .main:has(.advanced-tab) .chart-help{flex-wrap:wrap}
 .main:has(.advanced-tab) .inspector>*{min-width:0}
 @media(max-width:720px){
- .main:has(.advanced-tab){padding-inline:14px}
  .main:has(.advanced-tab) .inspector{grid-template-columns:minmax(0,1fr)}
  .main:has(.advanced-tab) .workspace-heading h1{overflow-wrap:anywhere}
+}
+
+/* Match the precision and rhythm of the primary telemetry controls. */
+.advanced-nav{gap:12px;margin-bottom:14px;align-items:center}
+.tool-tabs{gap:3px;padding:3px;border:1px solid var(--border);border-radius:7px;background:var(--panel)}
+.tool-tabs button{min-height:30px;padding:7px 10px;border-radius:4px;line-height:1.4}
+.tool-tabs button:hover:not(:disabled){background:var(--raised)}
+.preset-select{font-size:10px;line-height:1.5}
+.advanced-workspace select,.advanced-workspace input:not([type=checkbox]),.advanced-workspace textarea{font-family:inherit;font-size:11px;line-height:1.5;min-height:32px;border-radius:6px}
+.advanced-workspace label{font-size:10px;line-height:1.5;gap:5px}
+.analysis-filters,.analysis-controls{gap:12px;padding-block:14px}
+.analysis-controls button,.preset-manager button{min-height:32px;border-radius:6px}
+.analysis-controls button:hover:not(:disabled){background:var(--panel)}
+.analysis-legend{font-size:10px;line-height:1.6;gap:12px 18px;padding-block:12px}
+.analysis-surface{border-radius:10px}
+.surface-footer{font-size:9px;line-height:1.6;padding:10px 12px}
+.point-inspector{font-size:11px;line-height:1.7;padding:10px 12px}
+.analysis-statistics{gap:14px}
+.analysis-statistics strong{font-size:11px;line-height:1.6}
+.analysis-statistics p{font-size:10px;line-height:1.85;margin-block:7px}
+.analysis-notes{font-size:11px;line-height:1.8}
+.analysis-busy{font-size:11px;line-height:1.7}
+.event-table-scroll{border-radius:8px;overscroll-behavior:contain;scrollbar-gutter:stable}
+.event-table{font-size:11px}
+.event-table th{z-index:1;font-size:9px;letter-spacing:.3px}
+.event-table td,.event-table th{padding:12px}
+.event-table tbody tr:hover{background:var(--soft)}
+.event-table td:first-child button{font-size:11px;line-height:1.7}
+.event-table small{font-size:9px;margin-top:4px}
+.formula-editor h2{font-size:17px;line-height:1.5;letter-spacing:-.2px}
+.formula-editor textarea{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;line-height:1.8;tab-size:2}
+.formula-actions button{min-height:34px;border-radius:6px}
+.formula-examples{line-height:1.6;gap:10px 14px}
+.formula-picker button{line-height:1.6;min-height:30px}
+.traction-calibration{line-height:1.7}
+.traction-calibration summary{min-height:30px}
+@container charts (width < 520px){
+ .tool-tabs{width:100%}
+ .tool-tabs button{flex:1 1 auto;padding-inline:8px;font-size:10px}
+ .analysis-filters,.analysis-controls{gap:10px}
+ .analysis-filters>label,.analysis-controls>label{flex:1 1 125px}
+ .advanced-workspace select{max-width:100%}
+ .analysis-filters input[type=number],.analysis-controls input[type=number]{width:100%}
+ .axis-fields>label{flex:1 1 100px}
+ .event-table td:first-child{min-width:190px}
+ .surface-footer{padding-inline:10px}
 }

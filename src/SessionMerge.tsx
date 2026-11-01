@@ -8,8 +8,8 @@ export default function SessionMerge({preview,entries,busy,error,onConfirm,onCan
     if(event.key==='Escape'&&!busy){event.stopPropagation();onCancel();}
     if(event.key==='Tab'){const controls=Array.from(dialog.current?.querySelectorAll<HTMLElement>('button:not(:disabled),input:not(:disabled)')??[]),first=controls[0],last=controls.at(-1);if(event.shiftKey&&document.activeElement===first){event.preventDefault();last?.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus();}}
   }}>
-    <div className="eyebrow">VIRTUAL SESSION</div><h2 id="merge-title">Merge sessions</h2>
-    <p>{preview.sources.length} recordings · {preview.laps.length} laps · {preview.day}</p><p className="muted">Recording day comes from XRK metadata. Original files and saved workspaces stay intact.</p>
+    <div className="eyebrow">COMBINED SESSION</div><h2 id="merge-title">Merge sessions</h2>
+    <p>{preview.sources.length} recordings · {preview.laps.length} laps · {preview.day}</p><p className="muted">Combine these recordings in one session, with laps ordered oldest first. Unmerge to show the recordings separately again. Original files and saved workspaces stay intact.</p>
     <ul>{preview.sources.map(source=>{const entry=entries.find(e=>e.id===source.sessionId);return <li key={source.sessionId}>{entry?.source.split(/[\\/]/).pop()||entry?.name||source.sessionId}</li>;})}</ul>
     {preview.warnings.length>0&&<><h3>Review recording differences</h3><ul className="merge-warnings">{preview.warnings.map(w=><li key={w}>{w}</li>)}</ul><label className="merge-ack"><input type="checkbox" checked={acknowledged} disabled={busy} onChange={e=>setAcknowledged(e.target.checked)}/> I have reviewed these warnings</label></>}
     {error&&<p role="alert" className="merge-error">{error} Cancel and review the sources again before retrying.</p>}

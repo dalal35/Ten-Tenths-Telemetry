@@ -1,6 +1,6 @@
 import {describe,it,expect} from 'vitest';
-import type {Session,MergeInfo} from './types';
-import {videoSourceContext,sourceVideoAnalysis,canSeekVideoLap,lapDisplayNumber,lapSourceLabel} from './merging';
+import type {Session,MergeInfo,LibraryEntry} from './types';
+import {videoSourceContext,sourceVideoAnalysis,canSeekVideoLap,lapDisplayNumber,lapSourceLabel,visibleSessionEntries,preferredVisibleSession} from './merging';
 import {restoreWorkspace,serializeWorkspace} from './workspace';
 import {defaultVideoState} from './video/state';
 import {projectVideoTime} from './video/useVideoSync';
@@ -32,5 +32,51 @@ describe('merged source adapters',()=>{
  it('merged_video_future_state: keeps unknown schemas opaque and never borrows a different source mapping',()=>{
   const future={sessionId:b.id,contentVersion:refs[1].contentVersion,version:999,payload:'retain'};
   const restored=restoreWorkspace(merged,{contentVersion:'v',primary:qb,sourceVideos:{[b.id]:future}},'v');expect(restored.sourceVideos?.[b.id].futureRaw).toEqual(future);expect(restored.sourceVideos?.[a.id]?.state).toBeNull();expect((serializeWorkspace(restored).sourceVideos as Record<string,unknown>)[b.id]).toEqual(future);
+ });
+});
+
+describe('combined library session display',()=>{
+ const entry=(id:string,extra:Partial<LibraryEntry>={}):LibraryEntry=>({id,contentVersion:'v1',source:`${id}.xrk`,name:id,driver:'',track:'',recordedAt:'',lapCount:1,channelCount:0,status:'ready',workspace:null,lastUsed:0,...extra});
+ const combined=(id:string,sourceIds:string[],extra:Partial<LibraryEntry>={})=>entry(id,{mergeSources:sourceIds.map(sessionId=>({sessionId,contentVersion:'v1'})),...extra});
+ const ids=(entries:LibraryEntry[])=>visibleSessionEntries(entries).map(e=>e.id);
+ it('replaces constituent rows with one combined session and restores them after unmerge',()=>{
+  const originals=[entry('a'),entry('b')],merge=combined('merge-100-ab',['a','b']);
+  expect(ids([...originals,merge])).toEqual([merge.id]);
+  expect(ids(originals)).toEqual(['a','b']);
+  expect(preferredVisibleSession([...originals,merge],'a')).toBe(merge);
+  expect(preferredVisibleSession(originals,merge.id)).toBe(originals[0]);
+ });
+ it('hides contained older merges but retains partial overlaps',()=>{
+  const ab=combined('merge-100-ab',['a','b']),abc=combined('merge-200-abc',['a','b','c']),cd=combined('merge-300-cd',['c','d']);
+  const entries=['a','b','c','d'].map(id=>entry(id)).concat(ab,abc,cd);
+  expect(ids(entries)).toEqual([abc.id,cd.id]);
+  expect(preferredVisibleSession(entries,ab.id)).toBe(abc);
+  expect(preferredVisibleSession(entries,cd.id)).toBe(cd);
+ });
+ it('chooses equal merges by creation time then ID, independent of last use and input order',()=>{
+  const old=combined('merge-9-zz',['a','b'],{lastUsed:999}),newer=combined('merge-10-aa',['b','a']),tie=combined('merge-10-zz',['a','b']);
+  for(const entries of [[old,newer,tie],[tie,newer,old]])expect(ids(entries)).toEqual([tie.id]);
+  expect(ids([combined('merged-a',['a','b']),combined('merged-z',['a','b'])])).toEqual(['merged-z']);
+ });
+ it('keeps missing and modified originals reachable for repair',()=>{
+  const missing=entry('a',{status:'missing'}),modified=entry('b',{status:'modified'}),merge=combined('merge-100-ab',['a','b'],{status:'missing'});
+  expect(ids([missing,modified,merge])).toEqual(['a','b',merge.id]);
+  expect(ids([entry('a'),entry('b'),merge])).toEqual(['a','b',merge.id]);
+  expect(ids([missing,modified,{...merge,status:'ready'}])).toEqual(['a','b',merge.id]);
+  expect(preferredVisibleSession([missing,modified,merge],'a')).toBeUndefined();
+ });
+ it('never hides a refreshed recording or merge behind stale source versions',()=>{
+  const refreshed=entry('a',{contentVersion:'v2'}),b=entry('b'),old=combined('merge-100-ab',['a','b']);
+  const current=combined('merge-200-abc',['a','b','c'],{mergeSources:[{sessionId:'a',contentVersion:'v2'},{sessionId:'b',contentVersion:'v1'},{sessionId:'c',contentVersion:'v1'}]});
+  expect(ids([refreshed,b,old])).toEqual(['a',old.id]);
+  expect(ids([old,current])).toEqual([old.id,current.id]);
+  expect(preferredVisibleSession([refreshed,b,old],refreshed.id)).toBe(refreshed);
+ });
+ it('returns the existing objects without changing persisted entries or workspaces',()=>{
+  const originals=[entry('a'),entry('b')],merge=combined('merge-100-ab',['a','b']);
+  const entries=Object.freeze([...originals,merge].map(entry=>Object.freeze(entry))),before=JSON.stringify(entries);
+  expect(visibleSessionEntries(entries)).toEqual([merge]);
+  expect(visibleSessionEntries(entries)[0]).toBe(merge);
+  expect(JSON.stringify(entries)).toBe(before);
  });
 });

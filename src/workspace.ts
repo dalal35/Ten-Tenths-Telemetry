@@ -5,7 +5,7 @@ import type {AdvancedState} from './advancedState';
 import {restoreVideoState,serializeVideoState} from './video/state';
 import {speedFactor,displaySpeedUnit} from './speedDisplay';
 export interface Zoom {primary:string;comparison:string|null;axis:Axis;min:number;max:number}
-export interface Workspace {contentVersion:string;primary:string;comparison:string|null;channels:string[];axis:Axis;layout:'comfortable'|'compact';zoom:Zoom|null;advanced?:AdvancedState;video?:ReturnType<typeof restoreVideoState>;sourceVideos?:Record<string,ReturnType<typeof restoreVideoState>>;view?:'telemetry'|'advanced'|'video'}
+export interface Workspace {contentVersion:string;primary:string;comparison:string|null;channels:string[];axis:Axis;layout:'comfortable'|'compact';zoom:Zoom|null;advanced?:AdvancedState;video?:ReturnType<typeof restoreVideoState>;sourceVideos?:Record<string,ReturnType<typeof restoreVideoState>>;coach?:{referenceId:string|null};view?:'telemetry'|'advanced'|'video'|'coach'}
 export function restoreWorkspace(s:Session,saved:unknown,contentVersion=''):Workspace {
   const candidate=(saved&&typeof saved==='object'?saved:{}) as Partial<Workspace>;
   const w=contentVersion&&candidate.contentVersion!==contentVersion?{}:candidate;
@@ -18,7 +18,7 @@ export function restoreWorkspace(s:Session,saved:unknown,contentVersion=''):Work
   const activeVideo=activeSource?sourceVideos?.[activeSource]:video;
   const restoredAdvanced=restoreAdvanced(w.advanced);restoredAdvanced.config.axis=w.axis==='time'?'time':'distance';
   const channels=Array.isArray(w.channels)?[...new Set(w.channels)].filter(id=>s.channels.some(c=>c.id===id)||restoredAdvanced.formulas.some(f=>f.id===id)):defaults.length?defaults:s.channels.slice(0,2).map(c=>c.id);
-  return {contentVersion,primary,comparison:w.comparison!==primary&&s.laps.some(l=>l.id===w.comparison)?w.comparison!:null,channels,axis:w.axis==='time'?'time':'distance',layout:w.layout==='compact'?'compact':'comfortable',zoom:w.zoom??null,advanced:restoredAdvanced,...(s.merge?{sourceVideos}:candidate.video===undefined?{}:{video}),view:w.view==='advanced'?'advanced':w.view==='video'&&(s.merge||activeVideo?.state)?'video':'telemetry'};
+  return {contentVersion,primary,comparison:w.comparison!==primary&&s.laps.some(l=>l.id===w.comparison)?w.comparison!:null,channels,axis:w.axis==='time'?'time':'distance',layout:w.layout==='compact'?'compact':'comfortable',zoom:w.zoom??null,advanced:restoredAdvanced,coach:{referenceId:s.laps.some(l=>l.id===w.coach?.referenceId&&l.complete)?w.coach!.referenceId:null},...(s.merge?{sourceVideos}:candidate.video===undefined?{}:{video}),view:w.view==='coach'?'coach':w.view==='advanced'?'advanced':w.view==='video'&&(s.merge||activeVideo?.state)?'video':'telemetry'};
 }
 export function serializeWorkspace(w:Workspace):Record<string,unknown> {
   const {video,sourceVideos,...rest}=w;

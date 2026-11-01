@@ -31,6 +31,12 @@ try{
    w.originalVideos=JSON.stringify([w.entry.workspace.video,w.secondEntry.workspace.video]);
   }
   w.__TAURI_INTERNALS__={convertFileSrc:path=>`https://asset.localhost/${encodeURIComponent(path)}`,invoke:async(cmd,args)=>{
+   if(cmd==='start_video_sync'){w.syncArgs=args;return 'sync-job';}
+   if(cmd==='video_sync_status'){if(w.failSyncStatus)throw new Error('Status unavailable');return w.syncStatus;}
+   if(cmd==='cancel_video_sync'){w.syncCancelled=true;return;}
+   if(cmd==='youtube_cache_status')return {limitBytes:10737418240,usedBytes:0,entries:[]};
+   if(cmd==='youtube_download_status')return null;
+   if(cmd==='resolve_cached_youtube_video')return null;
    if(cmd==='library_snapshot')return {entries:[...(w.mergedEntry?[w.mergedEntry]:[]),w.entry,w.secondEntry],activeSessionId:w.mergedEntry?'merged-video':'integration',warnings:[]};
    if(cmd==='load_library_session')return args.sessionId==='merged-video'?w.mergedSession:args.sessionId==='second'?w.secondSession:w.session;
    if(cmd==='save_workspace'){if(w.holdResetSave&&args.workspace.primary==='lap1'){w.holdResetSave=false;await new Promise(resolve=>w.releaseResetSave=resolve);}w.saves.push(args.workspace);(args.sessionId==='merged-video'?w.mergedEntry:args.sessionId==='second'?w.secondEntry:w.entry).workspace=args.workspace;return;}
@@ -46,6 +52,7 @@ try{
    return null;
   }};
   const times=new WeakMap(),sources=new WeakMap(),rates=new WeakMap();
+  Object.defineProperties(HTMLVideoElement.prototype,{videoWidth:{get(){return 1920;}},videoHeight:{get(){return 1080;}}});
   Object.defineProperties(HTMLMediaElement.prototype,{src:{get(){return sources.get(this)??'';},set(v){sources.set(this,v);}},duration:{get(){return w.duration;}},currentTime:{get(){return times.get(this)??0;},set(v){if(w.failSeek)throw new Error('Synthetic seek failure');w.seeks.push(v);const finish=()=>{times.set(this,v);this.dispatchEvent(new Event('timeupdate'));this.dispatchEvent(new Event('seeked'));};if(w.delaySeek)w.finishSeek=finish;else queueMicrotask(finish);}},playbackRate:{get(){return rates.get(this)??1;},set(v){rates.set(this,v);this.dispatchEvent(new Event('ratechange'));}},paused:{get(){return !this.dataset.playing;}}});
   HTMLMediaElement.prototype.load=function(){if(sources.has(this))queueMicrotask(()=>this.dispatchEvent(new Event('loadedmetadata')));};HTMLMediaElement.prototype.play=async function(){this.dataset.playing='1';this.dispatchEvent(new Event('playing'));};HTMLMediaElement.prototype.pause=function(){delete this.dataset.playing;this.dispatchEvent(new Event('pause'));};
   w.advance=t=>{const el=document.querySelector('video');times.set(el,t);el.dispatchEvent(new Event('timeupdate'));};
@@ -53,15 +60,75 @@ try{
  await page.goto(`${server.resolvedUrls.local[0]}tests/video-integration.html`);
  await expect(page.getByRole('button',{name:'Video',exact:true})).toBeVisible();
  await expect(page.getByRole('button',{name:'Play',exact:true})).toBeEnabled();
+ await page.evaluate(()=>window.syncStatus={phase:'sampling',progress:.4,result:null,error:null});
+ await page.getByRole('button',{name:'Estimate sync'}).click();
+ await expect(page.getByLabel('Sync analysis progress')).toHaveAttribute('value','0.4');
+ await page.evaluate(()=>window.syncStatus={phase:'complete',progress:1,error:null,result:{ambiguous:true,applicable:false,rejectionReason:'Competing peaks',candidates:[{offsetSeconds:12,sign:1,correlation:.8,overlapSeconds:30,peakWidthSeconds:2,consistent:true,windows:[{videoStartSeconds:1,videoEndSeconds:4,correlation:.9}]},{offsetSeconds:32,sign:-1,correlation:.7,overlapSeconds:20,peakWidthSeconds:3,consistent:true,windows:[]}]}});
+ await expect(page.getByText(/Competing peaks/)).toBeVisible();
+ await expect(page.getByText(/heuristic uncertainty/i).first()).toBeVisible();
+ await expect(page.getByText(/12.00 s/)).toContainText('Candidate 1');
+ await expect(page.getByText(/uncalibrated candidates/i)).toBeVisible();
+ await expect(page.getByText(/Window 1:/)).toBeVisible();
+ await expect(page.getByText(/Candidate 2 offset/)).toContainText('0 turning-event windows');
+ assert.equal(await page.evaluate(()=>window.saves.at(-1).video.segments.length),2,'candidate must preserve manual segments');
+ await page.evaluate(()=>window.syncStatus={phase:'complete',progress:1,error:null,result:{ambiguous:false,applicable:false,rejectionReason:'Calibration required',candidates:[{offsetSeconds:-949,sign:1,correlation:.8,overlapSeconds:11.2,peakWidthSeconds:2,consistent:false,windows:[{videoStartSeconds:1,videoEndSeconds:4,correlation:-.4}]},{offsetSeconds:-1100,sign:1,correlation:.7,overlapSeconds:20,peakWidthSeconds:3,consistent:true,windows:[]},{offsetSeconds:-1150,sign:1,correlation:.6,overlapSeconds:20,peakWidthSeconds:3,consistent:true,windows:[]},{offsetSeconds:-1211.4,sign:-1,correlation:.5,overlapSeconds:20,peakWidthSeconds:3,consistent:true,windows:[]}]}});
+ await page.getByRole('button',{name:'Estimate sync'}).click();await expect(page.getByText(/Candidate 4 offset: -1211.40/)).toBeVisible();await expect(page.getByText(/Candidate 1 offset: -949.00/)).toContainText('overlap 11.2 s');await expect(page.getByText(/Window 1:.*-0.40/)).toBeVisible();await expect(page.getByText(/uncalibrated candidates/i)).toBeVisible();await expect(page.getByText('Calibration required')).toBeVisible();
+
+ // Sequence evidence remains read-only, including candidates from another recording.
+ await page.evaluate(()=>window.syncStatus={phase:'complete',progress:1,error:null,result:{ambiguous:true,applicable:false,rejectionReason:'Candidate only',candidates:[],sequence:{confidence:'ambiguous',comparisonIncomplete:true,competitorMargin:0,cuts:[{startSeconds:20,endSeconds:20.05}],warnings:['Landmark phase remains unresolved.'],sampledFrames:120,runtimeSeconds:2.5,candidates:[{recordingId:'second',recordingName:'Other XRK',hypothesis:0,markerHypothesis:true,landmarkScore:.2,clip:1,offsetSeconds:-1211.455,score:.76,rmsResidualSeconds:.135,maxResidualSeconds:.32,intervalRmsSeconds:.151,skippedCrossings:1,motion:null,triggerCorrectionSeconds:null,matches:[0,1,2,3].map(i=>({videoSeconds:1252.75+i*27,telemetrySeconds:41.295+i*27,lapNumber:i+2,residualSeconds:0}))}]}}});
+ await page.getByRole('button',{name:'Estimate sync'}).click();
+ await expect(page.getByText(/Sequence confidence: ambiguous/)).toBeVisible();
+ await expect(page.getByText(/Possible edit: 20.00–20.05/)).toBeVisible();
+ await page.getByText(/Sequence 1: Other XRK/).click();
+ await expect(page.getByText(/residuals measure sequence fit/)).toBeVisible();
+ await expect(page.getByText(/XRK-conditioned marker hypothesis/)).toBeVisible();
+ await expect(page.getByText(/Lap boundary 3:/)).toContainText('video interval 27.000 s / XRK 27.000 s');
+ assert.equal(await page.evaluate(()=>window.saves.at(-1).video.segments.length),2,'lap sequence candidates must preserve manual segments');
+ await expect(page.getByRole('button',{name:/Apply.*sync/i})).toHaveCount(0);
+
+ // A full-video request proposes both recordings without changing either manual mapping.
+ const mappingsBefore=await page.evaluate(()=>JSON.stringify([window.entry.workspace.video.segments,window.secondEntry.workspace.video.segments]));
+ await page.evaluate(()=>{
+  const segment=(id,name,a,b)=>({candidateIndex:0,candidateIndices:[0],recordingId:id,recordingName:name,clip:0,videoStartSeconds:a,videoEndSeconds:b,telemetryStartSeconds:100,telemetryEndSeconds:140,offsetSeconds:100-a,matchedLaps:6,markerSupported:true,uniqueIntervalEvidence:3,boundaries:[0,1,2,3,4,5,6].map(i=>({videoSeconds:a+(b-a)*i/6,telemetrySeconds:100+40*i/6,lapNumber:i+1,residualSeconds:0})),status:'provisional',localMargin:2,comparisonIncomplete:true});
+  window.syncStatus={phase:'complete',progress:1,error:null,result:{ambiguous:true,applicable:false,rejectionReason:'Proposals only',candidates:[],sequence:{confidence:'Multiple-recording proposals; unvalidated',comparisonIncomplete:true,competitorMargin:2,cuts:[],warnings:[],sampledFrames:200,runtimeSeconds:4,windowCount:3,cacheHit:true,candidates:[],assignment:{segments:[segment('integration','0362',10,150),segment('second','0361',300,500)],unmappedGaps:[{videoStartSeconds:0,videoEndSeconds:10,reason:'Unsupported footage'},{videoStartSeconds:150,videoEndSeconds:300,reason:'Ambiguous or pit footage'},{videoStartSeconds:500,videoEndSeconds:900,reason:'Unsupported footage'}],comparisonIncomplete:true,bestScore:8,competingScore:6,competitorMargin:2}}}};
+  window.duration=900;document.querySelector('video').dispatchEvent(new Event('durationchange'));
+ });
+ await page.getByRole('button',{name:'Analyze entire video'}).click();
+ await expect.poll(()=>page.evaluate(()=>window.syncArgs.videoEnd)).toBe(900);
+ assert.equal(await page.evaluate(()=>window.syncArgs.videoStart),0);
+ await expect(page.getByRole('table',{name:'Global video-to-recording assignment'}).getByRole('row')).toHaveCount(3);
+ await expect(page.getByText('0361',{exact:true})).toBeVisible();await expect(page.getByText('0362',{exact:true})).toBeVisible();
+ await page.getByText('Unmapped footage · 3 intervals').click();await expect(page.getByText(/150.000–300.000 s: Ambiguous or pit footage/)).toBeVisible();
+ assert.equal(await page.evaluate(()=>JSON.stringify([window.entry.workspace.video.segments,window.secondEntry.workspace.video.segments])),mappingsBefore);
+ await page.getByRole('button',{name:'Open recording',exact:true}).click();await expect(page.getByRole('heading',{name:'Second circuit',exact:true})).toBeVisible();
+ await page.getByRole('button',{name:/Integration Test/}).click();await expect(page.getByRole('heading',{name:'Synthetic circuit',exact:true})).toBeVisible();
+ assert.equal(await page.evaluate(()=>JSON.stringify([window.entry.workspace.video.segments,window.secondEntry.workspace.video.segments])),mappingsBefore);
+ await page.evaluate(()=>{window.duration=60;document.querySelector('video').dispatchEvent(new Event('durationchange'));});
+
+ // Changing bounds invalidates a completed result and cancels an in-flight job.
+ await page.getByLabel('Analysis end · seconds').fill('59');await expect(page.getByText(/Candidate 1 offset/)).toHaveCount(0);
+ await page.evaluate(()=>{window.syncStatus={phase:'sampling',progress:.3,result:null,error:null};window.syncCancelled=false;});await page.getByRole('button',{name:'Estimate sync'}).click();await expect(page.getByLabel('Sync analysis progress')).toBeVisible();await page.getByLabel('Analysis start · seconds').fill('1');await expect.poll(()=>page.evaluate(()=>window.syncCancelled)).toBe(true);await expect(page.getByLabel('Sync analysis progress')).toHaveCount(0);await expect(page.getByRole('button',{name:'Estimate sync'})).toBeDisabled();
+ await page.evaluate(()=>window.syncStatus={phase:'cancelled',progress:0,result:null,error:null});await expect(page.getByRole('button',{name:'Estimate sync'})).toBeEnabled();
+ await page.getByLabel('Analysis start · seconds').fill('0');await page.evaluate(()=>{window.failSyncStatus=true;window.syncCancelled=false;});await page.getByRole('button',{name:'Estimate sync'}).click();await expect(page.getByText('Status unavailable')).toBeVisible();await expect.poll(()=>page.evaluate(()=>window.syncCancelled)).toBe(true);await expect(page.getByRole('button',{name:'Estimate sync'})).toBeDisabled();await page.evaluate(()=>{window.failSyncStatus=false;window.syncStatus={phase:'cancelled',progress:0,result:null,error:null};});await expect(page.getByRole('button',{name:'Estimate sync'})).toBeEnabled();
+ await page.evaluate(()=>{window.failSyncStatus=true;});await page.getByRole('button',{name:'Estimate sync'}).click();await expect(page.getByText('Status unavailable')).toBeVisible();await expect(page.getByRole('button',{name:'Estimate sync'})).toBeEnabled({timeout:4000});await page.evaluate(()=>window.failSyncStatus=false);
+ await page.getByLabel('Analysis end · seconds').fill('600');await page.getByRole('button',{name:'Estimate sync'}).click();await expect(page.getByText(/valid interval/)).toBeVisible();
+ await page.getByLabel('Analysis end · seconds').fill('60');
+ await page.evaluate(()=>{window.syncStatus={phase:'sampling',progress:.2,result:null,error:null};window.syncCancelled=false;});
+ await page.getByRole('button',{name:'Estimate sync'}).click();await expect(page.getByRole('button',{name:'Cancel analysis'})).toBeVisible();await page.getByRole('button',{name:'Cancel analysis'}).click();await expect.poll(()=>page.evaluate(()=>window.syncCancelled)).toBe(true);await expect(page.getByText('Analysis cancelled')).toBeVisible();await expect(page.getByRole('button',{name:'Estimate sync'})).toBeDisabled();await page.evaluate(()=>window.syncStatus={phase:'cancelled',progress:0,result:null,error:null});await expect(page.getByRole('button',{name:'Estimate sync'})).toBeEnabled();
+ await page.evaluate(()=>{window.syncCancelled=false;window.syncStatus={phase:'sampling',progress:.2,result:null,error:null};});
+ await page.getByRole('button',{name:'Estimate sync'}).click();await expect(page.getByLabel('Sync analysis progress')).toBeVisible();await page.evaluate(()=>window.holdResetSave=true);await page.getByRole('button',{name:'Correction +0.1 s'}).click();await expect.poll(()=>page.evaluate(()=>window.syncCancelled)).toBe(true);await expect(page.getByLabel('Sync analysis progress')).toHaveCount(0);await expect(page.getByText(/Candidate 1 offset/)).toHaveCount(0);await expect.poll(()=>page.evaluate(()=>!!window.releaseResetSave)).toBe(true);await expect(page.getByRole('button',{name:'Estimate sync'})).toBeDisabled();await page.evaluate(()=>{window.releaseResetSave();window.releaseResetSave=null;});await page.getByRole('button',{name:'Correction −0.1 s'}).click();await expect(page.getByRole('button',{name:'Estimate sync'})).toBeDisabled();await page.evaluate(()=>window.syncStatus={phase:'cancelled',progress:0,result:null,error:null});await expect(page.getByRole('button',{name:'Estimate sync'})).toBeEnabled();
+ await page.evaluate(()=>window.syncStatus={phase:'error',progress:0,result:null,error:'Unsupported platform'});await page.getByRole('button',{name:'Estimate sync'}).click();await expect(page.getByText('Unsupported platform')).toBeVisible();
+
+
  await expect(page.locator('.readout').first()).not.toContainText('—');
  // An attached source belongs only to Video; Advanced is always its dedicated workspace.
  await page.getByRole('button',{name:'Advanced',exact:true}).click();
  await expect(page.locator('.advanced-workspace')).toBeVisible();
  await expect(page.locator('.video-workspace')).toHaveCount(0);
- await expect(page.locator('video')).toHaveCount(0);
+ await expect(page.locator('video')).not.toBeVisible();
  await expect(page.getByRole('button',{name:'Attach MP4 / MOV',exact:true})).toHaveCount(0);
  await page.getByRole('button',{name:'Video',exact:true}).click();
- await expect(page.locator('.advanced-workspace')).toHaveCount(0);
+ await expect(page.locator('.advanced-workspace')).not.toBeVisible();
  await expect(page.getByRole('button',{name:'Play',exact:true})).toBeEnabled();
 
  // A valid segment may extend beyond the half-open recorded laps. Those frames cannot own sync.
@@ -150,7 +217,7 @@ try{
  await page.locator('.lap-select').nth(1).click();await expect(page.getByRole('status',{name:'Video sync status'})).toContainText('seeking');
  await page.evaluate(()=>{window.oldFinish=window.finishSeek;window.delaySeek=false;});
  await page.getByRole('button',{name:'Advanced',exact:true}).click();
- await expect(page.locator('video')).toHaveCount(0);
+ await expect(page.locator('video')).not.toBeVisible();
  assert(await page.evaluate(()=>window.beforeAdvanced.paused),'Leaving Video pauses disposed player');
  await page.locator('.lap-select').nth(0).click();await page.getByRole('tab',{name:'Shift Analysis',exact:true}).click();await expect(page.locator('.event-table tbody tr')).toHaveCount(1);
  before=await seeks();await page.locator('.event-table tbody tr button').first().click();
@@ -195,15 +262,17 @@ try{
  await expect.poll(()=>page.evaluate(()=>window.advancedRequests.at(-1)?.xChannel)).toBe(null);
  await expect.poll(()=>page.evaluate(()=>window.advancedRequests.at(-1)?.yChannel)).toBe(null);
  await page.getByRole('tab',{name:'Histograms',exact:true}).click();
- await page.getByRole('button',{name:'Video',exact:true}).click();await expect(page.getByRole('button',{name:'Attach MP4 / MOV',exact:true})).toBeVisible();await expect(page.locator('.advanced-workspace')).toHaveCount(0);
+ await page.getByRole('button',{name:'Video',exact:true}).click();await expect(page.getByRole('button',{name:'Attach MP4 / MOV',exact:true})).toBeVisible();await expect(page.locator('.advanced-workspace')).not.toBeVisible();
  await page.getByRole('button',{name:'Advanced',exact:true}).click();await expect(page.getByRole('tab',{name:'Histograms',exact:true})).toHaveAttribute('aria-selected','true');
  // Explicit Video entry repairs corrupt/stale state, while opaque future schemas stay read-only.
- await page.evaluate(()=>localStorage.setItem('video-fixture-mode','corrupt'));await page.reload();await page.getByRole('button',{name:'Video',exact:true}).click();await expect(page.getByRole('button',{name:'Attach MP4 / MOV',exact:true})).toBeVisible();await expect(page.getByText(/no mappings were restored/)).toBeVisible();await expect.poll(()=>page.evaluate(()=>window.saves.at(-1)?.video?.source)).toBe(null);
- await page.evaluate(()=>localStorage.setItem('video-fixture-mode','future'));await page.reload();await page.getByRole('button',{name:'Video',exact:true}).click();await expect(page.getByText(/This video workspace uses a newer version/)).toBeVisible();await expect(page.getByRole('button',{name:'Attach MP4 / MOV',exact:true})).toHaveCount(0);await expect.poll(()=>page.evaluate(()=>window.saves.at(-1)?.video?.version)).toBe(99);
+ await page.evaluate(()=>localStorage.setItem('video-fixture-mode','corrupt'));await page.reload();await page.getByRole('button',{name:'Video',exact:true}).click();await expect(page.getByRole('button',{name:'Attach MP4 / MOV',exact:true})).toBeVisible();await expect(page.getByText(/Video settings unavailable/)).toBeVisible();await expect.poll(()=>page.evaluate(()=>window.saves.at(-1)?.video?.source)).toBe(null);
+ await page.evaluate(()=>localStorage.setItem('video-fixture-mode','future'));await page.reload();await page.getByRole('button',{name:'Video',exact:true}).click();await expect(page.getByText(/Update Ten Tenths Telemetry to edit/)).toBeVisible();await expect(page.getByRole('button',{name:'Attach MP4 / MOV',exact:true})).toHaveCount(0);await expect.poll(()=>page.evaluate(()=>window.saves.at(-1)?.video?.version)).toBe(99);
  // Virtual merging uses original-source video contexts even when logger times overlap.
  await page.evaluate(()=>localStorage.setItem('video-fixture-mode','merge'));await page.reload();
  await expect(page.getByRole('heading',{name:'Merged · Synthetic circuit'})).toBeVisible();await expect(page.getByRole('button',{name:'Play',exact:true})).toBeEnabled();
  await expect(page.getByText('Video source · synthetic.xrk',{exact:true})).toBeVisible();
+ await page.evaluate(()=>{window.syncArgs=null;window.syncStatus={phase:'error',progress:0,result:null,error:'Fixture completed'};});await page.getByRole('button',{name:'Estimate sync'}).click();await expect(page.getByText('Fixture completed')).toBeVisible();assert.equal(await page.evaluate(()=>window.syncArgs.sessionId),'integration');assert.equal(await page.evaluate(()=>window.syncArgs.contentVersion),'v1');assert.equal(await page.evaluate(()=>window.syncArgs.sourceIdentity.path),'/fixture/video.mp4');
+
  await page.evaluate(()=>window.comparisonEvent=true);await page.getByRole('button',{name:'Compare lap 5',exact:true}).click();await page.getByRole('button',{name:'Advanced',exact:true}).click();await page.getByRole('tab',{name:'Shift Analysis',exact:true}).click();
  await expect(page.locator('.event-table tbody tr')).toHaveCount(2);const foreignEventSeeks=await page.evaluate(()=>window.seeks.length);await page.locator('.event-table tbody tr').nth(1).getByRole('button').first().click();await page.waitForTimeout(150);assert.equal(await page.evaluate(()=>window.seeks.length),foreignEventSeeks,'A comparison-source event cannot seek the primary source video');
  // Foreign-source map events must retain provenance for mouse and keyboard seeks.
