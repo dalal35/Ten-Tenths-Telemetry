@@ -1,4 +1,4 @@
-import {launchBrowser,browserTestEntries} from './browser.mjs';
+import {launchBrowser,browserTestEntries,browserTestNoWatch} from './browser.mjs';
 // Real React acceptance coverage; only the native IPC/media boundary is simulated.
 import {expect} from '@playwright/test';
 import {createServer} from 'vite';
@@ -8,7 +8,7 @@ import {mkdirSync} from 'node:fs';
 let server, browser;
 try {
   mkdirSync('.tools', {recursive:true});
-  server=await createServer({optimizeDeps:{entries:browserTestEntries},server:{host:'127.0.0.1',port:0,strictPort:false,hmr:false,watch:null}});
+  server=await createServer({plugins:[browserTestNoWatch],optimizeDeps:{entries:browserTestEntries},server:{host:'127.0.0.1',port:0,strictPort:false,hmr:false}});
   await server.listen();
   console.log('Sidebar verification: Vite ready');
   browser=await launchBrowser();
@@ -72,8 +72,10 @@ try {
   await expect(details.getByLabel('Recording date')).toHaveValue('2026-10-14');
   await details.getByLabel('Session name').fill('Canceled title');
   await details.getByRole('button',{name:'Cancel',exact:true}).click();
+  assert.equal(await page.locator('dialog:modal').count(),0,'Cancel releases native top-layer modality during the exit');
+  await expect(page.locator('.library-entry.active .row-actions')).toBeFocused();
   await expect(page.locator('.library-entry.active .session-button')).not.toContainText('Canceled title');
-  await editActive();await details.getByLabel('Session name').fill('Fail save');
+  await editActive();assert(await details.evaluate(node=>node.matches(':modal')),'Reopening details during an interrupted exit restores native modality');await details.getByLabel('Session name').fill('Fail save');
   await details.getByRole('button',{name:'Save',exact:true}).click();
   await expect(details.getByRole('alert')).toContainText('Fixture save failure');
   await details.getByLabel('Session name').fill('Edited practice');

@@ -55,7 +55,7 @@ try{
  }
  console.log(`PASS: ${pairs.length} ordered workspace/viewport transitions with stationary shell`);
  await page.setViewportSize({width:1440,height:1000});await click('Telemetry');await settle();
- await page.evaluate(()=>{window.auditPauseTransition=true;window.auditPausedAnimations=[];});
+ await page.waitForTimeout(190);await page.evaluate(()=>{window.auditPauseTransition=true;window.auditPausedAnimations=[];});
  const beforeFrames=await geometry();await click('AI Driving Coach');
  await page.waitForFunction(()=>window.auditPausedAnimations.length===1);
  const frames=[];
@@ -101,7 +101,7 @@ try{
  await click('AI Driving Coach');await settle();await expect(page.locator('.coach-progress')).toContainText('Analysis complete');
  assert.equal(await page.evaluate(()=>window.auditCalls.filter(c=>c.cmd==='analyze_driving_coach').length),coachBefore.analyses+1,'A completed hidden job is reused without another analysis');
  assert(await page.evaluate(()=>window.auditCoachCard===document.querySelector('.coach-card')),'Existing AI recommendation nodes remain mounted');
- await page.evaluate(()=>{window.auditPauseTransition=true;window.auditPausedAnimations=[];});await click('Telemetry');await page.waitForFunction(()=>window.auditPausedAnimations.length===1);await page.setViewportSize({width:1000,height:700});
+ await page.waitForTimeout(190);await page.evaluate(()=>{window.auditPauseTransition=true;window.auditPausedAnimations=[];});await click('Telemetry');await page.waitForFunction(()=>window.auditPausedAnimations.length===1);await page.setViewportSize({width:1000,height:700});
  await expect.poll(()=>page.evaluate(()=>document.getAnimations().filter(a=>/^workspace-(in|out)$/.test(a.animationName??'')).length)).toBe(0);await page.evaluate(()=>window.auditPauseTransition=false);
  await page.emulateMedia({reducedMotion:'reduce'});const beforeReduced=await page.evaluate(()=>window.auditTransitions.length);await click('AI Driving Coach');await expect(page.locator('.coach-card')).toHaveCount(3);
  assert.equal(await page.evaluate(()=>window.auditTransitions.length),beforeReduced,'Reduced motion commits without a snapshot animation');
@@ -117,7 +117,7 @@ try{
   const point=input==='pointerdown'?{x:densityBounds.x+densityBounds.width/2,y:densityBounds.y+densityBounds.height/2}:{x:bounds.x+bounds.width-12,y:bounds.y+80};
   await page.mouse.move(point.x,point.y);
   // Park before switching so pointermove cannot conceal a lost first gesture.
-  await page.evaluate(()=>{window.auditPauseTransition=true;window.auditPausedAnimations=[];[...document.querySelectorAll('.workspace-switch button')].find(button=>button.textContent==='Telemetry').click();});await page.waitForFunction(()=>window.auditPausedAnimations.length===1);
+  await page.waitForTimeout(190);await page.evaluate(()=>{window.auditPauseTransition=true;window.auditPausedAnimations=[];[...document.querySelectorAll('.workspace-switch button')].find(button=>button.textContent==='Telemetry').click();});await page.waitForFunction(()=>window.auditPausedAnimations.length===1);
   assert.equal(await page.evaluate(()=>document.getAnimations().filter(a=>/^workspace-(in|out)$/.test(a.animationName??'')).length),1,`${input} starts from a live paused outgoing snapshot`);
   if(input==='pointerdown'){await page.mouse.down();await page.mouse.up();}else await page.mouse.wheel(0,100);
   await expect.poll(()=>page.evaluate(()=>document.getAnimations().filter(a=>/^workspace-(in|out)$/.test(a.animationName??'')).length),{timeout:1000}).toBe(0);
@@ -129,13 +129,13 @@ try{
  // before it commits. No focus/channel/seek side effect may leak from the old intent.
  await click('AI Driving Coach');await settle();
  const beforeCancel=await page.evaluate(()=>({primary:window.auditEntry.workspace.primary,comparison:window.auditEntry.workspace.comparison,channels:window.auditEntry.workspace.channels,zoom:window.auditEntry.workspace.zoom}));
- await page.evaluate(()=>{window.auditHoldUpdates=true;window.auditHeldUpdates=[];document.querySelector('.coach-card button').click();[...document.querySelectorAll('.workspace-switch button')].find(button=>button.textContent==='Advanced').click();});
+ await page.waitForTimeout(190);await page.evaluate(()=>{window.auditHoldUpdates=true;window.auditHeldUpdates=[];document.querySelector('.coach-card button').click();[...document.querySelectorAll('.workspace-switch button')].find(button=>button.textContent==='Advanced').click();});
  await page.waitForFunction(()=>window.auditHeldUpdates.length>0);
  await page.evaluate(()=>{window.auditHoldUpdates=false;window.auditHeldUpdates.splice(0).forEach(resolve=>resolve());});await settle();await expect(page.locator('.workspace-switch button[aria-pressed=true]')).toHaveText('Advanced');
  assert.deepEqual(await page.evaluate(()=>({primary:window.auditEntry.workspace.primary,comparison:window.auditEntry.workspace.comparison,channels:window.auditEntry.workspace.channels,zoom:window.auditEntry.workspace.zoom})),beforeCancel,'Superseded inspection leaves no selection/channel/zoom intent');
  await expect(page.locator('.alignment-note')).not.toContainText('Focus:');
  await click('AI Driving Coach');await settle();
- await page.evaluate(()=>{window.auditHoldUpdates=true;window.auditHeldUpdates=[];const buttons=[...document.querySelectorAll('.coach-card-footer button')];buttons[0].click();buttons[1].click();});
+ await page.waitForTimeout(190);await page.evaluate(()=>{window.auditHoldUpdates=true;window.auditHeldUpdates=[];const buttons=[...document.querySelectorAll('.coach-card-footer button')];buttons[0].click();buttons[1].click();});
  await page.waitForFunction(()=>window.auditHeldUpdates.length>0);
  await page.evaluate(()=>{window.auditHoldUpdates=false;window.auditHeldUpdates.splice(0).forEach(resolve=>resolve());});await settle();
  await expect(page.locator('.workspace-switch button[aria-pressed=true]')).toHaveText('Video');

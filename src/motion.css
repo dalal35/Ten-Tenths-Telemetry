@@ -1,9 +1,17 @@
-:root{--motion-fast:140ms;--motion-settle:240ms;--motion-ease:cubic-bezier(.22,1,.36,1)}
-.workspace-switch.segmented{position:relative;isolation:isolate;padding:4px;gap:3px;border:1px solid var(--border);border-radius:7px;background:var(--panel)}
-.workspace-switch.segmented button{position:relative;border-radius:4px;min-height:32px;padding:8px 15px;background:transparent;white-space:nowrap}
-.workspace-selection{position:absolute;inset:0;z-index:-1;border-radius:4px;background:var(--raised);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--cyan) 18%,var(--border)),0 2px 4px #0001}
-.workspace-selection::after{content:'';position:absolute;bottom:0;left:20%;right:20%;height:2px;background:var(--cyan);border-radius:2px;opacity:.9}
+@import './design.css';
+/* Sampled by the installed Motion spring(.12, 0): critically damped, no overshoot. */
+:root{--motion-fast:120ms;--motion-settle:250ms;--motion-exit:120ms;--motion-ease:cubic-bezier(.22,1,.36,1);--motion-spring:linear(0,.4615,.8176,.9471,.9858,.9964,.9991,1)}
+.workspace-switch.segmented{position:relative;isolation:isolate;padding:0;gap:4px;border:0;border-bottom:1px solid var(--border);border-radius:0;background:transparent;width:100%;margin-bottom:12px}
+.workspace-switch.segmented button{position:relative;border-radius:5px 5px 0 0;min-height:40px;padding:10px 14px;background:transparent;white-space:nowrap;font-size:12px;display:inline-flex;align-items:center;justify-content:center;gap:8px;color:var(--muted)}
+.workspace-switch.segmented button:first-child{padding-left:10px}
+.workspace-switch.segmented button:hover:not(:disabled){color:var(--ink);background:var(--hover)}
+.workspace-selection{position:absolute;inset:auto 0 -1px;height:2px;z-index:1;border-radius:2px;background:var(--ink);pointer-events:none}
 .workspace-tab-label{position:relative}
+.workspace-icon{width:15px;height:15px;flex-shrink:0;stroke:currentColor;stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round;opacity:.7}
+.workspace-switch .active .workspace-icon{opacity:1}
+.axis-switch button,.tool-tabs button{position:relative;isolation:isolate}
+.control-selection{position:absolute;inset:0;z-index:-1;border-radius:3px;background:var(--raised);pointer-events:none}
+.axis-switch button.active,.tool-tabs button[aria-selected=true]{background:transparent}
 /* The session chrome never scrolls or participates in workspace captures. */
 .main:has(.workspace-viewport){display:flex;flex-direction:column;overflow:hidden;padding-bottom:0}
 .main:has(.workspace-viewport)>.workspace-heading,.main:has(.workspace-viewport)>.lap-summary,.main:has(.workspace-viewport)>.workspace-switch,.main:has(.workspace-viewport)>.error-banner{flex-shrink:0}
@@ -29,16 +37,20 @@
 .workspace-stage:not(.video-workspace){min-width:0;margin:0;border:0;background:transparent}
 .workspace-switch button.active{color:var(--ink)}
 .explorer-slot{transition:none!important}
-.explorer-popover,.channel-menu,.merge-dialog{animation:surface-arrive var(--motion-settle) var(--motion-ease) both}
-.explorer-backdrop,.merge-backdrop{animation:scrim-arrive 160ms ease-out both}
-.library-entry.active,.lap-row.selected{animation:selection-arrive 220ms ease-out}
-.explorer-slot[data-visible=true]>.sidebar{animation:explorer-arrive 260ms var(--motion-ease) both}
-button{transition:background-color var(--motion-fast) ease,color var(--motion-fast) ease,border-color var(--motion-fast) ease,box-shadow var(--motion-fast) ease}
-button:active:not(:disabled){filter:brightness(.94)}
+.explorer-popover,.channel-menu,.merge-backdrop .merge-dialog{animation:none;transform-origin:top right}
+.session-details[open]{animation:none}
+.session-details::backdrop,.explorer-backdrop{animation:scrim-arrive var(--motion-fast) ease-out both}
+.library-entry.active,.lap-row.selected{animation:none}
+.explorer-slot[data-visible=true]>.sidebar{animation:explorer-arrive var(--motion-settle) var(--motion-spring) both}
+button{transition:background-color var(--motion-fast) ease,color var(--motion-fast) ease,border-color var(--motion-fast) ease}
+button:where(.import-button,.icon-button,.explorer-icon,.compare-toggle,.merge-actions button,.video-controls button,.analysis-controls button){transition:background-color var(--motion-fast) ease,color var(--motion-fast) ease,border-color var(--motion-fast) ease,scale var(--motion-settle) var(--motion-spring)}
+button:where(.import-button,.icon-button,.explorer-icon,.compare-toggle,.merge-actions button,.video-controls button,.analysis-controls button):active:not(:disabled){scale:.97;transition-duration:70ms}
+button:active:not(:disabled){filter:none}
+input:not([type=range]),select,textarea{transition:border-color var(--motion-fast) ease,background-color var(--motion-fast) ease}
+input:not([type=range]):hover:not(:disabled),select:hover:not(:disabled),textarea:hover:not(:disabled){border-color:var(--muted)}
 :where(button,input,select,textarea,[tabindex]):focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
 @keyframes surface-arrive{from{opacity:0;transform:translateY(-5px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
 @keyframes scrim-arrive{from{opacity:0}to{opacity:1}}
 @keyframes explorer-arrive{from{opacity:.7;transform:translateX(-12px)}to{opacity:1;transform:translateX(0)}}
-@keyframes selection-arrive{from{box-shadow:inset 3px 0 var(--cyan)}to{box-shadow:inset 0 0 transparent}}
-@media(max-width:680px){.workspace-switch.segmented{display:flex;width:100%;gap:2px}.workspace-switch.segmented button{flex:1;min-width:0;padding:8px 6px;font-size:10px}}
+@media(max-width:680px){.workspace-switch.segmented{display:flex;width:100%;gap:2px}.workspace-switch.segmented button{flex:1;min-width:0;padding:8px 6px;font-size:11px;gap:6px}.workspace-icon{width:14px;height:14px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}

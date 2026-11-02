@@ -1,4 +1,4 @@
-import {launchBrowser,browserTestEntries} from './browser.mjs';
+import {launchBrowser,browserTestEntries,browserTestNoWatch} from './browser.mjs';
 // Browser exercises of the React workflow. IPC is simulated; native persistence is tested separately.
 import {createServer} from 'vite';
 import assert from 'node:assert/strict';
@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 process.env.NODE_ENV='production';
 let server,browser;
 try{
- server=await createServer({cacheDir:'node_modules/.vite-workflow',optimizeDeps:{entries:browserTestEntries},server:{host:'127.0.0.1',port:0,strictPort:false,hmr:false,watch:null}});await server.listen();
+ server=await createServer({plugins:[browserTestNoWatch],cacheDir:'node_modules/.vite-workflow',optimizeDeps:{entries:browserTestEntries},server:{host:'127.0.0.1',port:0,strictPort:false,hmr:false}});await server.listen();
  browser=await launchBrowser();
  const page=await browser.newPage({viewport:{width:1440,height:1000}});
  // Exercise queued-save/analysis ordering even when React effects run slowly.

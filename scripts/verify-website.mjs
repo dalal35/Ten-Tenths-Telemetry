@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
 import {readFile, stat} from 'node:fs/promises';
-import {resolve, extname} from 'node:path';
+import {resolve, extname, relative, isAbsolute, sep} from 'node:path';
 import {expect} from '@playwright/test';
 import {launchBrowser} from './browser.mjs';
 import {verifyWorkspaceRoute} from './verify-workspace-route.mjs';
@@ -16,7 +16,8 @@ const server=createServer(async(req,res)=>{
     const url=new URL(req.url,'http://localhost');
     if(!url.pathname.startsWith(prefix))throw new Error('Invalid prefix');
     let path=resolve(root,decodeURIComponent(url.pathname.slice(prefix.length))||'index.html');
-    if(!path.startsWith(root+'/'))throw new Error('Outside root');
+    const local=relative(root,path);
+    if(local==='..'||local.startsWith('..'+sep)||isAbsolute(local))throw new Error('Outside root');
     if((await stat(path)).isDirectory())path+='/index.html';
     const data=await readFile(path);res.writeHead(200,{'Content-Type':types[extname(path)]||'application/octet-stream'});res.end(data);
   }catch {res.writeHead(404);res.end('Not found');}

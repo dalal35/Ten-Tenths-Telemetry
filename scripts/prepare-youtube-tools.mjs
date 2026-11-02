@@ -33,7 +33,15 @@ export async function verifyFile(path,expected){
 }
 export function publishExecutable(source,destination){
  const temporary=`${destination}.${randomUUID()}.partial`;
- try{copyFileSync(source,temporary);chmodSync(temporary,0o755);renameSync(temporary,destination);}
+ try{
+  copyFileSync(source,temporary);chmodSync(temporary,0o755);
+  try{renameSync(temporary,destination);}
+  catch(error){
+   if(process.platform!=='win32'||error.code!=='EPERM')throw error;
+   // ReplaceFileW preserves open handles to the old file when Windows rename cannot.
+   execFileSync('python',['-c',`import ctypes,sys\nk=ctypes.WinDLL('kernel32',use_last_error=True)\nf=k.ReplaceFileW;f.argtypes=[ctypes.c_wchar_p,ctypes.c_wchar_p,ctypes.c_wchar_p,ctypes.c_uint32,ctypes.c_void_p,ctypes.c_void_p];f.restype=ctypes.c_int\nif not f(sys.argv[1],sys.argv[2],None,0,None,None): raise ctypes.WinError(ctypes.get_last_error())`,destination,temporary],{stdio:['ignore','pipe','pipe']});
+  }
+ }
  finally{rmSync(temporary,{force:true});}
 }
 export function extractZip(path,directory,expectedName){

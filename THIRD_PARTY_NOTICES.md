@@ -1,5 +1,13 @@
 # Third-party notices
 
+## Interface typography
+
+IBM Plex Sans (Regular, Medium, SemiBold) and IBM Plex Mono (Regular) are bundled
+locally as WOFF2 files from the [IBM Plex project](https://github.com/IBM/plex).
+Copyright 2017 IBM Corp. Licensed under the SIL Open Font License 1.1. The full
+license notices are included in `public/fonts/plex-sans-OFL.txt` and
+`public/fonts/plex-mono-OFL.txt`, and are copied into the frontend distribution.
+
 ## Managed YouTube downloads
 
 The application bundles yt-dlp 2026.10.26 (official standalone GPL-3.0-or-later distribution, including Python/EJS), Deno 2.9.8 (MIT and bundled component licenses), and separately executed FFmpeg/ffprobe 9.0.2 (minimal LGPL-2.1-or-later build). Pinned input hashes, complete upstream yt-dlp aggregate license text, Deno license, FFmpeg license/source/signature/build recipe and top-level source archives are installed in `resources/youtube/`. No user tool installation or executable self-update is required.

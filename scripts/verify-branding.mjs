@@ -1,4 +1,4 @@
-import {launchBrowser} from './browser.mjs';
+import {launchBrowser,browserTestNoWatch} from './browser.mjs';
 import {expect} from '@playwright/test';
 import {createServer} from 'vite';
 import assert from 'node:assert/strict';
@@ -6,7 +6,7 @@ import {mkdirSync} from 'node:fs';
 let server,browser;
 try{
  mkdirSync('.tools/branding',{recursive:true});
- server=await createServer({optimizeDeps:{entries:['index.html']},server:{host:'127.0.0.1',port:0,strictPort:false,hmr:false,watch:null}});await server.listen();
+ server=await createServer({plugins:[browserTestNoWatch],optimizeDeps:{entries:['index.html']},server:{host:'127.0.0.1',port:0,strictPort:false,hmr:false}});await server.listen();
  browser=await launchBrowser();const page=await browser.newPage({viewport:{width:1440,height:920}});
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.addInitScript(()=>{localStorage.setItem('apex-theme','light');localStorage.setItem('apex-telemetry:session-explorer',JSON.stringify({sidebarState:'collapsed',sort:'driver-desc',grouping:'circuit'}));});

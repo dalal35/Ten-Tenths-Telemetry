@@ -233,7 +233,7 @@ impl WindowsJob {
                 .map_err(|e| format!("Cannot own download process group: {e}"))?;
             let snapshot =
                 CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0).map_err(|e| e.to_string())?;
-            let resumed = (|| {
+            let resumed: Result<(), String> = (|| {
                 let mut entry = THREADENTRY32 {
                     dwSize: std::mem::size_of::<THREADENTRY32>() as u32,
                     ..Default::default()

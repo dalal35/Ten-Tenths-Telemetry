@@ -1,5 +1,5 @@
 // Test-only IPC/media boundary. No recording or native model is modified.
-export function installWorkspaceFixture({disableTransitions=false,initialView='telemetry'}={}){
+export function installWorkspaceFixture({disableTransitions=false,initialView='telemetry',seriesSamples=2001}={}){
  const w=window;w.isTauri=true;w.auditCalls=[];w.auditTransitions=[];w.auditCoachResolvers=[];w.auditHeldUpdates=[];w.auditSeeks=[];w.auditPlotConstructs=0;
  const seenPlots=new WeakSet();new MutationObserver(records=>{for(const record of records)for(const node of record.addedNodes){if(node.nodeType!==1)continue;const plots=[...(node.matches('.uplot')?[node]:[]),...node.querySelectorAll('.uplot')];for(const plot of plots)if(!seenPlots.has(plot)){seenPlots.add(plot);w.auditPlotConstructs++;}}}).observe(document,{childList:true,subtree:true});
  const nativeTransition=document.startViewTransition?.bind(document);
@@ -46,7 +46,7 @@ export function installWorkspaceFixture({disableTransitions=false,initialView='t
   if(cmd==='cancel_driving_coach')return;
   if(cmd==='analyze_driving_coach'){if(w.auditHoldCoach)await new Promise(resolve=>w.auditCoachResolvers.push(resolve));return {report,explanations:[],mode:'deterministic',modelVersion:'fixture',notice:'Presentation fixture',cached:true,elapsedMs:0,inferenceMetrics:null};}
   if(cmd==='analyze_session'){
-   const view=lapId=>({lapId,duration:60,length:1000,mapping:[{meters:0,time:0},{meters:500,time:30},{meters:1000,time:60}],track:Array.from({length:160},(_,i)=>({x:100*Math.cos(i/159*Math.PI*2),y:60*Math.sin(i/159*Math.PI*2),position:args.axis==='time'?i/159*60:i/159*1000,speed:20})),warnings:[],series:args.channelIds.map(id=>({channelId:id,name:channels.find(c=>c.id===id)?.name??id,unit:id==='rpm'?'rpm':'m/s',x:Array.from({length:2001},(_,i)=>i/2000*(args.axis==='time'?60:1000)),values:Array.from({length:2001},(_,i)=>id==='rpm'?8000+2000*Math.sin(i/67):22+6*Math.sin(i/137))}))});
+   const view=lapId=>({lapId,duration:60,length:1000,mapping:[{meters:0,time:0},{meters:500,time:30},{meters:1000,time:60}],track:Array.from({length:160},(_,i)=>({x:100*Math.cos(i/159*Math.PI*2),y:60*Math.sin(i/159*Math.PI*2),position:args.axis==='time'?i/159*60:i/159*1000,speed:20})),warnings:[],series:args.channelIds.map(id=>({channelId:id,name:channels.find(c=>c.id===id)?.name??id,unit:id==='rpm'?'rpm':'m/s',x:Array.from({length:seriesSamples},(_,i)=>i/(seriesSamples-1)*(args.axis==='time'?60:1000)),values:Array.from({length:seriesSamples},(_,i)=>id==='rpm'?8000+2000*Math.sin(i*2001/seriesSamples/67):22+6*Math.sin(i*2001/seriesSamples/137))}))});
    const metrics={elapsed:10,entrySpeed:20,minSpeed:18,exitSpeed:25,channels:[]};
    return {primary:view(args.primaryId),comparison:args.comparisonId?view(args.comparisonId):null,cornerBoundaries:null,alignment:{method:'spatial',coverage:1,notes:[]},segments:Array.from({length:6},(_,i)=>({id:`section-${i}`,label:`Corner ${i+1}`,kind:'corner',start:i*160,end:(i+1)*160,startMeters:i*160,endMeters:(i+1)*160,uncertaintyMeters:4,primary:metrics,comparison:args.comparisonId?metrics:null,deltaSeconds:0})),delta:null,warnings:[]};
   }

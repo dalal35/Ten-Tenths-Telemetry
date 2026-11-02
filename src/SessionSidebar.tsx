@@ -1,6 +1,7 @@
 import {useEffect,useLayoutEffect,useMemo,useRef,useState} from 'react';
 import {createPortal} from 'react-dom';
-import {SelectionRail} from './motion';
+import {SelectionRail,Surface} from './motion';
+import {AnimatePresence,motion,useIsPresent} from 'motion/react';
 import SessionDetails from './SessionDetails';
 import type {ReactNode} from 'react';
 import type {LibraryEntry,Session} from './types';
@@ -24,8 +25,10 @@ interface Props {
 // Portaled popovers stay clear of the independently scrolling session region.
 function ExplorerPopover({anchor,onClose,children,label,menu=false,container}:{anchor:HTMLButtonElement;onClose:()=>void;children:ReactNode;label:string;menu?:boolean;container:HTMLElement|null}){
   const ref=useRef<HTMLDivElement>(null);
+  const present=useIsPresent();
   const [position,setPosition]=useState({left:0,top:0});
   useLayoutEffect(()=>{
+    if(!present)return;
     const place=()=>{const rect=anchor.getBoundingClientRect(),height=ref.current?.offsetHeight??160,width=ref.current?.offsetWidth??220;setPosition({left:Math.max(8,Math.min(rect.right-width,window.innerWidth-width-8)),top:Math.max(8,Math.min(rect.bottom+5,window.innerHeight-height-8))});};
     place();const observer=new ResizeObserver(place);if(ref.current)observer.observe(ref.current);
     const outside=(event:PointerEvent)=>{if(!ref.current?.contains(event.target as Node)&&!anchor.contains(event.target as Node))onClose();};
@@ -49,13 +52,13 @@ function ExplorerPopover({anchor,onClose,children,label,menu=false,container}:{a
         candidates.find(el=>el?.isConnected&&el.getClientRects().length&&!el.closest('[inert]'))?.focus();
       });
     };
-  },[anchor,onClose,container]);
+  },[anchor,onClose,container,present]);
   const close=()=>{onClose();anchor.focus();};
-  return createPortal(<div ref={ref} className="explorer-popover" style={position} role={menu?'menu':'dialog'} aria-label={label} onKeyDown={e=>{
+  return createPortal(<Surface ref={ref} className="explorer-popover" style={position} role={menu?'menu':'dialog'} aria-label={label} onKeyDown={e=>{
     if(e.key==='Escape'){e.preventDefault();e.stopPropagation();close();}
     if(menu&&['ArrowDown','ArrowUp','Home','End'].includes(e.key)){e.preventDefault();const buttons=Array.from(ref.current?.querySelectorAll<HTMLButtonElement>('button:not(:disabled)')??[]),index=buttons.indexOf(document.activeElement as HTMLButtonElement);buttons[e.key==='Home'?0:e.key==='End'?buttons.length-1:(index+(e.key==='ArrowDown'?1:-1)+buttons.length)%buttons.length]?.focus();}
     if(e.key==='Tab'){const controls=Array.from(ref.current?.querySelectorAll<HTMLElement>('button:not(:disabled),select')??[]);if(e.shiftKey&&document.activeElement===controls[0]||!e.shiftKey&&document.activeElement===controls.at(-1)){e.preventDefault();close();}}
-  }}>{children}</div>,container??document.body);
+  }}>{children}</Surface>,container??document.body);
 }
 
 export default function SessionExplorer(p:Props){
@@ -127,12 +130,12 @@ export default function SessionExplorer(p:Props){
           })}</div>
         </div>)}{!visibleEntries.length&&<p className="sidebar-hint">Your sessions stay on this computer.<br/>Import an XRK file to begin.</p>}</div>
       </section>}
-      {session&&<section className="lap-region" aria-label="Laps"><div className="sidebar-label laps-heading">LAPS <span>{session.laps.length}</span></div><div className="lap-table-head"><span>LAP</span><span>TIME</span><span>COMPARE</span></div><div className="lap-list" inert={p.lifecycle}>{session.laps.map(l=><div key={l.id} className={`lap-row ${l.id===p.primary?'selected':''} ${l.id===p.comparison?'compared':''}`}>{l.id===p.primary&&<SelectionRail group="lap-selection" value={l.id}/>}<button className="lap-select" onClick={()=>p.onLap(l.id)} title="Use as primary lap" aria-pressed={l.id===p.primary}><span className="lap-number">{lapDisplayNumber(session,l.id).toString().padStart(2,'0')}</span><span className="lap-time mono">{formatTime(l.duration)}{(!l.complete||l.id===best?.id)&&<small>{!l.complete?lapBoundaryLabel(session,l.id):'FASTEST'}</small>}</span></button><button className={`compare-toggle ${l.id===p.comparison?'on':''}`} disabled={l.id===p.primary} aria-label={`Compare lap ${lapDisplayNumber(session,l.id)}`} aria-pressed={l.id===p.comparison} onClick={()=>p.onCompare(p.comparison===l.id?null:l.id)}>{l.id===p.comparison?'●':'＋'}</button></div>)}</div></section>}
+      {session&&<section className="lap-region" aria-label="Laps"><div className="sidebar-label laps-heading">LAPS <span>{session.laps.length}</span></div><div className="lap-table-head"><span>LAP</span><span>TIME</span><span>COMPARE</span></div><motion.div layoutScroll className="lap-list" inert={p.lifecycle}>{session.laps.map(l=><div key={l.id} className={`lap-row ${l.id===p.primary?'selected':''} ${l.id===p.comparison?'compared':''}`}>{l.id===p.primary&&<SelectionRail group="lap-selection" value={l.id}/>}<button className="lap-select" onClick={()=>p.onLap(l.id)} title="Use as primary lap" aria-pressed={l.id===p.primary}><span className="lap-number">{lapDisplayNumber(session,l.id).toString().padStart(2,'0')}</span><span className="lap-time mono">{formatTime(l.duration)}{(!l.complete||l.id===best?.id)&&<small>{!l.complete?lapBoundaryLabel(session,l.id):'FASTEST'}</small>}</span></button><button className={`compare-toggle ${l.id===p.comparison?'on':''}`} disabled={l.id===p.primary} aria-label={`Compare lap ${lapDisplayNumber(session,l.id)}`} aria-pressed={l.id===p.comparison} onClick={()=>p.onCompare(p.comparison===l.id?null:l.id)}>{l.id===p.comparison?'●':'＋'}</button></div>)}</motion.div></section>}
       {session&&<div className="sidebar-footer" title={session.source}><span className="dot"/><span>{session.source.split(/[\\/]/).pop()}</span></div>}
-      {details&&<SessionDetails entry={details} onClose={()=>setDetails(null)} onSave={(name,driver,date)=>p.onEditDetails(details,name,driver,date)}/>}
+      <AnimatePresence>{details&&<SessionDetails key={details.id} entry={details} onClose={()=>setDetails(null)} onSave={(name,driver,date)=>p.onEditDetails(details,name,driver,date)}/>}</AnimatePresence>
     </aside>
-    {popover&&visible&&<ExplorerPopover anchor={popover.anchor} container={sidebar.current} onClose={closePopover} label={popover.key==='organize'?'Organize sessions':'Session actions'} menu={popover.key!=='organize'}>
+    <AnimatePresence>{popover&&visible&&<ExplorerPopover key={popover.key} anchor={popover.anchor} container={sidebar.current} onClose={closePopover} label={popover.key==='organize'?'Organize sessions':'Session actions'} menu={popover.key!=='organize'}>
       {popover.key==='organize'?<><label>Sort sessions<select aria-label="Sort sessions" value={preferences.sort} onChange={e=>p.onPreferences({...preferences,sort:e.target.value as SessionSort})}><option value="date-desc">Date · Newest first</option><option value="date-asc">Date · Oldest first</option><option value="driver-asc">Driver · A–Z</option><option value="driver-desc">Driver · Z–A</option><option value="circuit-asc">Circuit · A–Z</option><option value="circuit-desc">Circuit · Z–A</option></select></label><label>Group sessions<select aria-label="Group sessions" value={preferences.grouping} onChange={e=>{setClosedGroups(new Set());p.onPreferences({...preferences,grouping:e.target.value as SessionGrouping});}}><option value="date">By date</option><option value="driver">By driver</option><option value="circuit">By circuit</option><option value="none">No grouping</option></select></label></>:popover.key==='header'?<button role="menuitem" disabled={p.busy||p.restoring} onClick={()=>{closePopover();p.onMergeMode();changeState('expanded');}}>Merge sessions</button>:<>{(()=>{const entry=entries.find(e=>e.id===popover.key);if(!entry)return null;const action=(kind:Action)=>{const anchor=popover.anchor;closePopover();anchor.focus();p.onManage(entry,kind);};return <><button role="menuitem" onClick={()=>{closePopover();popover.anchor.focus();setDetails(entry);}}>Edit details</button>{entry.mergeSources?<button role="menuitem" onClick={()=>action('unmerge')}>Unmerge</button>:<><button role="menuitem" onClick={()=>action(entry.status==='missing'?'locate':'refresh')}>{entry.status==='missing'?'Locate…':'Refresh'}</button><button role="menuitem" onClick={()=>action('remove')}>Remove</button></>}</>;})()}</>}
-    </ExplorerPopover>}
+    </ExplorerPopover>}</AnimatePresence>
   </div>;
 }

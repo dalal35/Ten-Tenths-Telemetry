@@ -1,9 +1,9 @@
-import {launchBrowser,browserTestEntries} from './browser.mjs';
+import {launchBrowser,browserTestEntries,browserTestNoWatch} from './browser.mjs';
 import {createServer} from 'vite';
 import assert from 'node:assert/strict';
 let server,browser;
 try {
- server=await createServer({optimizeDeps:{entries:browserTestEntries},server:{host:'127.0.0.1',port:0,strictPort:false,hmr:false,watch:null}});await server.listen();
+ server=await createServer({plugins:[browserTestNoWatch],optimizeDeps:{entries:browserTestEntries},server:{host:'127.0.0.1',port:0,strictPort:false,hmr:false}});await server.listen();
  browser=await launchBrowser();
  const page=await browser.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.addInitScript(()=>{const originalMatchMedia=window.matchMedia.bind(window);window.densityQueries=[];window.matchMedia=media=>{const query=originalMatchMedia(media);window.densityQueries.push(query);return query;};window.bars=[];window.rings=[];window.currentRings=[];window.paintCount=0;const clear=CanvasRenderingContext2D.prototype.clearRect;CanvasRenderingContext2D.prototype.clearRect=function(...args){window.paintCount++;window.currentRings=[];return clear.apply(this,args);};const ellipse=CanvasRenderingContext2D.prototype.ellipse;CanvasRenderingContext2D.prototype.ellipse=function(...args){window.rings.push(args);window.currentRings.push(args);return ellipse.apply(this,args);};const original=CanvasRenderingContext2D.prototype.fillRect;CanvasRenderingContext2D.prototype.fillRect=function(...args){window.bars.push(args);window.lastBarColor=this.fillStyle;return original.apply(this,args);};});

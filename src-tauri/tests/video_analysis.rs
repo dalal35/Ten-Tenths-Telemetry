@@ -645,3 +645,31 @@ fn seek_on_subsecond_clip_matches_sequential_frames() {
     );
     std::fs::remove_file(path).unwrap();
 }
+
+// The user-supplied recording is private and stays outside source control.
+#[cfg(windows)]
+#[test]
+#[ignore = "set TTT_PADDED_VIDEO to the supplied local recording"]
+fn supplied_padded_video_preserves_visible_dimensions_and_pts() {
+    let path = PathBuf::from(std::env::var_os("TTT_PADDED_VIDEO").expect("TTT_PADDED_VIDEO"));
+    let cancel = CancellationToken::default();
+    let metadata = inspect(&path, &cancel).unwrap();
+    assert_eq!((metadata.width, metadata.height), (640, 360));
+    let frame = extract_frame(
+        &path,
+        0.0,
+        ResizeOptions::default(),
+        PixelFormat::Rgb8,
+        &cancel,
+    )
+    .unwrap();
+    assert_eq!(
+        (frame.width, frame.height, frame.pixels.len()),
+        (640, 360, 640 * 360 * 3)
+    );
+    assert_eq!(
+        frame.timestamp_seconds,
+        frame.timestamp_value as f64 / frame.timestamp_timescale as f64
+    );
+    assert!(frame.timestamp_seconds >= metadata.track_start_seconds);
+}
