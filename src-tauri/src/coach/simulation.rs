@@ -1,4 +1,8 @@
 //! Distance-domain capability scenarios. Every number is calculated outside inference.
+#[cfg(test)]
+use super::modeled::profile;
+#[cfg(test)]
+use crate::telemetry::Analysis;
 use super::{
     modeled::{at, curvature},
     types::*,
@@ -337,6 +341,247 @@ fn timing_consistent(baseline: f64, recorded: f64) -> bool {
 }
 
 #[cfg(test)]
+pub(super) fn investigate(
+    s: &Session,
+    base: &Analysis,
+    best: &Lap,
+    e: &VehicleEnvelope,
+    uncertainty: f64,
+) -> (Vec<Opportunity>, Vec<SimulatedProfile>) {
+    let mut opportunities = Vec::new();
+    let mut alternatives = Vec::new();
+    let Some(speed) = s.channels.iter().find(|c| c.id == "gps-speed") else {
+        return (opportunities, alternatives);
+    };
+    let chord = 10_f64.max(uncertainty * 3.);
+    for (i, section) in base
+        .segments
+        .iter()
+        .enumerate()
+        .filter(|(_, s)| s.kind == "corner")
+    {
+        let start = section.start_meters.max(1.5 * chord);
+        // A connected corner complex is one coupled tradeoff until the next straight.
+        // At the lap seam stop where both curvature chords still have GPS support.
+        let desired_end = base
+            .segments
+            .iter()
+            .skip(i + 1)
+            .find(|s| s.kind == "straight")
+            .map_or(section.end_meters, |s| s.end_meters);
+        let end = desired_end.min(
+            base.primary
+                .mapping
+                .last()
+                .map_or(desired_end, |p| p.meters - 1.5 * chord),
+        );
+        if end <= start {
+            continue;
+        }
+        let Some(raw) = profile(speed, &base.primary, best, start, end) else {
+            continue;
+        };
+        let n = ((end - start) / 2.).ceil() as usize;
+        if n < 8 {
+            continue;
+        }
+        let x: Vec<_> = (0..=n)
+            .map(|j| start + (end - start) * j as f64 / n as f64)
+            .collect();
+        let Some(v): Option<Vec<_>> = x.iter().map(|x| at(&raw, *x)).collect() else {
+            continue;
+        };
+        let Some(k): Option<Vec<_>> = x
+            .iter()
+            .map(|x| geometry(&base.primary, *x, chord))
+            .collect()
+        else {
+            continue;
+        };
+        let map: Vec<_> = base
+            .primary
+            .mapping
+            .iter()
+            .map(|p| (p.meters, p.time))
+            .collect();
+        let (Some(t0), Some(t1)) = (at(&map, start), at(&map, end)) else {
+            continue;
+        };
+        let baseline = seconds(&x, &v);
+        let recorded = t1 - t0;
+        // Canonical distance is not automatically physical distance. Never calibrate a gain
+        // with an arbitrary scale: reject incoherent speed-distance/time alignment instead.
+        if !timing_consistent(baseline, recorded) {
+            continue;
+        }
+        let apex = v
+            .iter()
+            .enumerate()
+            .filter(|(j, _)| x[*j] <= section.end_meters)
+            .min_by(|a, b| a.1.total_cmp(b.1))
+            .map(|(i, _)| i)
+            .unwrap();
+        let mut selected: Option<(f64, f64, String)> = None;
+        let id = format!("{}:{}:physics", best.id, section.id);
+        for strategy in ["exit-focus", "entry-momentum", "balanced-corner"] {
+            let make = |nominal| -> Option<Vec<f64>> {
+                let grip = if nominal {
+                    e.nominal_lateral_mps2
+                } else {
+                    e.conservative_lateral_mps2
+                };
+                let caps: Vec<_> = v
+                    .iter()
+                    .zip(&k)
+                    .enumerate()
+                    .map(|(j, (&speed, &k))| {
+                        let cap = if k > 1e-6 {
+                            (grip / k).sqrt().min(e.max_observed_speed_mps)
+                        } else {
+                            e.max_observed_speed_mps
+                        };
+                        // Competing strategy constraints retain actual entry/apex costs, rather
+                        // than taking pointwise positive advantages from unrelated profiles.
+                        if (strategy == "exit-focus" && j <= apex)
+                            || (strategy == "entry-momentum" && x[j] >= section.end_meters)
+                        {
+                            cap.min(speed)
+                        } else {
+                            cap
+                        }
+                    })
+                    .collect();
+                solve(&x, &k, &caps, v[0], *v.last()?, e, nominal)
+            };
+            let (Some(lo), Some(hi)) = (make(false), make(true)) else {
+                continue;
+            };
+            let lower = baseline - seconds(&x, &lo);
+            let upper = baseline - seconds(&x, &hi);
+            let simulated_profile=SimulatedProfile { opportunity_id:id.clone(),strategy:strategy.into(),start_meters:start,end_meters:end,baseline_seconds:baseline,recorded_seconds:recorded,conservative_seconds:seconds(&x,&lo),nominal_seconds:seconds(&x,&hi),points:x.iter().enumerate().map(|(j,&meters)|SimulatedPoint{meters,baseline_speed_mps:v[j],conservative_speed_mps:lo[j],nominal_speed_mps:hi[j],curvature_per_meter:k[j]}).collect(), assumptions:vec!["Identical entry and terminal speeds; coupled corner complex through the following straight timed together. Intervals near the lap seam are trimmed to the last supported curvature chord. Forward/backward v² reachability and acceleration–lateral friction ellipse validated in every cell.".into(),format!("Recorded line retained; track width and alternate geometric racing lines are not inferred. Speed is capped at session 99th percentile; no top-speed extrapolation. Baseline speed integral minus recorded interval: {:+.4} s; this residual is alignment/model bias, not a statistical gain error bound.",baseline-recorded)] };
+            alternatives.push(simulated_profile);
+            if upper > 1e-8
+                && upper >= lower
+                && selected.as_ref().map_or(true, |old| {
+                    lower.max(0.) > old.0 || (lower.max(0.) == old.0 && upper > old.1)
+                })
+            {
+                selected = Some((lower.max(0.), upper, strategy.into()));
+            }
+        }
+        let Some((lower, upper, strategy)) = selected else {
+            continue;
+        };
+        let assumption=format!("{strategy}: sustain session q75–q90 speed-dependent propulsion/braking and median per-lap q90–q95 lateral capability, with fixed entry/end speed and unchanged GPS line. Conditional sensitivity, not confidence bounds.");
+        let method="Forward/backward distance-domain v² simulation at ≤2 m cells; friction ellipse checked using maximum cell speed and curvature; integrate 2Δs/(v₀+v₁). Full corner-to-straight interval; baseline speed-time alignment checked within 4% or 50 ms. No gain floor or recorded-sector cap.".to_string();
+        let chosen = alternatives
+            .iter()
+            .rev()
+            .find(|p| p.opportunity_id == id && p.strategy == strategy)
+            .unwrap();
+        let mut regional_gain = [0_f64; 3];
+        for pair in chosen.points.windows(2) {
+            let dx = 2. * (pair[1].meters - pair[0].meters);
+            let gain = dx / (pair[0].baseline_speed_mps + pair[1].baseline_speed_mps)
+                - dx / (pair[0].conservative_speed_mps + pair[1].conservative_speed_mps);
+            let midpoint = (pair[0].meters + pair[1].meters) * 0.5;
+            let region = if midpoint <= x[apex] {
+                0
+            } else if midpoint <= section.end_meters {
+                1
+            } else {
+                2
+            };
+            regional_gain[region] += gain;
+        }
+        let region = regional_gain
+            .iter()
+            .enumerate()
+            .max_by(|a, b| a.1.total_cmp(b.1))
+            .unwrap()
+            .0;
+        let dominant = [
+            "entry toward the minimum",
+            "minimum through corner exit",
+            "following straight",
+        ][region];
+        let max_delta = chosen
+            .points
+            .iter()
+            .max_by(|a, b| {
+                (a.conservative_speed_mps - a.baseline_speed_mps)
+                    .total_cmp(&(b.conservative_speed_mps - b.baseline_speed_mps))
+            })
+            .unwrap();
+        let model_min = chosen
+            .points
+            .iter()
+            .filter(|p| p.meters <= section.end_meters)
+            .map(|p| p.conservative_speed_mps)
+            .min_by(f64::total_cmp)
+            .unwrap();
+        let mut evidence = vec![Evidence {
+            id: format!("{id}:timing"),
+            metric: "speedIntegralSeconds".into(),
+            unit: "s".into(),
+            lap_value: baseline,
+            reference_value: Some(recorded),
+            channel_ids: vec![speed.id.clone()],
+        }];
+        for (metric, unit, value, reference) in [
+            ("scenarioMinimumSpeed", "m/s", v[apex], Some(model_min)),
+            (
+                "scenarioMaximumSpeedAdvantage",
+                "m/s",
+                max_delta.conservative_speed_mps - max_delta.baseline_speed_mps,
+                None,
+            ),
+            (
+                "scenarioMaximumAdvantagePosition",
+                "m",
+                max_delta.meters,
+                None,
+            ),
+            ("scenarioEntryGain", "s", regional_gain[0], None),
+            ("scenarioExitGain", "s", regional_gain[1], None),
+            ("scenarioDownstreamGain", "s", regional_gain[2], None),
+        ] {
+            evidence.push(Evidence {
+                id: format!("{id}:{metric}"),
+                metric: metric.into(),
+                unit: unit.into(),
+                lap_value: value,
+                reference_value: reference,
+                channel_ids: vec![speed.id.clone()],
+            });
+        }
+        let action=match region {
+            0=>"Test smoother speed retention from entry toward the minimum while keeping the exit repeatable. Compare the complete corner and following straight over repeated laps; reject the change if the downstream time worsens.",
+            1=>"Keep the entry repeatable and test a more settled minimum-to-exit speed recovery. Compare the minimum-speed location and exit trace, then time the complete corner and following straight over repeated laps.",
+            _=>"Keep the corner entry repeatable and test an exit that preserves momentum onto the following straight. Compare speed recovery and RPM together; accept the change only if the full corner-to-straight interval improves repeatedly."
+        };
+        let opportunity=Opportunity {coaching:None,
+            id:id.clone(),lap_id:best.id.clone(),reference_lap_id:best.id.clone(),
+            section_id:Some(section.id.clone()),label:format!("{}: corner-to-straight momentum",section.label),
+            kind:"physics-counterfactual".into(),start_time:best.start+t0,end_time:best.start+t1,
+            start_meters:Some(start),end_meters:Some(end),observed_loss_seconds:None,estimated_gain_seconds:None,
+            modeled_gain:Some(ModeledGain {
+                lower_seconds:lower,upper_seconds:upper,assumption:assumption.clone(),method:method.clone(),reference_lap_id:None
+            }),
+            gain_range:Some(GainRange {
+                lower_seconds:lower,upper_seconds:upper,basis:"hypothesis".into(),assumption,method
+            }),
+            faster_example_count:0,confidence:"low".into(),status:"investigate".into(),priority_score:upper,evidence,
+            observation:format!("The {strategy} capability scenario saves {lower:.3}–{upper:.3} s across the complete corner and downstream interval. Its largest conservative contribution is {dominant}; competing entry and exit profiles preserve shared boundary speeds."),
+            action:action.into(),
+            uncertainty:format!("Capability reuse is conditional on grip, line and engine response. Sensitivity ranges are not demonstrated gains. Baseline timing residual {:+.4} s is alignment/model bias; scenario bounds do not cover all model error. Missing brake/throttle signals prevent causal diagnosis; no numerical shift benefit is inferred.",baseline-recorded)
+        };
+        opportunities.push(opportunity);
+    }
+    (opportunities, alternatives)
+}
+
+#[cfg(test)]
 mod tests {
     use super::*;
     fn vehicle() -> VehicleEnvelope {
@@ -513,5 +758,102 @@ mod tests {
         let missing = super::super::analysis::analyze(&s, None, None).unwrap();
         assert!(missing.performance_envelope.is_none());
         assert!(missing.simulated_profiles.is_empty());
+    }
+    #[test]
+    fn real_xrk_profiles_have_physical_limits_and_disjoint_budget() {
+        for file in ["0361", "0362"] {
+            let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(format!(
+                "../data/yash dalal_59_PURDUE GP IN_Warm-up_a_{file}.xrk"
+            ));
+            let session = telemetry::parse_session(&path).unwrap();
+            let r = super::super::analysis::analyze(&session, None, None).unwrap();
+            // Exercise the archived interval engine directly. Production now
+            // returns periodic profiles under a separately calibrated model.
+            let best = session.laps.iter().find(|l| l.id == r.best_lap_id).unwrap();
+            let base = telemetry::analyze(&session, &best.id, None, "time", &[]).unwrap();
+            let owned: Vec<_> = session
+                .laps
+                .iter()
+                .filter(|l| super::super::analysis::valid(l))
+                .map(|l| {
+                    (
+                        l,
+                        telemetry::analyze(&session, &l.id, None, "time", &[])
+                            .unwrap()
+                            .primary,
+                    )
+                })
+                .collect();
+            let views: Vec<_> = owned.iter().map(|(l, v)| (*l, v)).collect();
+            let noise = base.alignment.position_uncertainty_m.unwrap_or(1.);
+            let e =
+                envelope(&session, &views, noise).expect("real valid laps support legacy envelope");
+            let (_, profiles) = investigate(&session, &base, best, &e, noise);
+            assert!(!profiles.is_empty());
+            for p in &profiles {
+                let x: Vec<_> = p.points.iter().map(|p| p.meters).collect();
+                let k: Vec<_> = p.points.iter().map(|p| p.curvature_per_meter).collect();
+                for nominal in [false, true] {
+                    let v: Vec<_> = p
+                        .points
+                        .iter()
+                        .map(|p| {
+                            if nominal {
+                                p.nominal_speed_mps
+                            } else {
+                                p.conservative_speed_mps
+                            }
+                        })
+                        .collect();
+                    assert!(feasible(&x, &k, &v, &e, nominal));
+                    assert!(
+                        (seconds(&x, &v)
+                            - if nominal {
+                                p.nominal_seconds
+                            } else {
+                                p.conservative_seconds
+                            })
+                        .abs()
+                            < 1e-8
+                    );
+                    assert!((v[0] - p.points[0].baseline_speed_mps).abs() < 1e-6);
+                    assert!(
+                        (v.last().unwrap() - p.points.last().unwrap().baseline_speed_mps).abs()
+                            < 1e-6
+                    );
+                }
+                assert!(
+                    (p.baseline_seconds - p.recorded_seconds).abs()
+                        <= 0.05_f64.max(p.recorded_seconds * 0.04)
+                );
+            }
+            let spans: Vec<_> = r
+                .enhancement_budget
+                .iter()
+                .filter_map(|b| b.opportunity_id.as_ref())
+                .filter_map(|id| r.opportunities.iter().find(|o| &o.id == id))
+                .filter_map(|o| Some((o.start_meters?, o.end_meters?)))
+                .collect();
+            for (i, a) in spans.iter().enumerate() {
+                for b in spans.iter().skip(i + 1) {
+                    assert!(a.1 <= b.0 || b.1 <= a.0);
+                }
+            }
+            println!(
+                "{file}: envelope {:?}; profiles {}; whole-lap {:?}",
+                e.speed_bands
+                    .iter()
+                    .map(|b| (
+                        b.min_speed_mps,
+                        b.nominal_acceleration_mps2,
+                        b.nominal_braking_mps2
+                    ))
+                    .collect::<Vec<_>>(),
+                profiles.len(),
+                r.improvement_potential
+                    .as_ref()
+                    .map(|g| (g.lower_seconds, g.upper_seconds))
+            );
+        }
     }
 }

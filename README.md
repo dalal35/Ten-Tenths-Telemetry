@@ -1,3 +1,8 @@
+> **Unfinished interval-coaching experiment:** this branch preserves the archived
+> investigation and its unchanged failing 0361 regression. Production coaching
+> uses the separately verified periodic full-lap model. Do not merge this
+> experiment until its fixed-boundary feasibility/calibration issue is resolved.
+
 <p align="center">
   <picture>
     <source media="(prefers-reduced-motion: reduce)" srcset="docs/readme/hero-static.svg" />
