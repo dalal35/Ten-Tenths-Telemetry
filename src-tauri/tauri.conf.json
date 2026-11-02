@@ -6,7 +6,7 @@
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://127.0.0.1:1420",
-    "beforeBuildCommand": "npm run build",
+    "beforeBuildCommand": "node scripts/prepare-coach-model.mjs && node scripts/prepare-youtube-tools.mjs && npm run build",
     "frontendDist": "../dist"
   },
   "app": {
@@ -36,6 +36,7 @@
     ],
     "category": "Sports",
     "shortDescription": "Precision motorsport telemetry analysis",
+    "externalBin": ["binaries/yt-dlp", "binaries/deno", "binaries/ffmpeg", "binaries/ffprobe"],
     "macOS": {
       "minimumSystemVersion": "13.0",
       "signingIdentity": "-"
@@ -47,7 +48,9 @@
       "icons/icon.icns"
     ],
     "resources": [
-      "../THIRD_PARTY_NOTICES.md"
+      "../THIRD_PARTY_NOTICES.md",
+      "resources/coach/",
+      "resources/youtube/"
     ]
   }
 }

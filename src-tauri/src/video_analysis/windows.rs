@@ -59,9 +59,9 @@ impl Drop for Runtime {
 }
 #[derive(Clone, Copy)]
 struct Layout {
-    width: u32,
     height: u32,
     stride: i32,
+    visible: (u32, u32, u32, u32),
     rotation: u32,
 }
 impl Layout {
@@ -97,19 +97,59 @@ impl Layout {
             if (stride as i64).abs() < width as i64 * 4 {
                 return Err(invalid("Invalid decoded row stride"));
             }
+            // The decoded surface can include alignment rows outside the display aperture.
+            // MFVideoArea uses two 16.16 offsets followed by signed dimensions.
+            let mut visible = (0, 0, width, height);
+            for key in [&MF_MT_MINIMUM_DISPLAY_APERTURE, &MF_MT_GEOMETRIC_APERTURE] {
+                let mut data = [0u8; 16];
+                let mut size = 0;
+                match media.GetBlob(key, &mut data, Some(&mut size)) {
+                    Ok(()) => {
+                        if size != 16 {
+                            return Err(invalid("Invalid video aperture"));
+                        }
+                        let frac_x = u16::from_le_bytes([data[0], data[1]]);
+                        let x = i16::from_le_bytes([data[2], data[3]]);
+                        let frac_y = u16::from_le_bytes([data[4], data[5]]);
+                        let y = i16::from_le_bytes([data[6], data[7]]);
+                        let w = i32::from_le_bytes(data[8..12].try_into().unwrap());
+                        let h = i32::from_le_bytes(data[12..16].try_into().unwrap());
+                        if frac_x != 0
+                            || frac_y != 0
+                            || x < 0
+                            || y < 0
+                            || w <= 0
+                            || h <= 0
+                            || x as u64 + w as u64 > width as u64
+                            || y as u64 + h as u64 > height as u64
+                        {
+                            return Err(invalid("Unsupported or invalid video aperture"));
+                        }
+                        visible = (x as u32, y as u32, w as u32, h as u32);
+                        break;
+                    }
+                    Err(e) if e.code() == MF_E_ATTRIBUTENOTFOUND => {}
+                    Err(e) => {
+                        return Err(VideoAnalysisError::new(
+                            ErrorKind::Decode,
+                            format!("Read video aperture: {e}"),
+                        ))
+                    }
+                }
+            }
             Ok(Self {
-                width,
                 height,
                 stride,
+                visible,
                 rotation,
             })
         }
     }
     fn display(self) -> (u32, u32) {
         if self.rotation == 90 || self.rotation == 270 {
-            (self.height, self.width)
+            (self.visible.3, self.visible.2)
         } else {
-            (self.width, self.height)
+            (self.visible.2, self.visible.3)
         }
     }
 }
@@ -320,11 +360,15 @@ impl Decoder {
                 )?
             };
             let locked = Locked::new(buffer, self.layout)?;
+            let (x, y, width, height) = self.layout.visible;
+            let top = locked.top as i128 + y as i128 * locked.stride as i128 + x as i128 * 4;
+            let top =
+                usize::try_from(top).map_err(|_| invalid("Invalid decoded aperture offset"))?;
             let pixels = windows_pixels::convert(
                 locked.bytes(),
-                locked.top,
+                top,
                 locked.stride,
-                (self.layout.width, self.layout.height),
+                (width, height),
                 self.layout.rotation,
                 dimensions,
                 format,

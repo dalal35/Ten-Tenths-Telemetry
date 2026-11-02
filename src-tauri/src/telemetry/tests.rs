@@ -101,6 +101,26 @@ fn speed_gaps_disable_distance() {
     assert!(analyze(&s, "a", None, "distance", &[]).is_err());
 }
 #[test]
+fn rejected_speed_sample_disables_distance_and_delta() {
+    let mut s = sample();
+    let mut warnings = vec![];
+    s.channels[0] = channel(
+        "gps-speed".into(),
+        "GPS Speed".into(),
+        "m/s".into(),
+        (0..=200).map(|i| i * 100).collect(),
+        (0..=200)
+            .map(|i| if i == 2 { f64::NAN } else { 10. })
+            .collect(),
+        &mut warnings,
+    );
+    assert_eq!(s.channels[0].gaps, vec![[0.1, 0.3]]);
+    let time = analyze(&s, "a", Some("b"), "time", &[]).unwrap();
+    assert!(time.primary.length.is_none());
+    assert!(time.delta.is_none());
+    assert!(analyze(&s, "a", Some("b"), "distance", &[]).is_err());
+}
+#[test]
 fn incomplete_laps_disable_delta() {
     let mut s = sample();
     s.laps[0].complete = false;

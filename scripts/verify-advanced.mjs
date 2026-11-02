@@ -1,4 +1,4 @@
-import {launchBrowser,browserTestEntries} from './browser.mjs';
+import {launchBrowser,browserTestEntries,browserTestNoWatch} from './browser.mjs';
 // Actual App, IPC simulation backed by read-only real-XRK Rust diagnostic outputs.
 import {expect} from '@playwright/test';
 import {createServer} from 'vite';
@@ -10,7 +10,7 @@ assert(fixture,'Place real XRK fixtures in data/ before running advanced checks.
 const data=JSON.parse(execFileSync('cargo',['run','--offline','--manifest-path','src-tauri/Cargo.toml','--example','advanced_check','--',`data/${fixture}`],{encoding:'utf8',maxBuffer:64*1024*1024,stdio:['ignore','pipe','inherit']}));
 let server,browser;
 try {
- server=await createServer({optimizeDeps:{entries:browserTestEntries},server:{host:'127.0.0.1',port:0,strictPort:false,hmr:false,watch:null}});await server.listen();
+ server=await createServer({plugins:[browserTestNoWatch],optimizeDeps:{entries:browserTestEntries},server:{host:'127.0.0.1',port:0,strictPort:false,hmr:false,watch:null}});await server.listen();
  browser=await launchBrowser();
  const page=await browser.newPage({viewport:{width:1600,height:1100}});const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.addInitScript(d=>{

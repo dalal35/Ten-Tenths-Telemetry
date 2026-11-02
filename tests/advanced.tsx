@@ -1,7 +1,10 @@
 import {createRoot} from 'react-dom/client';
 import App from '../src/App';
+import {MotionConfig} from 'motion/react';
+import {motionTokens} from '../src/motion';
 import '../src/styles.css';
 import '../src/explorer.css';
-createRoot(document.getElementById('root')!).render(<App/>);
+import '../src/motion.css';
+createRoot(document.getElementById('root')!).render(<MotionConfig reducedMotion="user" transition={motionTokens.spring}><App/></MotionConfig>);
 import uPlot from 'uplot';
 Object.assign(window,{advancedPlotCursors:()=>uPlot.sync('telemetry').plots.map(p=>({left:p.cursor.left,position:p.cursor.left==null?null:p.posToVal(p.cursor.left,'x')}))});

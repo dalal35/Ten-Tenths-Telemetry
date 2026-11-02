@@ -63,6 +63,16 @@ describe('video state restoration', () => {
     expect(restore(raw).state?.source).toEqual({ type: 'youtube', url: 'https://www.youtube.com/watch?v=abcdefghijk', videoId: 'abcdefghijk' });
     expect(restore({ ...raw, preferences: { panelHeight: 900, playbackRate: 4, pausedVideoTime: 500 } }).warnings).toEqual([]);
   });
+  it('restores YouTube cache identity without persisting a runtime path', () => {
+    const cache = { sha256: 'a'.repeat(64), size: 1234, durationSeconds: 61.5, trackStartSeconds: 0.04 };
+    const raw = { ...valid(), source: { type: 'youtube', url: 'https://youtu.be/abcdefghijk', videoId: 'abcdefghijk', cache } };
+    expect(restore(raw).state?.source).toEqual({ type: 'youtube', url: 'https://www.youtube.com/watch?v=abcdefghijk', videoId: 'abcdefghijk', cache });
+    expect(JSON.stringify(serializeVideoState(restore(raw)))).not.toContain('path');
+  });
+  it.each([{ sha256: 'bad' }, { size: 0 }, { durationSeconds: Infinity }, { trackStartSeconds: NaN }])('rejects malformed YouTube cache identity: %j', patch => {
+    const cache = { sha256: 'a'.repeat(64), size: 1234, durationSeconds: 61.5, trackStartSeconds: 0.04, ...patch };
+    expect(restore({ ...valid(), source: { type: 'youtube', url: 'https://youtu.be/abcdefghijk', videoId: 'abcdefghijk', cache } }).state).toBeNull();
+  });
   it('preserves future versions byte-equivalent through ordinary serialization', () => {
     const future = { ...valid(), version: 2, additions: { opaque: [1, '二', { sourceUrl: 'custom' }] } };
     const result = restore(future);

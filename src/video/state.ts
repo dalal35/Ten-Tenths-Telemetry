@@ -1,6 +1,6 @@
 import type { Session } from '../types';
 import { parseYouTubeUrl, validateSegments } from './model';
-import type { VideoSegment, VideoSource, VideoStateV1 } from './model';
+import type { VideoCacheIdentity, VideoSegment, VideoSource, VideoStateV1 } from './model';
 
 const LIMIT = 65536;
 const record = (value: unknown): value is Record<string, unknown> => !!value && typeof value === 'object' && !Array.isArray(value);
@@ -28,7 +28,15 @@ function readSource(raw: unknown): VideoSource | null {
   }
   if (raw.type === 'youtube' && text(raw.url) && text(raw.videoId)) {
     const source = parseYouTubeUrl(raw.url);
-    if (source?.type === 'youtube' && source.videoId === raw.videoId) return source;
+    if (source?.type === 'youtube' && source.videoId === raw.videoId) {
+      if (raw.cache === undefined) return source;
+      if (record(raw.cache) && /^[a-f0-9]{64}$/.test(String(raw.cache.sha256)) && Number.isSafeInteger(raw.cache.size) && nonnegative(raw.cache.size) && raw.cache.size > 0
+        && typeof raw.cache.durationSeconds === 'number' && Number.isFinite(raw.cache.durationSeconds) && raw.cache.durationSeconds > 0
+        && typeof raw.cache.trackStartSeconds === 'number' && Number.isFinite(raw.cache.trackStartSeconds)) {
+        const cache: VideoCacheIdentity = { sha256: raw.cache.sha256 as string, size: raw.cache.size as number, durationSeconds: raw.cache.durationSeconds, trackStartSeconds: raw.cache.trackStartSeconds };
+        return { ...source, cache };
+      }
+    }
   }
   throw new Error('The saved video source is damaged. Choose the video again to repair it.');
 }

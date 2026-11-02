@@ -1,10 +1,12 @@
-import {launchBrowser,browserTestEntries} from './browser.mjs';
+import {launchBrowser,browserTestEntries,browserTestNoWatch} from './browser.mjs';
 // Browser exercises of the React workflow. IPC is simulated; native persistence is tested separately.
 import {createServer} from 'vite';
 import assert from 'node:assert/strict';
+// Measure shipped React behavior; development error stacks retain initial props.
+process.env.NODE_ENV='production';
 let server,browser;
 try{
- server=await createServer({optimizeDeps:{entries:browserTestEntries},server:{host:'127.0.0.1',port:0,strictPort:false,hmr:false,watch:null}});await server.listen();
+ server=await createServer({plugins:[browserTestNoWatch],cacheDir:'node_modules/.vite-workflow',optimizeDeps:{entries:browserTestEntries},server:{host:'127.0.0.1',port:0,strictPort:false,hmr:false}});await server.listen();
  browser=await launchBrowser();
  const page=await browser.newPage({viewport:{width:1440,height:1000}});
  // Exercise queued-save/analysis ordering even when React effects run slowly.
@@ -23,9 +25,9 @@ try{
    const db=read();if(cmd.startsWith('plugin:event'))return 1;
    if(cmd==='plugin:dialog|open'){window.openCalls=(window.openCalls??0)+1;return null;}
    if(cmd==='library_snapshot')return db;
-   if(cmd==='load_library_session'){if(args.sessionId===db.virtualSession?.id)return db.virtualSession;if(args.sessionId==='two')await new Promise(r=>setTimeout(r,80));db.activeSessionId=args.sessionId;write(db);return sessions.find(s=>s.id===args.sessionId);}
-   const preview=()=>{const selected=sessions.filter(s=>args.sessionIds.includes(s.id));const refs=selected.map(s=>({sessionId:s.id,contentVersion:db.entries.find(e=>e.id===s.id).contentVersion}));return {sources:refs,day:'2026-10-14',previewVersion:refs.map(r=>r.contentVersion).join('-'),warnings:['Conflicting track metadata.','Source timestamps overlap; both recordings are retained.'],laps:selected.flatMap((s,i)=>s.laps.map((lap,j)=>({...lap,id:JSON.stringify([s.id,lap.id]),sourceSessionId:s.id,sourceLapId:lap.id,displayNumber:i*2+j+1}))),channels:selected.flatMap(s=>s.channels.map(c=>({...c,id:`${s.id}::${c.id}`,sourceSessionId:s.id,sourceChannelId:c.id,times:[],values:[]})))};};
-   if(cmd==='preview_merge_sessions'){if(window.rejectMergeDate)throw Error('Recording date is ambiguous; filenames are not used.');return preview();}
+   if(cmd==='load_library_session'){if(args.sessionId===db.virtualSession?.id)return db.virtualSession;if(args.sessionId==='two')await new Promise(r=>setTimeout(r,80));db.activeSessionId=args.sessionId;write(db);const entry=db.entries.find(e=>e.id===args.sessionId);const loaded=structuredClone(sessions.find(s=>s.id===args.sessionId)??{...sessions[0],id:entry.id,name:entry.name,track:entry.track,source:entry.source});(window.decodedSamples??=[]).push(new WeakRef(loaded.channels[0].values));return loaded;}
+   const preview=()=>{const sourceIds=new Set(args.sessionIds.flatMap(id=>db.entries.find(e=>e.id===id)?.mergeSources?.map(r=>r.sessionId)??[id]));const selected=sessions.filter(s=>sourceIds.has(s.id));const refs=selected.map(s=>({sessionId:s.id,contentVersion:db.entries.find(e=>e.id===s.id).contentVersion}));return {sources:refs,day:'2026-10-14',previewVersion:refs.map(r=>r.contentVersion).join('-'),warnings:['Conflicting track metadata.','Source timestamps overlap; both recordings are retained.'],laps:selected.flatMap((s,i)=>s.laps.map((lap,j)=>({...lap,id:JSON.stringify([s.id,lap.id]),sourceSessionId:s.id,sourceLapId:lap.id,displayNumber:i*2+j+1}))),channels:selected.flatMap(s=>s.channels.map(c=>({...c,id:`${s.id}::${c.id}`,sourceSessionId:s.id,sourceChannelId:c.id,times:[],values:[]})))};};
+   if(cmd==='preview_merge_sessions'){if(window.rejectMergePreview)throw Error('Source recording is unavailable; locate the original file.');return preview();}
    if(cmd==='merge_sessions'){
     window.mergeCalls=(window.mergeCalls??0)+1;await new Promise(r=>setTimeout(r,100));const p=preview();if(args.previewVersion!==p.previewVersion||!args.acknowledgeWarnings)throw Error('Stale or unacknowledged preview');
     const merged={id:'merged-test',name:'Merged recordings',driver:'Test',track:'Track one',recordedAt:p.day,source:'Virtual merge',laps:p.laps,channels:p.channels,warnings:p.warnings,merge:{preview:p,sources:p.sources.map(r=>({...r,session:{...sessions.find(s=>s.id===r.sessionId),channels:[]}}))}};
@@ -33,7 +35,7 @@ try{
     db.virtualSession=merged;db.entries.unshift({...merged,mergeSources:p.sources,contentVersion:'merged-v1',status:'ready',lapCount:4,channelCount:4,workspace,lastUsed:2});db.activeSessionId=merged.id;write(db);return merged;
    }
    if(cmd==='unmerge_session'){await new Promise(r=>setTimeout(r,100));db.entries=db.entries.filter(e=>e.id!==args.sessionId);delete db.virtualSession;db.activeSessionId='one';write(db);return db;}
-   if(cmd==='refresh_library_session'){await new Promise(r=>setTimeout(r,200));const current=read();const entry=current.entries.find(e=>e.id===args.sessionId);entry.contentVersion='v2';entry.workspace=null;write(current);return sessions.find(s=>s.id===args.sessionId);}
+   if(cmd==='refresh_library_session'){await new Promise(r=>{window.finishRefresh=r;});const current=read();const entry=current.entries.find(e=>e.id===args.sessionId);entry.contentVersion='v2';entry.workspace=null;write(current);return sessions.find(s=>s.id===args.sessionId);}
    if(cmd==='save_workspace'){await new Promise(r=>setTimeout(r,30));if(db.entries.find(e=>e.id===args.sessionId).contentVersion!==args.expectedContentVersion)throw Error('Stale source version');db.entries.find(e=>e.id===args.sessionId).workspace=args.workspace;db.activeSessionId=args.sessionId;write(db);return;}
    if(cmd==='remove_library_session'){db.entries=db.entries.filter(e=>e.id!==args.sessionId);write(db);return db;}
    if(cmd==='set_corner_boundaries'){await new Promise(r=>setTimeout(r,args.boundaries?.[0]===55?80:args.boundaries?.[0]===70?200:10));localStorage.setItem('test-corners',JSON.stringify(args.boundaries));return;}
@@ -62,7 +64,9 @@ try{
  await page.reload();await page.getByRole('heading',{name:'Track one'}).waitFor();await page.locator('.plot-label').filter({hasText:'mph'}).waitFor();assert.equal(await page.locator('.plot-label').filter({hasText:'mph'}).count(),1,'Reload retains mph');assert.equal(await page.locator('.segmented[aria-label="Horizontal axis"] button.active').innerText(),'Time');assert.equal(await page.getByRole('button',{name:'Comfortable',exact:true}).count(),1,'Reload restores graph density');
  await page.locator('.library-entry').filter({hasText:/^one/}).getByRole('button',{name:'Session actions',exact:true}).click();
  await page.getByRole('menuitem',{name:'Refresh',exact:true}).click();
+ await page.waitForFunction(()=>document.querySelector('main').inert);
  assert.equal(await page.locator('main').getAttribute('inert'),'','Workspace is frozen during explicit refresh');
+ await page.evaluate(()=>window.finishRefresh());
  await page.waitForFunction(()=>!document.querySelector('main').inert&&document.querySelector('.segmented[aria-label="Horizontal axis"] button.active')?.textContent==='Distance');
  await page.locator('.plot-label').filter({hasText:'mph'}).waitFor();assert.equal(await page.locator('.plot-label').filter({hasText:'mph'}).count(),1,'Changed source retains mph');
  // Merge UI exercises real React selection, lifecycle queues and persisted restoration.
@@ -74,8 +78,8 @@ try{
  await page.getByRole('checkbox',{name:'Select one for merging'}).check();
  assert.equal(await page.getByRole('button',{name:'Merge Sessions',exact:true}).isDisabled(),true);
  await page.getByRole('checkbox',{name:'Select two for merging'}).check();
- await page.evaluate(()=>window.rejectMergeDate=true);await page.getByRole('button',{name:'Merge Sessions',exact:true}).click();
- await page.getByRole('alert').filter({hasText:'ambiguous'}).waitFor();await page.evaluate(()=>window.rejectMergeDate=false);
+ await page.evaluate(()=>window.rejectMergePreview=true);await page.getByRole('button',{name:'Merge Sessions',exact:true}).click();
+ await page.getByRole('alert').filter({hasText:'unavailable'}).waitFor();await page.evaluate(()=>window.rejectMergePreview=false);
  await page.getByRole('button',{name:'Merge Sessions',exact:true}).click();
  const dialog=page.getByRole('dialog',{name:'Merge sessions'});await dialog.waitFor();assert.match(await dialog.innerText(),/2026-10-14/);assert.match(await dialog.innerText(),/4 laps/);assert.match(await dialog.innerText(),/overlap/);await page.screenshot({path:'.tools/session-merge-preview.png'});
  assert.equal(await dialog.getByRole('button',{name:'Confirm merge',exact:true}).isDisabled(),true);
@@ -84,10 +88,15 @@ try{
  await page.getByRole('checkbox',{name:'Select one for merging'}).check();await page.getByRole('checkbox',{name:'Select two for merging'}).check();
  await page.getByRole('button',{name:'Merge Sessions',exact:true}).click();await dialog.getByRole('checkbox',{name:'I have reviewed these warnings'}).check();
  await dialog.getByRole('button',{name:'Confirm merge',exact:true}).evaluate(el=>{el.click();el.click();});
- await page.getByRole('heading',{name:'Merged · Track one'}).waitFor();await page.screenshot({path:'.tools/session-merge-workspace.png'});assert.equal(await page.locator('.library-entry').count(),3);assert.equal(await page.locator('.lap-row').count(),4);assert(await page.locator('.session-region').evaluate(el=>el.getBoundingClientRect().height<240),'Small session libraries do not reserve empty navigation space');assert.equal(await page.evaluate(()=>window.mergeCalls),1);
+ await page.getByRole('heading',{name:'Merged · Track one'}).waitFor();await page.screenshot({path:'.tools/session-merge-workspace.png'});assert.equal(await page.locator('.library-entry').count(),1,'Merged recordings appear as one combined session');assert.equal(await page.locator('.lap-row').count(),4);assert(await page.locator('.session-region').evaluate(el=>el.getBoundingClientRect().height<240),'Small session libraries do not reserve empty navigation space');assert.equal(await page.evaluate(()=>window.mergeCalls),1);
  await page.getByRole('button',{name:'Compare lap 3',exact:true}).click();await page.waitForTimeout(200);
- assert.match(await page.locator('.lap-list').innerText(),/two.xrk/);
+ assert.doesNotMatch(await page.locator('.lap-list').innerText(),/one\.xrk|two\.xrk/,'Lap rows omit source filenames');
  await page.reload();await page.getByRole('heading',{name:'Merged · Track one'}).waitFor();await page.getByText('Saved on this computer').waitFor();
+ await page.getByRole('button',{name:'Session explorer actions',exact:true}).click();await page.getByRole('menuitem',{name:'Merge sessions',exact:true}).click();
+ assert.equal(await page.getByRole('checkbox',{name:'Select Merged recordings for merging'}).count(),1,'Existing merged sessions can be selected for another merge');
+ assert.equal(await page.getByRole('checkbox',{name:'Select one for merging'}).count(),0,'Original recordings are contained in the combined session');
+ assert.equal(await page.getByRole('checkbox',{name:'Select two for merging'}).count(),0);
+ await page.getByRole('button',{name:'Cancel',exact:true}).click();
  await page.getByRole('button',{name:'Time',exact:true}).click();await page.locator('.library-entry.active').getByRole('button',{name:'Session actions',exact:true}).click();await page.getByRole('menuitem',{name:'Unmerge',exact:true}).click();
  await page.getByRole('heading',{name:'Track one',exact:true}).waitFor();await page.waitForTimeout(250);assert.equal(await page.locator('.library-entry').count(),2);
  assert.deepEqual(normalizeOriginals(await page.evaluate(()=>JSON.parse(localStorage.getItem('test-library')).entries.map(e=>({id:e.id,workspace:e.workspace})))),normalizeOriginals(originals),'Unmerge preserves original workspaces through existing default normalization, including queued saves');
@@ -96,5 +105,18 @@ try{
  await page.evaluate(()=>localStorage.setItem('test-platform','MacIntel'));await page.reload();await page.getByRole('heading',{name:'Track one'}).waitFor();
  assert.equal(await page.locator('.import-button kbd').innerText(),'⌘ O','macOS keeps the Command shortcut hint');
  await page.keyboard.press('Meta+o');await page.waitForFunction(()=>window.openCalls===1);
- assert.deepEqual(errors,[]);console.log('PASS: React IPC workflow — per-session switching, queued saves, workspace reload and safe library remove');
+ // Fresh IPC results must not leave every visited recording's sample arrays alive.
+ await page.addInitScript(()=>{const db=JSON.parse(localStorage.getItem('test-library')),template=db.entries[0];for(let i=0;i<8;i++)db.entries.push({...template,id:`memory-${i}`,name:`memory-${i}`,track:`Track memory-${i}`,source:`/tmp/memory-${i}.xrk`});localStorage.setItem('test-library',JSON.stringify(db));});
+ await page.reload();await page.getByRole('heading',{name:'Track one'}).waitFor();
+ for(let i=0;i<8;i++){
+  await page.getByRole('button',{name:new RegExp(`^memory-${i} Test`)}).click();
+  await page.getByRole('heading',{name:`Track memory-${i}`,exact:true}).waitFor();
+  await page.locator('.plot-label').filter({hasText:'mph'}).waitFor();
+  await page.getByText('Saved on this computer').waitFor();
+ }
+ await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+ await cdp.send('HeapProfiler.collectGarbage');
+ const retained=await page.evaluate(()=>window.decodedSamples.flatMap((reference,index)=>reference.deref()?[index]:[]));
+ assert(retained.includes(8)&&retained.length<=2,`Only the current React render and its previous render may retain decoded samples; found indices ${retained}`);
+ assert.deepEqual(errors,[]);console.log('PASS: React IPC workflow — per-session switching, queued saves, workspace reload, safe library remove and bounded sample retention');
 }finally{await browser?.close();await server?.close();}

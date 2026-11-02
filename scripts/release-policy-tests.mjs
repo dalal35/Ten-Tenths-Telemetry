@@ -3,6 +3,12 @@ import assert from 'node:assert/strict';
 import {test} from 'node:test';
 
 const workflow=readFileSync(new URL('../.github/workflows/release.yml',import.meta.url),'utf8');
+test('Windows helper provisioning inherits the installed Node and Python PATH',()=>{
+ for(const name of ['release.yml','windows-dev.yml']){
+  const source=readFileSync(new URL(`../.github/workflows/${name}`,import.meta.url),'utf8');
+  assert.match(source,/uses: msys2\/setup-msys2@v2[\s\S]*?msystem: UCRT64\n\s+path-type: inherit/);
+ }
+});
 test('publication requires selected native builds and only a tag push',()=>{
  assert.match(workflow,/needs: \[macos, windows\]/);
  assert.match(workflow,/github\.event_name == 'push'/);

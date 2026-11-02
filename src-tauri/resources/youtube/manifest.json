@@ -1,0 +1,93 @@
+{
+  "schema": 1,
+  "toolVersions": {
+    "ytDlp": "2026.10.26",
+    "deno": "2.9.8",
+    "ffmpeg": "9.0.2",
+    "ffprobe": "9.0.2"
+  },
+  "tools": {
+    "ytDlp": {
+      "version": "2026.10.26",
+      "license": "GPL-3.0-or-later (official standalone distribution)",
+      "targets": {
+        "aarch64-apple-darwin": {
+          "url": "https://github.com/yt-dlp/yt-dlp/releases/download/2026.10.26/yt-dlp_macos",
+          "sha256": "0f922c15ccc0b83eefa1c8bc9104e434318c4bf16e408e1ee93b7745a6efe0aa"
+        },
+        "x86_64-pc-windows-msvc": {
+          "url": "https://github.com/yt-dlp/yt-dlp/releases/download/2026.10.26/yt-dlp.exe",
+          "sha256": "f5389d3698ecde4ef06f4e6b1ce0294fe9ac1396228c8990b8d3416d6d177a7d"
+        }
+      }
+    },
+    "deno": {
+      "version": "2.9.8",
+      "license": "MIT and bundled third-party licenses",
+      "targets": {
+        "aarch64-apple-darwin": {
+          "url": "https://github.com/denoland/deno/releases/download/v2.9.8/deno-aarch64-apple-darwin.zip",
+          "sha256": "9f0bf660393da2eaff044cdc7444cb08c73f235849b61d224d825a194ce7c98e"
+        },
+        "x86_64-pc-windows-msvc": {
+          "url": "https://github.com/denoland/deno/releases/download/v2.9.8/deno-x86_64-pc-windows-msvc.zip",
+          "sha256": "cba84b26e0df5ae7f74fc66b86a95b866872a86292ebd84fa1e959927edd93bf"
+        }
+      }
+    },
+    "ffmpeg": {
+      "version": "9.0.2",
+      "license": "LGPL-2.1-or-later",
+      "url": "https://ffmpeg.org/releases/ffmpeg-9.0.2.tar.xz",
+      "sha256": "8c3850283eb25fa026482078a04051e0be17347b09ef81a0849bec15a96e002e",
+      "bytes": 12040788,
+      "commit": "946fcce07b6dcd0331c8cc609192aeff5e1924f8",
+      "signature": "ffmpeg-9.0.2.tar.xz.asc",
+      "signingFingerprint": "FCF986EA15E6E293A5644F10B4322F04D67658D8",
+      "configure": [
+        "--disable-autodetect",
+        "--disable-everything",
+        "--disable-gpl",
+        "--disable-nonfree",
+        "--disable-version3",
+        "--disable-doc",
+        "--disable-debug",
+        "--disable-ffplay",
+        "--disable-network",
+        "--disable-shared",
+        "--enable-static",
+        "--enable-small",
+        "--enable-ffmpeg",
+        "--enable-ffprobe",
+        "--enable-protocol=file,pipe",
+        "--enable-demuxer=mov,aac,mpegts,concat",
+        "--enable-muxer=mp4,mov,null",
+        "--enable-decoder=h264,aac",
+        "--enable-parser=h264,aac",
+        "--enable-bsf=aac_adtstoasc,h264_mp4toannexb",
+        "--enable-filter=null,anull",
+        "--enable-encoder=wrapped_avframe,pcm_s16le"
+      ]
+    }
+  },
+  "sourceArchives": [
+    {
+      "file": "yt-dlp-2026.10.26-src.tar.gz",
+      "url": "https://github.com/yt-dlp/yt-dlp/releases/download/2026.10.26/yt-dlp.tar.gz",
+      "sha256": "21f942d258d25cc4e60b4982a25c423460f0bebb835f38e6dfd1fcb140087f95",
+      "bytes": 6019106
+    },
+    {
+      "file": "deno-2.9.8-src.tar.gz",
+      "url": "https://github.com/denoland/deno/releases/download/v2.9.8/deno_src.tar.gz",
+      "sha256": "b57d0281c1647effc735f242ba52bc409747fc6ed6ad4946e76f062c67e113eb",
+      "bytes": 37035922
+    },
+    {
+      "file": "ffmpeg-9.0.2.tar.xz",
+      "url": "https://ffmpeg.org/releases/ffmpeg-9.0.2.tar.xz",
+      "sha256": "8c3850283eb25fa026482078a04051e0be17347b09ef81a0849bec15a96e002e",
+      "bytes": 12040788
+    }
+  ]
+}

@@ -1,0 +1,402 @@
+{
+  "date": "2026-10-22",
+  "analysisVersion": "coach-6",
+  "scope": "Purdue Grand Prix XRK recordings, original and fastest-only in-memory sessions; recordings never modified.",
+  "deterministicContribution": [
+    "Fastest valid lap and spatial alignment",
+    "Telemetry and physics calculations; measured/hypothesis gain ranges",
+    "One alternative per disjoint full-lap section budget; traditional sources and models never double counted",
+    "Primary recommendation membership, confidence, evidence and absolute-time navigation"
+  ],
+  "modelContribution": "Gemma selects and orders supplied interpretations from structured facts. Rust maps selected IDs to approved coaching wording. Gemma authors no numerical estimate.",
+  "realRecordings": [
+    {
+      "file": "0361",
+      "bestOnly": false,
+      "best": 26.675999999999988,
+      "traditional": 26.675999999999988,
+      "enhanced": {
+        "lowerSeconds": 26.664466329880877,
+        "upperSeconds": 26.670874751993196
+      },
+      "potential": {
+        "lowerSeconds": 0.005125248006791392,
+        "upperSeconds": 0.011533670119110365,
+        "basis": "hypothesis"
+      },
+      "budgetCount": 3,
+      "primary": [
+        {
+          "id": "lap-8:segment-3:apex-recovery",
+          "label": "Corner 2: apex recovery experiment",
+          "kind": "apex-recovery",
+          "gain": {
+            "lowerSeconds": 0.0027308463823582704,
+            "upperSeconds": 0.0058281234498438065,
+            "basis": "hypothesis"
+          }
+        },
+        {
+          "id": "lap-8:segment-2:tradeoff",
+          "label": "Straight 2: exit momentum",
+          "kind": "exit-tradeoff",
+          "gain": null
+        }
+      ],
+      "validLapCount": 10,
+      "sectionCount": 11,
+      "enhancementBudget": [
+        {
+          "gainRange": {
+            "assumption": "If a settled exit recovers to +1 m/s over a modestly shorter distance, capped by sustained same-speed acceleration already recorded on the fastest lap; available traction remains unverified.",
+            "basis": "hypothesis",
+            "lowerSeconds": 0.0027308463823582704,
+            "method": "Measured recovery window 10.6 m; a desired recovery shape compressed by up to15% is capped by the recorded acceleration and lateral-demand envelopes before computing any saving. Conditional fixed-distance integral of 1/v over the measured minimum-to-+1 m/s window. Compress the recorded speed-versus-distance shape by at most 15%, using the recorded same-speed acceleration envelope as a cap, then hold its recorded final speed to the original endpoint. Minimum speed, final speed and all speeds outside the window are preserved; no profile extrapolation. No faster lap validates this scenario, and the recovery duration is not time saved. Scenario choices are not confidence bounds or an achievable forecast; coarse GPS curvature must ease or remain stable; candidate lateral demand cannot exceed the recorded window maximum and longitudinal acceleration cannot exceed sustained same-speed measured capacity. Grip and control causes remain unverified; this is not a safe-speed instruction. Aggregation uses only disjoint endpoint-preserving scenarios.",
+            "upperSeconds": 0.0058281234498438065
+          },
+          "opportunityId": "lap-8:segment-3:apex-recovery",
+          "sectionId": "segment-3",
+          "sourceLapId": "lap-8"
+        },
+        {
+          "gainRange": {
+            "assumption": "If a settled exit recovers to +1 m/s over a modestly shorter distance, capped by sustained same-speed acceleration already recorded on the fastest lap; available traction remains unverified.",
+            "basis": "hypothesis",
+            "lowerSeconds": 0.001394364007487736,
+            "method": "Measured recovery window 9.3 m; a desired recovery shape compressed by up to15% is capped by the recorded acceleration and lateral-demand envelopes before computing any saving. Conditional fixed-distance integral of 1/v over the measured minimum-to-+1 m/s window. Compress the recorded speed-versus-distance shape by at most 15%, using the recorded same-speed acceleration envelope as a cap, then hold its recorded final speed to the original endpoint. Minimum speed, final speed and all speeds outside the window are preserved; no profile extrapolation. No faster lap validates this scenario, and the recovery duration is not time saved. Scenario choices are not confidence bounds or an achievable forecast; coarse GPS curvature must ease or remain stable; candidate lateral demand cannot exceed the recorded window maximum and longitudinal acceleration cannot exceed sustained same-speed measured capacity. Grip and control causes remain unverified; this is not a safe-speed instruction. Aggregation uses only disjoint endpoint-preserving scenarios.",
+            "upperSeconds": 0.0032215141510385324
+          },
+          "opportunityId": "lap-8:segment-7:apex-recovery",
+          "sectionId": "segment-7",
+          "sourceLapId": "lap-8"
+        },
+        {
+          "gainRange": {
+            "assumption": "If a settled exit recovers to +1 m/s over a modestly shorter distance, capped by sustained same-speed acceleration already recorded on the fastest lap; available traction remains unverified.",
+            "basis": "hypothesis",
+            "lowerSeconds": 0.0010000376169453848,
+            "method": "Measured recovery window 8.1 m; a desired recovery shape compressed by up to15% is capped by the recorded acceleration and lateral-demand envelopes before computing any saving. Conditional fixed-distance integral of 1/v over the measured minimum-to-+1 m/s window. Compress the recorded speed-versus-distance shape by at most 15%, using the recorded same-speed acceleration envelope as a cap, then hold its recorded final speed to the original endpoint. Minimum speed, final speed and all speeds outside the window are preserved; no profile extrapolation. No faster lap validates this scenario, and the recovery duration is not time saved. Scenario choices are not confidence bounds or an achievable forecast; coarse GPS curvature must ease or remain stable; candidate lateral demand cannot exceed the recorded window maximum and longitudinal acceleration cannot exceed sustained same-speed measured capacity. Grip and control causes remain unverified; this is not a safe-speed instruction. Aggregation uses only disjoint endpoint-preserving scenarios.",
+            "upperSeconds": 0.0024840325182280258
+          },
+          "opportunityId": "lap-8:segment-8:apex-recovery",
+          "sectionId": "segment-8",
+          "sourceLapId": "lap-8"
+        }
+      ],
+      "interpretation": "Conditional engineering scenario; not a measured saving or confidence interval."
+    },
+    {
+      "file": "0361",
+      "bestOnly": true,
+      "best": 26.675999999999988,
+      "traditional": 26.675999999999988,
+      "enhanced": {
+        "lowerSeconds": 26.664466329880877,
+        "upperSeconds": 26.670874751993196
+      },
+      "potential": {
+        "lowerSeconds": 0.005125248006791392,
+        "upperSeconds": 0.011533670119110365,
+        "basis": "hypothesis"
+      },
+      "budgetCount": 3,
+      "primary": [
+        {
+          "id": "lap-8:segment-3:apex-recovery",
+          "label": "Corner 2: apex recovery experiment",
+          "kind": "apex-recovery",
+          "gain": {
+            "lowerSeconds": 0.0027308463823582704,
+            "upperSeconds": 0.0058281234498438065,
+            "basis": "hypothesis"
+          }
+        }
+      ],
+      "validLapCount": 1,
+      "sectionCount": 11,
+      "enhancementBudget": [
+        {
+          "gainRange": {
+            "assumption": "If a settled exit recovers to +1 m/s over a modestly shorter distance, capped by sustained same-speed acceleration already recorded on the fastest lap; available traction remains unverified.",
+            "basis": "hypothesis",
+            "lowerSeconds": 0.0027308463823582704,
+            "method": "Measured recovery window 10.6 m; a desired recovery shape compressed by up to15% is capped by the recorded acceleration and lateral-demand envelopes before computing any saving. Conditional fixed-distance integral of 1/v over the measured minimum-to-+1 m/s window. Compress the recorded speed-versus-distance shape by at most 15%, using the recorded same-speed acceleration envelope as a cap, then hold its recorded final speed to the original endpoint. Minimum speed, final speed and all speeds outside the window are preserved; no profile extrapolation. No faster lap validates this scenario, and the recovery duration is not time saved. Scenario choices are not confidence bounds or an achievable forecast; coarse GPS curvature must ease or remain stable; candidate lateral demand cannot exceed the recorded window maximum and longitudinal acceleration cannot exceed sustained same-speed measured capacity. Grip and control causes remain unverified; this is not a safe-speed instruction. Aggregation uses only disjoint endpoint-preserving scenarios.",
+            "upperSeconds": 0.0058281234498438065
+          },
+          "opportunityId": "lap-8:segment-3:apex-recovery",
+          "sectionId": "segment-3",
+          "sourceLapId": "lap-8"
+        },
+        {
+          "gainRange": {
+            "assumption": "If a settled exit recovers to +1 m/s over a modestly shorter distance, capped by sustained same-speed acceleration already recorded on the fastest lap; available traction remains unverified.",
+            "basis": "hypothesis",
+            "lowerSeconds": 0.001394364007487736,
+            "method": "Measured recovery window 9.3 m; a desired recovery shape compressed by up to15% is capped by the recorded acceleration and lateral-demand envelopes before computing any saving. Conditional fixed-distance integral of 1/v over the measured minimum-to-+1 m/s window. Compress the recorded speed-versus-distance shape by at most 15%, using the recorded same-speed acceleration envelope as a cap, then hold its recorded final speed to the original endpoint. Minimum speed, final speed and all speeds outside the window are preserved; no profile extrapolation. No faster lap validates this scenario, and the recovery duration is not time saved. Scenario choices are not confidence bounds or an achievable forecast; coarse GPS curvature must ease or remain stable; candidate lateral demand cannot exceed the recorded window maximum and longitudinal acceleration cannot exceed sustained same-speed measured capacity. Grip and control causes remain unverified; this is not a safe-speed instruction. Aggregation uses only disjoint endpoint-preserving scenarios.",
+            "upperSeconds": 0.0032215141510385324
+          },
+          "opportunityId": "lap-8:segment-7:apex-recovery",
+          "sectionId": "segment-7",
+          "sourceLapId": "lap-8"
+        },
+        {
+          "gainRange": {
+            "assumption": "If a settled exit recovers to +1 m/s over a modestly shorter distance, capped by sustained same-speed acceleration already recorded on the fastest lap; available traction remains unverified.",
+            "basis": "hypothesis",
+            "lowerSeconds": 0.0010000376169453848,
+            "method": "Measured recovery window 8.1 m; a desired recovery shape compressed by up to15% is capped by the recorded acceleration and lateral-demand envelopes before computing any saving. Conditional fixed-distance integral of 1/v over the measured minimum-to-+1 m/s window. Compress the recorded speed-versus-distance shape by at most 15%, using the recorded same-speed acceleration envelope as a cap, then hold its recorded final speed to the original endpoint. Minimum speed, final speed and all speeds outside the window are preserved; no profile extrapolation. No faster lap validates this scenario, and the recovery duration is not time saved. Scenario choices are not confidence bounds or an achievable forecast; coarse GPS curvature must ease or remain stable; candidate lateral demand cannot exceed the recorded window maximum and longitudinal acceleration cannot exceed sustained same-speed measured capacity. Grip and control causes remain unverified; this is not a safe-speed instruction. Aggregation uses only disjoint endpoint-preserving scenarios.",
+            "upperSeconds": 0.0024840325182280258
+          },
+          "opportunityId": "lap-8:segment-8:apex-recovery",
+          "sectionId": "segment-8",
+          "sourceLapId": "lap-8"
+        }
+      ],
+      "interpretation": "Conditional engineering scenario; not a measured saving or confidence interval."
+    },
+    {
+      "file": "0362",
+      "bestOnly": false,
+      "best": 26.585000000000008,
+      "traditional": 26.585000000000008,
+      "enhanced": {
+        "lowerSeconds": 26.583388390480813,
+        "upperSeconds": 26.58451490659478
+      },
+      "potential": {
+        "lowerSeconds": 0.0004850934052269604,
+        "upperSeconds": 0.0016116095191938688,
+        "basis": "hypothesis"
+      },
+      "budgetCount": 1,
+      "primary": [
+        {
+          "id": "lap-7:segment-5:apex-recovery",
+          "label": "Corner 3: apex recovery experiment",
+          "kind": "apex-recovery",
+          "gain": {
+            "lowerSeconds": 0.0004850934052269604,
+            "upperSeconds": 0.0016116095191938688,
+            "basis": "hypothesis"
+          }
+        },
+        {
+          "id": "lap-7:segment-8:tradeoff",
+          "label": "Corner 6: minimum-speed tradeoff",
+          "kind": "apex-tradeoff",
+          "gain": null
+        },
+        {
+          "id": "lap-7:segment-0:tradeoff",
+          "label": "Straight 1: exit momentum",
+          "kind": "exit-tradeoff",
+          "gain": null
+        }
+      ],
+      "validLapCount": 10,
+      "sectionCount": 11,
+      "enhancementBudget": [
+        {
+          "gainRange": {
+            "assumption": "If a settled exit recovers to +1 m/s over a modestly shorter distance, capped by sustained same-speed acceleration already recorded on the fastest lap; available traction remains unverified.",
+            "basis": "hypothesis",
+            "lowerSeconds": 0.0004850934052269604,
+            "method": "Measured recovery window 6.4 m; a desired recovery shape compressed by up to15% is capped by the recorded acceleration and lateral-demand envelopes before computing any saving. Conditional fixed-distance integral of 1/v over the measured minimum-to-+1 m/s window. Compress the recorded speed-versus-distance shape by at most 15%, using the recorded same-speed acceleration envelope as a cap, then hold its recorded final speed to the original endpoint. Minimum speed, final speed and all speeds outside the window are preserved; no profile extrapolation. No faster lap validates this scenario, and the recovery duration is not time saved. Scenario choices are not confidence bounds or an achievable forecast; coarse GPS curvature must ease or remain stable; candidate lateral demand cannot exceed the recorded window maximum and longitudinal acceleration cannot exceed sustained same-speed measured capacity. Grip and control causes remain unverified; this is not a safe-speed instruction. Aggregation uses only disjoint endpoint-preserving scenarios.",
+            "upperSeconds": 0.0016116095191938688
+          },
+          "opportunityId": "lap-7:segment-5:apex-recovery",
+          "sectionId": "segment-5",
+          "sourceLapId": "lap-7"
+        }
+      ],
+      "interpretation": "Conditional engineering scenario; not a measured saving or confidence interval."
+    },
+    {
+      "file": "0362",
+      "bestOnly": true,
+      "best": 26.585000000000008,
+      "traditional": 26.585000000000008,
+      "enhanced": {
+        "lowerSeconds": 26.583388390480813,
+        "upperSeconds": 26.58451490659478
+      },
+      "potential": {
+        "lowerSeconds": 0.0004850934052269604,
+        "upperSeconds": 0.0016116095191938688,
+        "basis": "hypothesis"
+      },
+      "budgetCount": 1,
+      "primary": [
+        {
+          "id": "lap-7:segment-5:apex-recovery",
+          "label": "Corner 3: apex recovery experiment",
+          "kind": "apex-recovery",
+          "gain": {
+            "lowerSeconds": 0.0004850934052269604,
+            "upperSeconds": 0.0016116095191938688,
+            "basis": "hypothesis"
+          }
+        }
+      ],
+      "validLapCount": 1,
+      "sectionCount": 11,
+      "enhancementBudget": [
+        {
+          "gainRange": {
+            "assumption": "If a settled exit recovers to +1 m/s over a modestly shorter distance, capped by sustained same-speed acceleration already recorded on the fastest lap; available traction remains unverified.",
+            "basis": "hypothesis",
+            "lowerSeconds": 0.0004850934052269604,
+            "method": "Measured recovery window 6.4 m; a desired recovery shape compressed by up to15% is capped by the recorded acceleration and lateral-demand envelopes before computing any saving. Conditional fixed-distance integral of 1/v over the measured minimum-to-+1 m/s window. Compress the recorded speed-versus-distance shape by at most 15%, using the recorded same-speed acceleration envelope as a cap, then hold its recorded final speed to the original endpoint. Minimum speed, final speed and all speeds outside the window are preserved; no profile extrapolation. No faster lap validates this scenario, and the recovery duration is not time saved. Scenario choices are not confidence bounds or an achievable forecast; coarse GPS curvature must ease or remain stable; candidate lateral demand cannot exceed the recorded window maximum and longitudinal acceleration cannot exceed sustained same-speed measured capacity. Grip and control causes remain unverified; this is not a safe-speed instruction. Aggregation uses only disjoint endpoint-preserving scenarios.",
+            "upperSeconds": 0.0016116095191938688
+          },
+          "opportunityId": "lap-7:segment-5:apex-recovery",
+          "sectionId": "segment-5",
+          "sourceLapId": "lap-7"
+        }
+      ],
+      "interpretation": "Conditional engineering scenario; not a measured saving or confidence interval."
+    }
+  ],
+  "nativeModelFull0362": {
+    "inputOrder": [
+      "lap-7:segment-5:apex-recovery",
+      "lap-7:segment-8:tradeoff",
+      "lap-7:segment-0:tradeoff"
+    ],
+    "outputs": [
+      {
+        "evidenceId": "lap-7:segment-0:tradeoff",
+        "experiment": "Preserve the preceding exit and approach momentum while keeping this corner exit repeatable.",
+        "hypothesis": "Upstream momentum may explain exit recovery rather than a fault at the apex.",
+        "interpretationId": "entry-balance",
+        "relatedEvidenceIds": [],
+        "validation": "Compare full corner and downstream time, keeping exit speed and recovery repeatable."
+      },
+      {
+        "evidenceId": "lap-7:segment-8:tradeoff",
+        "experiment": "Try a smoother arc around the minimum-speed point while holding entry speed repeatable.",
+        "hypothesis": "The apex arc may scrub momentum, though entry speed or track conditions could also contribute.",
+        "interpretationId": "apex-arc",
+        "relatedEvidenceIds": [],
+        "validation": "Compare full corner and downstream time, keeping exit speed and recovery repeatable."
+      }
+    ],
+    "metrics": {
+      "backendInitMs": 66,
+      "generatedTokens": 46,
+      "gpu": false,
+      "inferenceMs": 43229,
+      "integrityMs": 1867,
+      "modelLoadMs": 867
+    },
+    "wallMs": 46801,
+    "assessment": "Useful nondefault upstream-momentum hypothesis and exit-first reordering observed. Recovery omitted by model remains a deterministic recommendation."
+  },
+  "counterevidenceDiagnostic": {
+    "qualityPass": false,
+    "result": {
+      "inputEvidence": [
+        {
+          "evidenceId": "normal-deceleration",
+          "summary": "{\"facts\":[[\"entrySpeed\",18.0,18.0,\"m/s\"],[\"minimumSpeed\",12.0,12.0,\"m/s\"],[\"exitSpeed\",20.0,20.0,\"m/s\"]],\"interpretations\":[{\"choiceId\":\"adjust\",\"experiment\":\"Try a smoother transition while preserving the same exit line.\",\"hypothesis\":\"Technique timing may affect recovery, though conditions could also explain the pattern.\",\"validation\":\"Compare full section and downstream time with repeated speed and RPM traces.\"},{\"choiceId\":\"check\",\"experiment\":\"Preserve the current approach and check full section repeatability before changing technique.\",\"hypothesis\":\"Normal corner slowing may be necessary; the telemetry does not establish a driving fault.\",\"validation\":\"Check raw speed and RPM repeatability before changing technique.\"}],\"observation\":\"Smooth necessary corner slowing, followed by prompt repeatable acceleration. No anomalous deceleration, no lost recovery and no faster comparison. Brake controls are absent.\"}"
+        },
+        {
+          "evidenceId": "calculated-gear",
+          "summary": "{\"facts\":[[\"rpmDropCount\",0.0,null,\"count\"],[\"speedRecoveryInterruptions\",0.0,null,\"count\"]],\"interpretations\":[{\"choiceId\":\"adjust\",\"experiment\":\"Try a smoother transition while preserving the same exit line.\",\"hypothesis\":\"Technique timing may affect recovery, though conditions could also explain the pattern.\",\"validation\":\"Compare full section and downstream time with repeated speed and RPM traces.\"},{\"choiceId\":\"check\",\"experiment\":\"Keep current shift timing while checking raw RPM and speed for a repeated interruption.\",\"hypothesis\":\"Calculated gear may reflect inference noise rather than an actual shift.\",\"validation\":\"Check raw speed and RPM repeatability before changing technique.\"}],\"observation\":\"GPS-calculated gear oscillates, but raw RPM and speed remain smooth with uninterrupted acceleration. No actual shift or drivetrain fault is established. No measured gear channel exists.\"}"
+        }
+      ],
+      "metrics": {
+        "backendInitMs": 965,
+        "generatedTokens": 17,
+        "gpu": false,
+        "inferenceMs": 6693,
+        "integrityMs": 1899,
+        "modelLoadMs": 626
+      },
+      "outputs": [
+        {
+          "evidenceId": "normal-deceleration",
+          "experiment": "Try a smoother transition while preserving the same exit line.",
+          "hypothesis": "Technique timing may affect recovery, though conditions could also explain the pattern.",
+          "interpretationId": "adjust",
+          "relatedEvidenceIds": [],
+          "validation": "Compare full section and downstream time with repeated speed and RPM traces."
+        }
+      ]
+    },
+    "assessment": "Gemma selected a technique experiment despite normal-deceleration counterevidence and omitted the calculated-gear case. Constrained source validation does not prove correct causal judgment. Production deterministic detection excludes unsupported normal-deceleration findings; all causes remain hypotheses.",
+    "finalScoredDiagnostic": {
+      "assessment": "Schema validity proves constrained selection, not causal reasoning quality.",
+      "counterevidenceQualityPass": false,
+      "inputEvidence": [
+        {
+          "evidenceId": "normal-deceleration",
+          "summary": "{\"facts\":[[\"entrySpeed\",18.0,18.0,\"m/s\"],[\"minimumSpeed\",12.0,12.0,\"m/s\"],[\"exitSpeed\",20.0,20.0,\"m/s\"]],\"interpretations\":[{\"choiceId\":\"adjust\",\"experiment\":\"Try a smoother transition while preserving the same exit line.\",\"hypothesis\":\"Technique timing may affect recovery, though conditions could also explain the pattern.\",\"validation\":\"Compare full section and downstream time with repeated speed and RPM traces.\"},{\"choiceId\":\"check\",\"experiment\":\"Preserve the current approach and check full section repeatability before changing technique.\",\"hypothesis\":\"Normal corner slowing may be necessary; the telemetry does not establish a driving fault.\",\"validation\":\"Check raw speed and RPM repeatability before changing technique.\"}],\"observation\":\"Smooth necessary corner slowing, followed by prompt repeatable acceleration. No anomalous deceleration, no lost recovery and no faster comparison. Brake controls are absent.\"}"
+        },
+        {
+          "evidenceId": "calculated-gear",
+          "summary": "{\"facts\":[[\"rpmDropCount\",0.0,null,\"count\"],[\"speedRecoveryInterruptions\",0.0,null,\"count\"]],\"interpretations\":[{\"choiceId\":\"adjust\",\"experiment\":\"Try a smoother transition while preserving the same exit line.\",\"hypothesis\":\"Technique timing may affect recovery, though conditions could also explain the pattern.\",\"validation\":\"Compare full section and downstream time with repeated speed and RPM traces.\"},{\"choiceId\":\"check\",\"experiment\":\"Keep current shift timing while checking raw RPM and speed for a repeated interruption.\",\"hypothesis\":\"Calculated gear may reflect inference noise rather than an actual shift.\",\"validation\":\"Check raw speed and RPM repeatability before changing technique.\"}],\"observation\":\"GPS-calculated gear oscillates, but raw RPM and speed remain smooth with uninterrupted acceleration. No actual shift or drivetrain fault is established. No measured gear channel exists.\"}"
+        }
+      ],
+      "metrics": {
+        "backendInitMs": 620,
+        "generatedTokens": 17,
+        "gpu": false,
+        "inferenceMs": 7355,
+        "integrityMs": 4952,
+        "modelLoadMs": 700
+      },
+      "outputs": [
+        {
+          "evidenceId": "normal-deceleration",
+          "experiment": "Try a smoother transition while preserving the same exit line.",
+          "hypothesis": "Technique timing may affect recovery, though conditions could also explain the pattern.",
+          "interpretationId": "adjust",
+          "relatedEvidenceIds": [],
+          "validation": "Compare full section and downstream time with repeated speed and RPM traces."
+        }
+      ]
+    }
+  },
+  "verification": {
+    "frontend": "122 focused coach/workspace/video synchronization tests passed (including 56 coach/workspace tests).",
+    "build": "TypeScript and Vite production build passed",
+    "browser": "Real0362 Rust report with simulated IPC; automatic summary, ranges incl sub-millisecond bounds, source provenance, full-lap budget, inspection navigation, cancellation/stale ownership, dark/light responsive layouts passed.",
+    "rustCoach": "57 passed, 1 optional native-Gemma quality diagnostic ignored in normal suite. Explicit native full and fastest-only trials separately executed.",
+    "independentReview": "Ship: engine, physics, frontend, runtime/service, including final unique bounded grammar. Independently ran modeled5/5 and service9/9. Source-card linkage, quantified experiment preservation, full-lap non-overlap and numerical isolation reviewed.",
+    "broaderSuiteLimitations": [
+      "Full npm suite: 318 passed and 8 failures in unchanged tests/website-download.test.ts; no website/test diff.",
+      "Full cargo suite: seven video_analysis tests fail macOS AVFoundation fixture generator status at tests/support/video_fixtures.rs:46 in the sandbox.",
+      "No native Windows host run or installer pipeline was performed."
+    ]
+  },
+  "nativeModelBestOnly0362": {
+    "inputOrder": [
+      "lap-7:segment-5:apex-recovery"
+    ],
+    "outputs": [
+      {
+        "evidenceId": "lap-7:segment-5:apex-recovery",
+        "experiment": "Inspect the GPS arc and RPM at the minimum. Test a settled entry and one smooth exit arc, then compare recovery onset, full corner time and the following section over repeated laps. Keep entry speed controlled while testing.",
+        "hypothesis": "The apex arc may scrub momentum, though entry speed or track conditions could also contribute.",
+        "interpretationId": "apex-arc",
+        "relatedEvidenceIds": [],
+        "validation": "Compare full corner and downstream time, keeping exit speed and recovery repeatable."
+      }
+    ],
+    "metrics": {
+      "backendInitMs": 65,
+      "generatedTokens": 25,
+      "gpu": false,
+      "inferenceMs": 20913,
+      "integrityMs": 1876,
+      "modelLoadMs": 636
+    },
+    "wallMs": 24159,
+    "assessment": "Accepted with no faster supporting segment or supporting values. Unique bounded grammar selects the recovery candidate once; the exact deterministic scenario driving experiment is preserved."
+  },
+  "structuralRegression": {
+    "priorBestOnlyTrial": "Rejected duplicate identical candidate IDs; deterministic fallback retained.",
+    "resolution": "Bounded grammar enumerates unique ordered subsets and per-candidate choices. Mapper independently rejects duplicates and unoffered choices. Corrected native fastest-only trial accepted."
+  }
+}

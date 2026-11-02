@@ -1,4 +1,4 @@
-import {launchBrowser,browserTestEntries} from './browser.mjs';
+import {launchBrowser,browserTestEntries,browserTestNoWatch} from './browser.mjs';
 // Real React acceptance coverage; only the native IPC/media boundary is simulated.
 import {expect} from '@playwright/test';
 import {createServer} from 'vite';
@@ -8,9 +8,11 @@ import {mkdirSync} from 'node:fs';
 let server, browser;
 try {
   mkdirSync('.tools', {recursive:true});
-  server=await createServer({optimizeDeps:{entries:browserTestEntries},server:{host:'127.0.0.1',port:0,strictPort:false,hmr:false,watch:null}});
+  server=await createServer({plugins:[browserTestNoWatch],optimizeDeps:{entries:browserTestEntries},server:{host:'127.0.0.1',port:0,strictPort:false,hmr:false}});
   await server.listen();
+  console.log('Sidebar verification: Vite ready');
   browser=await launchBrowser();
+  console.log('Sidebar verification: browser launched');
   const page=await browser.newPage({viewport:{width:1280,height:800}});
   page.setDefaultTimeout(6000);
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
@@ -18,8 +20,9 @@ try {
     window.isTauri=true;window.sidebarCalls=[];
     // Capture the rendered advanced axis labels to verify its local zoom, too.
     window.sidebarCanvasTicks=new WeakMap();
+    window.sidebarCanvasDraws=new WeakMap();
     const clear=CanvasRenderingContext2D.prototype.clearRect,text=CanvasRenderingContext2D.prototype.fillText;
-    CanvasRenderingContext2D.prototype.clearRect=function(...args){window.sidebarCanvasTicks.set(this.canvas,[]);return clear.apply(this,args);};
+    CanvasRenderingContext2D.prototype.clearRect=function(...args){window.sidebarCanvasTicks.set(this.canvas,[]);window.sidebarCanvasDraws.set(this.canvas,(window.sidebarCanvasDraws.get(this.canvas)??0)+1);return clear.apply(this,args);};
     CanvasRenderingContext2D.prototype.fillText=function(...args){window.sidebarCanvasTicks.get(this.canvas)?.push(String(args[0]));return text.apply(this,args);};
     const laps=Array.from({length:24},(_,i)=>({id:`lap-${i+1}`,number:i+1,duration:10+i,start:i*10,end:i*10+10+i,complete:i!==23}));
     const channels=[{id:'speed',name:'GPS Speed',unit:'m/s',times:[0,5,10],values:[10,15,20]},{id:'rpm',name:'RPM',unit:'rpm',times:[0,5,10],values:[1000,3000,2000]}];
@@ -32,7 +35,8 @@ try {
       window.sidebarCalls.push({cmd,args});const db=read();
       if(cmd.startsWith('plugin:event'))return 1;
       if(cmd==='library_snapshot')return db;
-      if(cmd==='load_library_session'){db.activeSessionId=args.sessionId;write(db);return sessions.find(s=>s.id===args.sessionId);}
+      if(cmd==='load_library_session'){db.activeSessionId=args.sessionId;write(db);return {...sessions.find(s=>s.id===args.sessionId),...db.entries.find(e=>e.id===args.sessionId)};}
+      if(cmd==='update_library_details'){if(args.name==='Fail save')throw Error('Fixture save failure');const entry=db.entries.find(e=>e.id===args.sessionId);Object.assign(entry,{name:args.name.trim(),driver:args.driver.trim(),recordedAt:args.recordedAt});write(db);return entry;}
       if(cmd==='save_workspace'){db.entries.find(e=>e.id===args.sessionId).workspace=args.workspace;write(db);return;}
       if(cmd==='plugin:dialog|open')return '/fixture/onboard.mp4';
       if(cmd==='authorize_local_video')return {path:args.path,size:100,modifiedMs:1,status:'ready'};
@@ -50,6 +54,7 @@ try {
       throw Error(`Unexpected sidebar IPC: ${cmd}`);
     }};
     const times=new WeakMap(),rates=new WeakMap(),sources=new WeakMap();
+    Object.defineProperties(HTMLVideoElement.prototype,{videoWidth:{get(){return 1920;}},videoHeight:{get(){return 1080;}}});
     Object.defineProperties(HTMLMediaElement.prototype,{
       src:{get(){return sources.get(this)??'';},set(value){sources.set(this,value);}},duration:{get(){return 600;}},currentTime:{get(){return times.get(this)??0;},set(value){times.set(this,value);this.dispatchEvent(new Event('timeupdate'));queueMicrotask(()=>this.dispatchEvent(new Event('seeked')));}},playbackRate:{get(){return rates.get(this)??1;},set(value){rates.set(this,value);this.dispatchEvent(new Event('ratechange'));}},paused:{get(){return !this.dataset.playing;}}
     });
@@ -57,9 +62,39 @@ try {
     HTMLMediaElement.prototype.play=async function(){this.dataset.playing='1';this.dispatchEvent(new Event('playing'));};
     HTMLMediaElement.prototype.pause=function(){delete this.dataset.playing;this.dispatchEvent(new Event('pause'));};
   });
+  const verifyDetails=async()=>{
+  console.log('Sidebar verification: checking session details');
+  // Editing is cancelable, retryable and persists through native-style reloads.
+  const editActive=async()=>{await page.locator('.library-entry.active .row-actions').click();await page.getByRole('menuitem',{name:'Edit details',exact:true}).click();};
+  await editActive();
+  const details=page.getByRole('dialog',{name:'Edit session details',exact:true});
+  await expect(details.getByLabel('Session name')).toBeFocused();
+  await expect(details.getByLabel('Recording date')).toHaveValue('2026-10-14');
+  await details.getByLabel('Session name').fill('Canceled title');
+  await details.getByRole('button',{name:'Cancel',exact:true}).click();
+  assert.equal(await page.locator('dialog:modal').count(),0,'Cancel releases native top-layer modality during the exit');
+  await expect(page.locator('.library-entry.active .row-actions')).toBeFocused();
+  await expect(page.locator('.library-entry.active .session-button')).not.toContainText('Canceled title');
+  await editActive();assert(await details.evaluate(node=>node.matches(':modal')),'Reopening details during an interrupted exit restores native modality');await details.getByLabel('Session name').fill('Fail save');
+  await details.getByRole('button',{name:'Save',exact:true}).click();
+  await expect(details.getByRole('alert')).toContainText('Fixture save failure');
+  await details.getByLabel('Session name').fill('Edited practice');
+  await details.getByLabel('Driver',{exact:true}).fill('Alex');
+  await details.getByLabel('Recording date').fill('2026-10-23');
+  await details.getByRole('button',{name:'Save',exact:true}).click();
+  await expect(details).toHaveCount(0);
+  await expect(page.locator('.library-entry.active .session-button')).toContainText('Edited practice');
+  await expect(page.locator('.library-entry.active .session-button')).toContainText('Alex');
+  await page.reload({waitUntil:'domcontentloaded'});await page.locator('.uplot').first().waitFor();
+  await expect(page.locator('.library-entry.active .session-button')).toContainText('Edited practice');
+  await editActive();await expect(details.getByLabel('Recording date')).toHaveValue('2026-10-23');
+  await page.keyboard.press('Escape');await expect(details).toHaveCount(0);
+  };
   await page.goto(server.resolvedUrls.local[0]);
+  console.log('Sidebar verification: page loaded');
   await page.locator('.uplot').first().waitFor().catch(async error=>{console.error('Initial render:',errors,await page.locator('body').innerText());throw error;});
   const shell=page.locator('.shell');
+  if(process.env.LIBRARY_DETAILS_ONLY){await verifyDetails();assert.deepEqual(errors,[]);console.log('PASS: library details Save/Cancel/error/reload/Escape interactions');}else{
   // First missing-control assertion supplies the deliberate RED on the original UI.
   await expect(page.getByRole('button',{name:'Collapse sidebar',exact:true})).toBeVisible();
   await expect(shell).toHaveAttribute('data-sidebar-state','expanded');
@@ -141,7 +176,7 @@ try {
   const over=page.locator('.u-over').first();await over.scrollIntoViewIfNeeded();const box=await over.boundingBox();
   await page.mouse.move(box.x+box.width*.2,box.y+30);await page.mouse.down();await page.mouse.move(box.x+box.width*.7,box.y+30,{steps:10});await page.mouse.up();
   const savedWorkspace=()=>page.evaluate(()=>JSON.parse(localStorage.getItem('sidebar-library')).entries.find(e=>e.id===JSON.parse(localStorage.getItem('sidebar-library')).activeSessionId).workspace);
-  await expect.poll(async()=>(await savedWorkspace())?.zoom?.max??0).toBeGreaterThan(0);
+  await expect.poll(async()=>{const zoom=(await savedWorkspace())?.zoom;return !!zoom&&zoom.max>zoom.min&&zoom.max-zoom.min<10;}).toBe(true);
   const baseline=await savedWorkspace();assert(baseline.zoom.max-baseline.zoom.min<10,'Real chart gesture narrows zoom');
   const layoutCheck=async(label)=>{
     // CSS transitions and ResizeObserver delivery follow rendered frames, not
@@ -160,9 +195,12 @@ try {
     }),{message:label,timeout:6000,intervals:[16,50,100]}).toEqual([]);
   };
   const modeCycle=async()=>{
+    // ResizeObserver updates React's mode after the viewport changes. Read the
+    // opener only after that source of truth agrees with the rendered shell.
+    await expect.poll(()=>page.evaluate(()=>{const shell=document.querySelector('.shell'),slot=document.querySelector('.explorer-slot');const narrow=shell.getBoundingClientRect().width<900;return shell.dataset.narrow===String(narrow)&&slot.dataset.drawer===String(narrow);})).toBe(true);
     const narrow=await page.getByRole('button',{name:'Open session explorer',exact:true}).isVisible();
     if(narrow){
-      await expect.poll(()=>page.locator('.explorer-slot').evaluate(el=>Math.round(el.getBoundingClientRect().width))).toBe(40);
+      await expect.poll(()=>page.locator('.explorer-slot').evaluate(el=>({width:Math.round(el.getBoundingClientRect().width),drawer:el.dataset.drawer,narrow:el.closest('.shell')?.dataset.narrow}))).toEqual({width:40,drawer:'true',narrow:'true'});
       const mainWidth=await page.locator('main').evaluate(el=>el.getBoundingClientRect().width);
       await page.getByRole('button',{name:'Open session explorer',exact:true}).click();await expect(page.locator('.lap-list')).toBeVisible();
       assert(Math.abs(await page.locator('main').evaluate(el=>el.getBoundingClientRect().width)-mainWidth)<1,'Drawer overlays without reducing analysis width');
@@ -214,21 +252,49 @@ try {
     await page.locator(view==='Advanced'?'.analysis-surface':'.uplot').first().scrollIntoViewIfNeeded();
     await page.screenshot({path:`.tools/sidebar-${view.toLowerCase()}-chart-600.png`,animations:'disabled'});
     await page.setViewportSize({width:1280,height:800});await page.waitForTimeout(180);
+    if(view==='Advanced'){
+      const ticks=await page.evaluate(()=>window.sidebarCanvasTicks.get(window.sidebarCanvas));
+      await page.getByRole('button',{name:'Telemetry',exact:true}).click();
+      await expect(page.locator('.analysis-surface')).toBeHidden();
+      await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+      assert.equal(await page.evaluate(()=>window.sidebarCanvas.isConnected),true,'Hidden Advanced retains its canvas node');
+      const idle=await page.evaluate(()=>({draws:window.sidebarCanvasDraws.get(window.sidebarCanvas),requests:window.sidebarCalls.filter(c=>c.cmd==='analyze_advanced').length}));
+      const telemetry=page.locator('.u-over').first();await telemetry.scrollIntoViewIfNeeded();const bounds=await telemetry.boundingBox();
+      await page.mouse.move(bounds.x+bounds.width*.2,bounds.y+30);await page.mouse.move(bounds.x+bounds.width*.7,bounds.y+30,{steps:8});
+      await expect(page.locator('.readout').first()).not.toContainText('—');
+      // Cover the 100ms Advanced request debounce while exercising real cursor events.
+      await page.waitForTimeout(180);
+      assert.deepEqual(await page.evaluate(()=>({draws:window.sidebarCanvasDraws.get(window.sidebarCanvas),requests:window.sidebarCalls.filter(c=>c.cmd==='analyze_advanced').length})),idle,'Hidden Advanced ignores telemetry cursor movement without redrawing or requesting analysis');
+      await page.getByRole('button',{name:'Advanced',exact:true}).click();await expect(page.locator('.analysis-surface')).toBeVisible();
+      assert.equal(await page.evaluate(()=>window.sidebarCanvas===document.querySelector('.analysis-surface canvas')),true,'Advanced navigation retains the canvas node');
+      await expect.poll(()=>page.evaluate(()=>window.sidebarCanvasTicks.get(window.sidebarCanvas))).toEqual(ticks);
+    }
+    if(view==='Video'){
+      await page.getByRole('button',{name:'Play',exact:true}).click();
+      await expect.poll(()=>page.locator('video').evaluate(video=>video.paused)).toBe(false);
+      await page.getByRole('button',{name:'Telemetry',exact:true}).click();
+      await expect.poll(()=>page.locator('video').evaluate(video=>video.paused)).toBe(true);
+      assert.equal(await page.evaluate(()=>window.sidebarVideo===document.querySelector('video')),true,'Leaving Video pauses playback while retaining the video node');
+      await page.getByRole('button',{name:'Video',exact:true}).click();await expect(page.getByRole('button',{name:'Play',exact:true})).toBeEnabled();
+      assert.equal(await page.evaluate(()=>window.sidebarVideo===document.querySelector('video')),true,'Returning to Video retains the video node');
+    }
   }
   // Sibling list scroll regions must leave lap access at the short-window size.
   await page.setViewportSize({width:1024,height:500});await page.waitForTimeout(180);await modeCycle();
   const geometry=await page.evaluate(()=>{const sessions=document.querySelector('.session-list'),laps=document.querySelector('.lap-list'),s=sessions.getBoundingClientRect(),l=laps.getBoundingClientRect();return {sessionHeight:s.height,lapHeight:l.height,sessionScroll:sessions.scrollHeight>sessions.clientHeight,lapScroll:laps.scrollHeight>laps.clientHeight,lapBottom:l.bottom,height:innerHeight};});
   assert(geometry.sessionScroll&&geometry.lapScroll,'100 sessions and 24 laps scroll independently');assert(geometry.lapHeight>=80&&geometry.lapBottom<=geometry.height,'Lap access remains usable in a short window');
-  await page.getByRole('button',{name:'Hide sessions',exact:true}).click();await page.reload();await page.locator('.uplot').first().waitFor();await expect(shell).toHaveAttribute('data-sidebar-state','analysis');
-  await page.getByRole('button',{name:'Collapse sidebar',exact:true}).click();await page.reload();await page.locator('.uplot').first().waitFor();await expect(shell).toHaveAttribute('data-sidebar-state','collapsed');
-  await page.getByRole('button',{name:'Expand sidebar',exact:true}).click();if(await shell.getAttribute('data-sidebar-state')==='analysis')await page.getByRole('button',{name:'Show sessions',exact:true}).click();await page.reload();await page.locator('.uplot').first().waitFor();await expect(shell).toHaveAttribute('data-sidebar-state','expanded');
+  await page.getByRole('button',{name:'Hide sessions',exact:true}).click();await page.reload({waitUntil:'domcontentloaded'});await page.locator('.uplot').first().waitFor();await expect(shell).toHaveAttribute('data-sidebar-state','analysis');
+  await page.getByRole('button',{name:'Collapse sidebar',exact:true}).click();await page.reload({waitUntil:'domcontentloaded'});await page.locator('.uplot').first().waitFor();await expect(shell).toHaveAttribute('data-sidebar-state','collapsed');
+  await page.getByRole('button',{name:'Expand sidebar',exact:true}).click();if(await shell.getAttribute('data-sidebar-state')==='analysis')await page.getByRole('button',{name:'Show sessions',exact:true}).click();await page.reload({waitUntil:'domcontentloaded'});await page.locator('.uplot').first().waitFor();await expect(shell).toHaveAttribute('data-sidebar-state','expanded');
+  await verifyDetails();
   // The same shell must also handle a minimal and an empty library.
   await page.evaluate(()=>{const db=JSON.parse(localStorage.getItem('sidebar-library'));db.entries=db.entries.slice(0,1);db.activeSessionId=db.entries[0].id;localStorage.setItem('sidebar-library',JSON.stringify(db));});
-  await page.reload();await page.locator('.uplot').first().waitFor();assert.equal(await sessionButtons.count(),1);await layoutCheck('Single-entry library');
+  await page.reload({waitUntil:'domcontentloaded'});await page.locator('.uplot').first().waitFor();assert.equal(await sessionButtons.count(),1);await layoutCheck('Single-entry library');
   await page.evaluate(()=>localStorage.setItem('sidebar-library',JSON.stringify({entries:[],activeSessionId:null,warnings:[]})));
-  await page.reload();await expect(page.getByRole('button',{name:/^Open telemetry/})).toBeVisible();assert.equal(await sessionButtons.count(),0);await layoutCheck('Empty library');
+  await page.reload({waitUntil:'domcontentloaded'});await expect(page.getByRole('button',{name:/^Open telemetry/})).toBeVisible();assert.equal(await sessionButtons.count(),0);await layoutCheck('Empty library');
   await page.setViewportSize({width:600,height:500});await page.waitForTimeout(180);await layoutCheck('Empty library at minimum size');
   await page.getByRole('button',{name:'Open session explorer',exact:true}).click();await expect(page.getByText('Your sessions stay on this computer.')).toBeVisible();await page.keyboard.press('Escape');
   assert.deepEqual(errors,[]);
   console.log('PASS: 100-entry session explorer organization/keyboard/merge-error exit; three persisted modes; live 600×500–2560×1440 Telemetry/Advanced/Video resizing with mounted plot/canvas/player identity and lap/channel/zoom/tab/video mapping preservation (simulated native IPC and media clock)');
+  }
 }finally{await browser?.close();await server?.close();}

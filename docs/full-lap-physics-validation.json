@@ -1,0 +1,1133 @@
+{
+  "analysisVersion": "coach-8-full-lap",
+  "gemmaContribution": {
+    "model": "Gemma 3 1B Q4_K_M bundled offline",
+    "wallMilliseconds": 55004,
+    "acceptedExplanations": 0,
+    "result": "Rejected qualitative/schema boundary; deterministic fallback retained. Structured input and raw output in full-lap-gemma-validation.json."
+  },
+  "method": "One continuous calibrated point-mass lap; signed section attribution; no external lap record or desired gain target.",
+  "recordings": [
+    {
+      "actualLapSeconds": 26.675999999999988,
+      "analysisMilliseconds": 994,
+      "bestLapId": "lap-8",
+      "calibration": {
+        "assumptions": [
+          "2D point mass on the recorded path; no downforce, banking, grade, tire temperature or mass identification. No absolute grip or engine limit is inferred from driver demand.",
+          "Separate 2 m/s propulsion and braking bands with median/MAD upper-outlier rejection from nonoverlapping 0.4 s windows. Bands need three observations; interpolate interior gaps, hold nearest supported capability at outer speeds. Combined-demand correction uses lateral utilization below 0.8 only.",
+          "Scenario limits use sustained 80th/98th percentile directional demand and 97th/99.5th percentile lateral demand. Maximum speed uses 99th/99.9th percentile recorded speed; power above that support remains unknown. No arbitrary performance uplift.",
+          "Section baselines use measured elapsed times; optimized times integrate the speed solution. Baseline speed-integral minus recorded duration is reported separately as alignment/integration residual.",
+          "Cyclic forward/backward reachability uses maximum endpoint lateral demand throughout each cell and a friction ellipse; every section includes entry/exit and downstream speed consequences. Section gains stay signed and partition one lap.",
+          "RPM/gear/throttle identification is insufficient for a reliable shift map; No explicit shift model; short interruptions and mandatory shift losses may be underrepresented by sustained upper-tail demand. No separate shift-saving or RPM recovery is attributed.",
+          "Calibration uses 477 sustained windows on 7 training laps; geometry chord 10.0 m; primary-path wider-chord curvature sensitivity retained (no geometry averaging across physically unaligned lap distances). 3 heldout laps excluded from capability fitting."
+        ],
+        "conservativeLateralMps2": 15.339985878290927,
+        "maxObservedSpeedMps": 21.54594183396002,
+        "nominalLateralMps2": 16.086433287839842,
+        "observedLateralMps2": 16.086433287839842,
+        "rpmEvidence": [
+          "No reliable gear/shift identification; mandatory shift losses may be underrepresented; no separate shifting gain attributed."
+        ],
+        "speedBands": [
+          {
+            "conservativeAccelerationMps2": 0.6662614898578622,
+            "conservativeBrakingMps2": 2.175467501368854,
+            "maxSpeedMps": 10.0,
+            "minSpeedMps": 8.0,
+            "nominalAccelerationMps2": 2.304637549001882,
+            "nominalBrakingMps2": 3.032253832843669,
+            "observedAccelerationMps2": 2.304637549001882,
+            "observedBrakingMps2": 3.032253832843669,
+            "sampleCount": 8
+          },
+          {
+            "conservativeAccelerationMps2": 3.2396246158299924,
+            "conservativeBrakingMps2": 2.13111560665737,
+            "maxSpeedMps": 12.0,
+            "minSpeedMps": 10.0,
+            "nominalAccelerationMps2": 3.802925686748062,
+            "nominalBrakingMps2": 4.717715107111644,
+            "observedAccelerationMps2": 3.802925686748062,
+            "observedBrakingMps2": 4.717715107111644,
+            "sampleCount": 44
+          },
+          {
+            "conservativeAccelerationMps2": 3.2330339429951165,
+            "conservativeBrakingMps2": 3.8611033942481465,
+            "maxSpeedMps": 14.0,
+            "minSpeedMps": 12.0,
+            "nominalAccelerationMps2": 3.776655630433246,
+            "nominalBrakingMps2": 5.540846402829965,
+            "observedAccelerationMps2": 3.776655630433246,
+            "observedBrakingMps2": 5.540846402829965,
+            "sampleCount": 107
+          },
+          {
+            "conservativeAccelerationMps2": 2.97240966298784,
+            "conservativeBrakingMps2": 7.141277103232255,
+            "maxSpeedMps": 16.0,
+            "minSpeedMps": 14.0,
+            "nominalAccelerationMps2": 3.7529928816194262,
+            "nominalBrakingMps2": 9.362627542062647,
+            "observedAccelerationMps2": 3.7529928816194262,
+            "observedBrakingMps2": 9.362627542062647,
+            "sampleCount": 62
+          },
+          {
+            "conservativeAccelerationMps2": 2.2347467814693363,
+            "conservativeBrakingMps2": 5.449149554934835,
+            "maxSpeedMps": 18.0,
+            "minSpeedMps": 16.0,
+            "nominalAccelerationMps2": 2.553896556952664,
+            "nominalBrakingMps2": 7.573698465890138,
+            "observedAccelerationMps2": 2.553896556952664,
+            "observedBrakingMps2": 7.573698465890138,
+            "sampleCount": 59
+          },
+          {
+            "conservativeAccelerationMps2": 1.704897308559089,
+            "conservativeBrakingMps2": 6.801432759947154,
+            "maxSpeedMps": 20.0,
+            "minSpeedMps": 18.0,
+            "nominalAccelerationMps2": 2.573657005194562,
+            "nominalBrakingMps2": 7.210578454110495,
+            "observedAccelerationMps2": 2.573657005194562,
+            "observedBrakingMps2": 7.210578454110495,
+            "sampleCount": 48
+          },
+          {
+            "conservativeAccelerationMps2": 1.5780838767010341,
+            "conservativeBrakingMps2": 4.67641765980095,
+            "maxSpeedMps": 22.0,
+            "minSpeedMps": 20.0,
+            "nominalAccelerationMps2": 1.9169851213575742,
+            "nominalBrakingMps2": 5.441509490281343,
+            "observedAccelerationMps2": 1.9169851213575742,
+            "observedBrakingMps2": 5.441509490281343,
+            "sampleCount": 27
+          }
+        ],
+        "validLapCount": 7
+      },
+      "gainRange": {
+        "assumption": "Conditional on repeatable telemetry-supported capacity and the recorded path; absolute vehicle limit is unidentified. Lower zero on a recommendation means no assured gain; signed costs remain in full-lap diagnostics. Zero lower potential means no supported minimum saving; a slower scenario remains visible in modeled lap times.",
+        "basis": "hypothesis",
+        "lowerSeconds": 0.37082305836906926,
+        "method": "Signed disjoint cell-time differences from two continuous cyclic combined-grip solutions. Quantile scenarios are sensitivity bounds, not confidence intervals.",
+        "upperSeconds": 1.3609359038455224
+      },
+      "modeledLapSeconds": {
+        "lowerSeconds": 25.315064096154465,
+        "upperSeconds": 26.30517694163092
+      },
+      "opportunities": [
+        {
+          "action": "Corner 4 exit: test consistent steering unwind and progressively restore acceleration after the minimum-speed region. Near 240 m the conditional model is 16.4 m/s versus 15.0 m/s recorded. Change one input at a time; verify repeatable measured time across this section and the following section, including any entry cost.",
+          "confidence": "low",
+          "endMeters": 263.9854795652626,
+          "endTime": 262.6529554624216,
+          "estimatedGainSeconds": null,
+          "evidence": [
+            {
+              "channelIds": [
+                "gps-speed"
+              ],
+              "id": "physics:segment-6:time",
+              "lapValue": 4.8786373287461515,
+              "metric": "Signed section time in continuous full-lap scenario",
+              "referenceValue": 4.638810851545117,
+              "unit": "s"
+            }
+          ],
+          "fasterExampleCount": 0,
+          "gainRange": {
+            "assumption": "Conditional on repeatable telemetry-supported capacity and the recorded path; absolute vehicle limit is unidentified. Lower zero on a recommendation means no assured gain; signed costs remain in full-lap diagnostics.",
+            "basis": "hypothesis",
+            "lowerSeconds": 0.056326963329315305,
+            "method": "Signed disjoint cell-time differences from two continuous cyclic combined-grip solutions. Quantile scenarios are sensitivity bounds, not confidence intervals.",
+            "upperSeconds": 0.23982647720103412
+          },
+          "id": "physics:lap-8:segment-6",
+          "kind": "physics",
+          "label": "Corner 4: connected speed potential",
+          "lapId": "lap-8",
+          "modeledGain": {
+            "assumption": "Conditional on repeatable telemetry-supported capacity and the recorded path; absolute vehicle limit is unidentified. Lower zero on a recommendation means no assured gain; signed costs remain in full-lap diagnostics.",
+            "lowerSeconds": 0.056326963329315305,
+            "method": "Signed disjoint cell-time differences from two continuous cyclic combined-grip solutions. Quantile scenarios are sensitivity bounds, not confidence intervals.",
+            "upperSeconds": 0.23982647720103412
+          },
+          "observation": "The full-lap vehicle model assigns 0.06 to 0.24 s here, including connected entry/apex/exit and straight tradeoffs. This is simulated potential; neighboring costs remain in the lap total.",
+          "observedLossSeconds": null,
+          "priorityScore": 0.11628358262957383,
+          "referenceLapId": "lap-8",
+          "sectionId": "segment-6",
+          "startMeters": 194.98927467888714,
+          "startTime": 257.7743181336754,
+          "status": "investigate",
+          "uncertainty": "Demand-derived calibration does not establish absolute grip or engine limits; range includes geometry and sustained-demand quantile sensitivity. Negative section costs elsewhere must be retained."
+        },
+        {
+          "action": "Corner 6 apex transition: test a smoother control transition through minimum speed while keeping the recorded line. Near 342 m the conditional model is 15.1 m/s versus 12.7 m/s recorded. Change one input at a time; verify repeatable measured time across this section and the following section, including any entry cost.",
+          "confidence": "low",
+          "endMeters": 353.9805294170567,
+          "endTime": 268.70392918342105,
+          "estimatedGainSeconds": null,
+          "evidence": [
+            {
+              "channelIds": [
+                "gps-speed"
+              ],
+              "id": "physics:segment-8:time",
+              "lapValue": 1.7212401525080168,
+              "metric": "Signed section time in continuous full-lap scenario",
+              "referenceValue": 1.483083231768244,
+              "unit": "s"
+            }
+          ],
+          "fasterExampleCount": 0,
+          "gainRange": {
+            "assumption": "Conditional on repeatable telemetry-supported capacity and the recorded path; absolute vehicle limit is unidentified. Lower zero on a recommendation means no assured gain; signed costs remain in full-lap diagnostics.",
+            "basis": "hypothesis",
+            "lowerSeconds": 0.19294869094071054,
+            "method": "Signed disjoint cell-time differences from two continuous cyclic combined-grip solutions. Quantile scenarios are sensitivity bounds, not confidence intervals.",
+            "upperSeconds": 0.23815692073977268
+          },
+          "id": "physics:lap-8:segment-8",
+          "kind": "physics",
+          "label": "Corner 6: connected speed potential",
+          "lapId": "lap-8",
+          "modeledGain": {
+            "assumption": "Conditional on repeatable telemetry-supported capacity and the recorded path; absolute vehicle limit is unidentified. Lower zero on a recommendation means no assured gain; signed costs remain in full-lap diagnostics.",
+            "lowerSeconds": 0.19294869094071054,
+            "method": "Signed disjoint cell-time differences from two continuous cyclic combined-grip solutions. Quantile scenarios are sensitivity bounds, not confidence intervals.",
+            "upperSeconds": 0.23815692073977268
+          },
+          "observation": "The full-lap vehicle model assigns 0.19 to 0.24 s here, including connected entry/apex/exit and straight tradeoffs. This is simulated potential; neighboring costs remain in the lap total.",
+          "observedLossSeconds": null,
+          "priorityScore": 0.2524879211256537,
+          "referenceLapId": "lap-8",
+          "sectionId": "segment-8",
+          "startMeters": 330.9817944549315,
+          "startTime": 266.98268903091304,
+          "status": "investigate",
+          "uncertainty": "Demand-derived calibration does not establish absolute grip or engine limits; range includes geometry and sustained-demand quantile sensitivity. Negative section costs elsewhere must be retained."
+        },
+        {
+          "action": "Corner 1 apex transition: test a smoother control transition through minimum speed while keeping the recorded line. Near 42 m the conditional model is 20.4 m/s versus 18.6 m/s recorded. Change one input at a time; verify repeatable measured time across this section and the following section, including any entry cost.",
+          "confidence": "low",
+          "endMeters": 77.99570987155487,
+          "endTime": 250.06423280332544,
+          "estimatedGainSeconds": null,
+          "evidence": [
+            {
+              "channelIds": [
+                "gps-speed"
+              ],
+              "id": "physics:segment-1:time",
+              "lapValue": 3.1216063748167073,
+              "metric": "Signed section time in continuous full-lap scenario",
+              "referenceValue": 2.8985071089272196,
+              "unit": "s"
+            }
+          ],
+          "fasterExampleCount": 0,
+          "gainRange": {
+            "assumption": "Conditional on repeatable telemetry-supported capacity and the recorded path; absolute vehicle limit is unidentified. Lower zero on a recommendation means no assured gain; signed costs remain in full-lap diagnostics.",
+            "basis": "hypothesis",
+            "lowerSeconds": 0.14652379722843367,
+            "method": "Signed disjoint cell-time differences from two continuous cyclic combined-grip solutions. Quantile scenarios are sensitivity bounds, not confidence intervals.",
+            "upperSeconds": 0.2230992658894877
+          },
+          "id": "physics:lap-8:segment-1",
+          "kind": "physics",
+          "label": "Corner 1: connected speed potential",
+          "lapId": "lap-8",
+          "modeledGain": {
+            "assumption": "Conditional on repeatable telemetry-supported capacity and the recorded path; absolute vehicle limit is unidentified. Lower zero on a recommendation means no assured gain; signed costs remain in full-lap diagnostics.",
+            "lowerSeconds": 0.14652379722843367,
+            "method": "Signed disjoint cell-time differences from two continuous cyclic combined-grip solutions. Quantile scenarios are sensitivity bounds, not confidence intervals.",
+            "upperSeconds": 0.2230992658894877
+          },
+          "observation": "The full-lap vehicle model assigns 0.15 to 0.22 s here, including connected entry/apex/exit and straight tradeoffs. This is simulated potential; neighboring costs remain in the lap total.",
+          "observedLossSeconds": null,
+          "priorityScore": 0.2022986137008056,
+          "referenceLapId": "lap-8",
+          "sectionId": "segment-1",
+          "startMeters": 17.999009970358813,
+          "startTime": 246.94262642850873,
+          "status": "investigate",
+          "uncertainty": "Demand-derived calibration does not establish absolute grip or engine limits; range includes geometry and sustained-demand quantile sensitivity. Negative section costs elsewhere must be retained."
+        }
+      ],
+      "physics": {
+        "assumptions": [
+          "2D point mass on the recorded path; no downforce, banking, grade, tire temperature or mass identification. No absolute grip or engine limit is inferred from driver demand.",
+          "Separate 2 m/s propulsion and braking bands with median/MAD upper-outlier rejection from nonoverlapping 0.4 s windows. Bands need three observations; interpolate interior gaps, hold nearest supported capability at outer speeds. Combined-demand correction uses lateral utilization below 0.8 only.",
+          "Scenario limits use sustained 80th/98th percentile directional demand and 97th/99.5th percentile lateral demand. Maximum speed uses 99th/99.9th percentile recorded speed; power above that support remains unknown. No arbitrary performance uplift.",
+          "Section baselines use measured elapsed times; optimized times integrate the speed solution. Baseline speed-integral minus recorded duration is reported separately as alignment/integration residual.",
+          "Cyclic forward/backward reachability uses maximum endpoint lateral demand throughout each cell and a friction ellipse; every section includes entry/exit and downstream speed consequences. Section gains stay signed and partition one lap.",
+          "RPM/gear/throttle identification is insufficient for a reliable shift map; No explicit shift model; short interruptions and mandatory shift losses may be underrepresented by sustained upper-tail demand. No separate shift-saving or RPM recovery is attributed.",
+          "Calibration uses 477 sustained windows on 7 training laps; geometry chord 10.0 m; primary-path wider-chord curvature sensitivity retained (no geometry averaging across physically unaligned lap distances). 3 heldout laps excluded from capability fitting."
+        ],
+        "baselineIntegratedSeconds": 26.71569941624392,
+        "baselineIntegrationErrorSeconds": 0.039699416243930585,
+        "coverageFraction": 1.0,
+        "coveredMeters": 413.97722931825274,
+        "dynamicsSupport": {
+          "accelerationSamples": 254,
+          "accelerationSpeedMps": [
+            8.0,
+            22.0
+          ],
+          "brakingSamples": 101,
+          "brakingSpeedMps": [
+            8.0,
+            22.0
+          ],
+          "extrapolatedDistanceFraction": 0.0,
+          "maximumSpeedExtrapolationMps": 0.0
+        },
+        "gainRange": {
+          "assumption": "Conditional on repeatable telemetry-supported capacity and the recorded path; absolute vehicle limit is unidentified. Lower zero on a recommendation means no assured gain; signed costs remain in full-lap diagnostics.",
+          "basis": "hypothesis",
+          "lowerSeconds": 0.37082305836906926,
+          "method": "Signed disjoint cell-time differences from two continuous cyclic combined-grip solutions. Quantile scenarios are sensitivity bounds, not confidence intervals.",
+          "upperSeconds": 1.3609359038455224
+        },
+        "modeledLapSeconds": {
+          "lowerSeconds": 25.315064096154465,
+          "upperSeconds": 26.30517694163092
+        },
+        "rejectionReasons": [],
+        "sections": [
+          {
+            "baselineSeconds": 0.9396264285087454,
+            "conservativeSeconds": 0.9097042493061288,
+            "endMeters": 17.999009970358813,
+            "excludedReasons": [],
+            "gainRange": {
+              "assumption": "Conditional on repeatable telemetry-supported capacity and the recorded path; absolute vehicle limit is unidentified. Lower zero on a recommendation means no assured gain; signed costs remain in full-lap diagnostics.",
+              "basis": "hypothesis",
+              "lowerSeconds": 0.02992217920261664,
+              "method": "Signed disjoint cell-time differences from two continuous cyclic combined-grip solutions. Quantile scenarios are sensitivity bounds, not confidence intervals.",
+              "upperSeconds": 0.08247319297561373
+            },
+            "label": "Straight 1",
+            "nominalSeconds": 0.8571532355331317,
+            "sectionId": "segment-0",
+            "startMeters": 0.0
+          },
+          {
+            "baselineSeconds": 3.1216063748167073,
+            "conservativeSeconds": 2.9750825775882737,
+            "endMeters": 77.99570987155487,
+            "excludedReasons": [],
+            "gainRange": {
+              "assumption": "Conditional on repeatable telemetry-supported capacity and the recorded path; absolute vehicle limit is unidentified. Lower zero on a recommendation means no assured gain; signed costs remain in full-lap diagnostics.",
+              "basis": "hypothesis",
+              "lowerSeconds": 0.14652379722843367,
+              "method": "Signed disjoint cell-time differences from two continuous cyclic combined-grip solutions. Quantile scenarios are sensitivity bounds, not confidence intervals.",
+              "upperSeconds": 0.2230992658894877
+            },
+            "label": "Corner 1",
+            "nominalSeconds": 2.8985071089272196,
+            "sectionId": "segment-1",
+            "startMeters": 17.999009970358813
+          },
+          {
+            "baselineSeconds": 2.1590414563251272,
+            "conservativeSeconds": 2.2407350548855063,
+            "endMeters": 121.99328979909863,
+            "excludedReasons": [],
+            "gainRange": {
+              "assumption": "Conditional on repeatable telemetry-supported capacity and the recorded path; absolute vehicle limit is unidentified. Lower zero on a recommendation means no assured gain; signed costs remain in full-lap diagnostics.",
+              "basis": "hypothesis",
+              "lowerSeconds": -0.08169359856037905,
+              "method": "Signed disjoint cell-time differences from two continuous cyclic combined-grip solutions. Quantile scenarios are sensitivity bounds, not confidence intervals.",
+              "upperSeconds": 0.04733965286825548
+            },
+            "label": "Straight 2",
+            "nominalSeconds": 2.1117018034568718,
+            "sectionId": "segment-2",
+            "startMeters": 77.99570987155487
+          },
+          {
+            "baselineSeconds": 2.9911970444142355,
+            "conservativeSeconds": 3.087136574931925,
+            "endMeters": 159.9911997365228,
+            "excludedReasons": [],
+            "gainRange": {
+              "assumption": "Conditional on repeatable telemetry-supported capacity and the recorded path; absolute vehicle limit is unidentified. Lower zero on a recommendation means no assured gain; signed costs remain in full-lap diagnostics.",
+              "basis": "hypothesis",
+              "lowerSeconds": -0.09593953051768933,
+              "method": "Signed disjoint cell-time differences from two continuous cyclic combined-grip solutions. Quantile scenarios are sensitivity bounds, not confidence intervals.",
+              "upperSeconds": 0.037028230353258085
+            },
+            "label": "Corner 2",
+            "nominalSeconds": 2.9541688140609774,
+            "sectionId": "segment-3",
+            "startMeters": 121.99328979909863
+          },
+          {
+            "baselineSeconds": 0.9888619367007152,
+            "conservativeSeconds": 0.9462602652974713,
+            "endMeters": 173.99042971346853,
+            "excludedReasons": [],
+            "gainRange": {
+              "assumption": "Conditional on repeatable telemetry-supported capacity and the recorded path; absolute vehicle limit is unidentified. Lower zero on a recommendation means no assured gain; signed costs remain in full-lap diagnostics.",
+              "basis": "hypothesis",
+              "lowerSeconds": 0.04260167140324389,
+              "method": "Signed disjoint cell-time differences from two continuous cyclic combined-grip solutions. Quantile scenarios are sensitivity bounds, not confidence intervals.",
+              "upperSeconds": 0.08408469155144149
+            },
+            "label": "Straight 3",
+            "nominalSeconds": 0.9047772451492737,
+            "sectionId": "segment-4",
+            "startMeters": 159.9911997365228
+          },
+          {
+            "baselineSeconds": 1.5709848929099053,
+            "conservativeSeconds": 1.4769398560014322,
+            "endMeters": 194.98927467888714,
+            "excludedReasons": [],
+            "gainRange": {
+              "assumption": "Conditional on repeatable telemetry-supported capacity and the recorded path; absolute vehicle limit is unidentified. Lower zero on a recommendation means no assured gain; signed costs remain in full-lap diagnostics.",
+              "basis": "hypothesis",
+              "lowerSeconds": 0.0940450369084731,
+              "method": "Signed disjoint cell-time differences from two continuous cyclic combined-grip solutions. Quantile scenarios are sensitivity bounds, not confidence intervals.",
+              "upperSeconds": 0.14172651030344596
+            },
+            "label": "Corner 3",
+            "nominalSeconds": 1.4292583826064593,
+            "sectionId": "segment-5",
+            "startMeters": 173.99042971346853
+          },
+          {
+            "baselineSeconds": 4.8786373287461515,
+            "conservativeSeconds": 4.822310365416836,
+            "endMeters": 263.9854795652626,
+            "excludedReasons": [],
+            "gainRange": {
+              "assumption": "Conditional on repeatable telemetry-supported capacity and the recorded path; absolute vehicle limit is unidentified. Lower zero on a recommendation means no assured gain; signed costs remain in full-lap diagnostics.",
+              "basis": "hypothesis",
+              "lowerSeconds": 0.056326963329315305,
+              "method": "Signed disjoint cell-time differences from two continuous cyclic combined-grip solutions. Quantile scenarios are sensitivity bounds, not confidence intervals.",
+              "upperSeconds": 0.23982647720103412
+            },
+            "label": "Corner 4",
+            "nominalSeconds": 4.638810851545117,
+            "sectionId": "segment-6",
+            "startMeters": 194.98927467888714
+          },
+          {
+            "baselineSeconds": 4.329733568491463,
+            "conservativeSeconds": 4.398280354820273,
+            "endMeters": 330.9817944549315,
+            "excludedReasons": [],
+            "gainRange": {
+              "assumption": "Conditional on repeatable telemetry-supported capacity and the recorded path; absolute vehicle limit is unidentified. Lower zero on a recommendation means no assured gain; signed costs remain in full-lap diagnostics.",
+              "basis": "hypothesis",
+              "lowerSeconds": -0.0685467863288105,
+              "method": "Signed disjoint cell-time differences from two continuous cyclic combined-grip solutions. Quantile scenarios are sensitivity bounds, not confidence intervals.",
+              "upperSeconds": 0.06662769928728274
+            },
+            "label": "Corner 5",
+            "nominalSeconds": 4.26310586920418,
+            "sectionId": "segment-7",
+            "startMeters": 263.9854795652626
+          },
+          {
+            "baselineSeconds": 1.7212401525080168,
+            "conservativeSeconds": 1.5282914615673062,
+            "endMeters": 353.9805294170567,
+            "excludedReasons": [],
+            "gainRange": {
+              "assumption": "Conditional on repeatable telemetry-supported capacity and the recorded path; absolute vehicle limit is unidentified. Lower zero on a recommendation means no assured gain; signed costs remain in full-lap diagnostics.",
+              "basis": "hypothesis",
+              "lowerSeconds": 0.19294869094071054,
+              "method": "Signed disjoint cell-time differences from two continuous cyclic combined-grip solutions. Quantile scenarios are sensitivity bounds, not confidence intervals.",
+              "upperSeconds": 0.23815692073977268
+            },
+            "label": "Corner 6",
+            "nominalSeconds": 1.483083231768244,
+            "sectionId": "segment-8",
+            "startMeters": 330.9817944549315
+          },
+          {
+            "baselineSeconds": 2.356789829879858,
+            "conservativeSeconds": 2.319610053067993,
+            "endMeters": 385.97876936436126,
+            "excludedReasons": [],
+            "gainRange": {
+              "assumption": "Conditional on repeatable telemetry-supported capacity and the recorded path; absolute vehicle limit is unidentified. Lower zero on a recommendation means no assured gain; signed costs remain in full-lap diagnostics.",
+              "basis": "hypothesis",
+              "lowerSeconds": 0.03717977681186513,
+              "method": "Signed disjoint cell-time differences from two continuous cyclic combined-grip solutions. Quantile scenarios are sensitivity bounds, not confidence intervals.",
+              "upperSeconds": 0.11080811137921653
+            },
+            "label": "Corner 7",
+            "nominalSeconds": 2.2459817185006417,
+            "sectionId": "segment-9",
+            "startMeters": 353.9805294170567
+          },
+          {
+            "baselineSeconds": 1.6182809866990624,
+            "conservativeSeconds": 1.6008261287477683,
+            "endMeters": 413.97722931825274,
+            "excludedReasons": [],
+            "gainRange": {
+              "assumption": "Conditional on repeatable telemetry-supported capacity and the recorded path; absolute vehicle limit is unidentified. Lower zero on a recommendation means no assured gain; signed costs remain in full-lap diagnostics.",
+              "basis": "hypothesis",
+              "lowerSeconds": 0.01745485795129409,
+              "method": "Signed disjoint cell-time differences from two continuous cyclic combined-grip solutions. Quantile scenarios are sensitivity bounds, not confidence intervals.",
+              "upperSeconds": 0.08976515129671836
+            },
+            "label": "Straight 4",
+            "nominalSeconds": 1.528515835402344,
+            "sectionId": "segment-10",
+            "startMeters": 385.97876936436126
+          }
+        ],
+        "totalMeters": 413.97722931825274,
+        "validation": {
+          "envelopeExceedanceFraction": 0.0819935691318328,
+          "feasibilityViolations": 0,
+          "maximumConstraintExcess": 3.552713678800501e-15,
+          "notes": [
+            "Leave-one-training-lap-out refits (7 of 7 omissions) produce 25.323\u201326.305 s across directional/lateral scenarios; published bounds include the slowest/fastest feasible refits.",
+            "Heldout residuals compare a minimum-time bound to a human-controlled lap, not a driver predictor. Exceedance counts speeds > bound +0.5 m/s; high exceedance indicates an underidentified capability envelope, not unsafe driver behavior."
+          ],
+          "prediction": {
+            "absoluteSpeedErrorP90Mps": 1.4164271573802303,
+            "coveredSectionTimeMaeSeconds": 0.021397246263875586,
+            "evaluatedLapIds": [
+              "lap-3",
+              "lap-6",
+              "lap-9"
+            ],
+            "horizonSeconds": 0.4,
+            "persistenceSpeedRmseMps": 0.9676371577111467,
+            "sampleCount": 196,
+            "speedRmseMps": 0.8211553486603178,
+            "target": "0.4 s forecast from preceding speed trend, projected onto training combined-grip capacity; no future control inputs. Section-time error uses teacher-forced windows over observed displacement, grouped by section, not an autonomous lap-time prediction. Persistence baseline holds current speed.",
+            "temporalCoverageFraction": 0.9593734703866862
+          },
+          "sectionTimeMaeSeconds": 0.14828613951616357,
+          "speedRmseMps": 1.297826784192769,
+          "target": "Withheld driver versus optimal capability bound; errors below are bound residuals, not a prediction of unknown driver controls.",
+          "testedCells": 414,
+          "trainingLapIds": [
+            "lap-1",
+            "lap-2",
+            "lap-4",
+            "lap-5",
+            "lap-7",
+            "lap-8",
+            "lap-10"
+          ],
+          "withheldLapIds": [
+            "lap-3",
+            "lap-6",
+            "lap-9"
+          ]
+        }
+      },
+      "previousHeuristicGainRange": {
+        "assumption": "Combine compatible alternatives over disjoint spatial intervals; corner-to-straight models replace every overlapping section. Validate boundary state, downstream sections and the complete lap.",
+        "basis": "hypothesis",
+        "lowerSeconds": 0.1483935895264661,
+        "method": "Sum the full-lap section budget once, independently of the three displayed recommendations. Seed each section from its exact compatible traditional source. An endpoint-preserving corner-complex model replaces all touched sections only if both scenario bounds dominate their combined budget; overlapping alternatives are never added. Additional supported sections may contribute beyond the three cards.",
+        "upperSeconds": 0.212432836398336
+      },
+      "previousHeuristicProfileCount": 3,
+      "primaryOpportunityIds": [
+        "physics:lap-8:segment-6",
+        "physics:lap-8:segment-8",
+        "physics:lap-8:segment-1"
+      ],
+      "profiles": [
+        {
+          "baselineSeconds": 26.71569941624392,
+          "conservativeSeconds": 26.30517694163092,
+          "endMeters": 413.97722931825274,
+          "nominalSeconds": 25.315064096154465,
+          "pointCount": 208,
+          "seamConservativeSpeedDifferenceMps": 0.0,
+          "seamNominalSpeedDifferenceMps": 0.0,
+          "startMeters": 0.0,
+          "strategy": "full-lap"
+        }
+      ],
+      "recordedTheoreticalBestSeconds": 26.675999999999988,
+      "recording": "yash dalal_59_PURDUE GP IN_Warm-up_a_0361.xrk"
+    },
+    {
+      "actualLapSeconds": 26.585000000000008,
+      "analysisMilliseconds": 1091,
+      "bestLapId": "lap-7",
+      "calibration": {
+        "assumptions": [
+          "2D point mass on the recorded path; no downforce, banking, grade, tire temperature or mass identification. No absolute grip or engine limit is inferred from driver demand.",
+          "Separate 2 m/s propulsion and braking bands with median/MAD upper-outlier rejection from nonoverlapping 0.4 s windows. Bands need three observations; interpolate interior gaps, hold nearest supported capability at outer speeds. Combined-demand correction uses lateral utilization below 0.8 only.",
+          "Scenario limits use sustained 80th/98th percentile directional demand and 97th/99.5th percentile lateral demand. Maximum speed uses 99th/99.9th percentile recorded speed; power above that support remains unknown. No arbitrary performance uplift.",
+          "Section baselines use measured elapsed times; optimized times integrate the speed solution. Baseline speed-integral minus recorded duration is reported separately as alignment/integration residual.",
+          "Cyclic forward/backward reachability uses maximum endpoint lateral demand throughout each cell and a friction ellipse; every section includes entry/exit and downstream speed consequences. Section gains stay signed and partition one lap.",
+          "RPM/gear/throttle identification is insufficient for a reliable shift map; No explicit shift model; short interruptions and mandatory shift losses may be underrepresented by sustained upper-tail demand. No separate shift-saving or RPM recovery is attributed.",
+          "Calibration uses 476 sustained windows on 7 training laps; geometry chord 10.0 m; primary-path wider-chord curvature sensitivity retained (no geometry averaging across physically unaligned lap distances). 3 heldout laps excluded from capability fitting."
+        ],
+        "conservativeLateralMps2": 15.56772914434679,
+        "maxObservedSpeedMps": 21.625404833788835,
+        "nominalLateralMps2": 16.248007423343395,
+        "observedLateralMps2": 16.248007423343395,
+        "rpmEvidence": [
+          "No reliable gear/shift identification; mandatory shift losses may be underrepresented; no separate shifting gain attributed."
+        ],
+        "speedBands": [
+          {
+            "conservativeAccelerationMps2": 3.2605253883409624,
+            "conservativeBrakingMps2": 1.6882551086438615,
+            "maxSpeedMps": 10.0,
+            "minSpeedMps": 8.0,
+            "nominalAccelerationMps2": 3.502641532462458,
+            "nominalBrakingMps2": 1.6882551086438615,
+            "observedAccelerationMps2": 3.502641532462458,
+            "observedBrakingMps2": 1.6882551086438615,
+            "sampleCount": 4
+          },
+          {
+            "conservativeAccelerationMps2": 3.2605253883409624,
+            "conservativeBrakingMps2": 2.6452908817059213,
+            "maxSpeedMps": 12.0,
+            "minSpeedMps": 10.0,
+            "nominalAccelerationMps2": 3.502641532462458,
+            "nominalBrakingMps2": 4.034779974091582,
+            "observedAccelerationMps2": 3.502641532462458,
+            "observedBrakingMps2": 4.034779974091582,
+            "sampleCount": 47
+          },
+          {
+            "conservativeAccelerationMps2": 3.280182084794338,
+            "conservativeBrakingMps2": 3.5650943377743163,
+            "maxSpeedMps": 14.0,
+            "minSpeedMps": 12.0,
+            "nominalAccelerationMps2": 4.071141568435491,
+            "nominalBrakingMps2": 7.396141970498121,
+            "observedAccelerationMps2": 4.071141568435491,
+            "observedBrakingMps2": 7.396141970498121,
+            "sampleCount": 113
+          },
+          {
+            "conservativeAccelerationMps2": 2.7528328646230826,
+            "conservativeBrakingMps2": 7.631267604556209,
+            "maxSpeedMps": 16.0,
+            "minSpeedMps": 14.0,
+            "nominalAccelerationMps2": 3.1308061944704293,
+            "nominalBrakingMps2": 8.941636648457349,
+            "observedAccelerationMps2": 3.1308061944704293,
+            "observedBrakingMps2": 8.941636648457349,
+            "sampleCount": 59
+          },
+          {
+            "conservativeAccelerationMps2": 2.4328986846676783,
+            "conservativeBrakingMps2": 6.64025675479017,
+            "maxSpeedMps": 18.0,
+            "minSpeedMps": 16.0,
+            "nominalAccelerationMps2": 2.72313746921594,
+            "nominalBrakingMps2": 6.9834091307782975,
+            "observedAccelerationMps2": 2.72313746921594,
+            "observedBrakingMps2": 6.9834091307782975,
+            "sampleCount": 46
+          },
+          {
+            "conservativeAccelerationMps2": 1.8215292895479356,
+            "conservativeBrakingMps2": 7.2145167616323285,
+            "maxSpeedMps": 20.0,
+            "minSpeedMps": 18.0,
+            "nominalAccelerationMps2": 2.4829746285420664,
+            "nominalBrakingMps2": 7.823742835159877,
+            "observedAccelerationMps2": 2.4829746285420664,
+            "observedBrakingMps2": 7.823742835159877,
+            "sampleCount": 52
+          },
+          {
+            "conservativeAccelerationMps2": 1.4176936531388822,
+            "conservativeBrakingMps2": 5.005179020183026,
+            "maxSpeedMps": 22.0,
+            "minSpeedMps": 20.0,
+            "nominalAccelerationMps2": 1.924331480446552,
+            "nominalBrakingMps2": 7.059452867719552,
+            "observedAccelerationMps2": 1.924331480446552,
+            "observedBrakingMps2": 7.059452867719552,
+            "sampleCount": 34
+          }
+        ],
+        "validLapCount": 7
+      },
+      "gainRange": {
+        "assumption": "Conditional on repeatable telemetry-supported capacity and the recorded path; absolute vehicle limit is unidentified. Lower zero on a recommendation means no assured gain; signed costs remain in full-lap diagnostics. Zero lower potential means no supported minimum saving; a slower scenario remains visible in modeled lap times.",
+        "basis": "hypothesis",
+        "lowerSeconds": 0.35605999310453385,
+        "method": "Signed disjoint cell-time differences from two continuous cyclic combined-grip solutions. Quantile scenarios are sensitivity bounds, not confidence intervals.",
+        "upperSeconds": 1.2793004648787942
+      },
+      "modeledLapSeconds": {
+        "lowerSeconds": 25.305699535121214,
+        "upperSeconds": 26.228940006895474
+      },
+      "opportunities": [
+        {
+          "action": "Corner 4 entry: test a smoother deceleration and release into the minimum-speed region, keeping the recorded line. Near 198 m the conditional model is 14.8 m/s versus 13.2 m/s recorded. Change one input at a time; verify repeatable measured time across this section and the following section, including any entry cost.",
+          "confidence": "low",
+          "endMeters": 264.37960039799805,
+          "endTime": 223.15545398404834,
+          "estimatedGainSeconds": null,
+          "evidence": [
+            {
+              "channelIds": [
+                "gps-speed"
+              ],
+              "id": "physics:segment-6:time",
+              "lapValue": 4.806716768172322,
+              "metric": "Signed section time in continuous full-lap scenario",
+              "referenceValue": 4.513984720523771,
+              "unit": "s"
+            }
+          ],
+          "fasterExampleCount": 0,
+          "gainRange": {
+            "assumption": "Conditional on repeatable telemetry-supported capacity and the recorded path; absolute vehicle limit is unidentified. Lower zero on a recommendation means no assured gain; signed costs remain in full-lap diagnostics.",
+            "basis": "hypothesis",
+            "lowerSeconds": 0.1397526366687556,
+            "method": "Signed disjoint cell-time differences from two continuous cyclic combined-grip solutions. Quantile scenarios are sensitivity bounds, not confidence intervals.",
+            "upperSeconds": 0.2927320476485509
+          },
+          "id": "physics:lap-7:segment-6",
+          "kind": "physics",
+          "label": "Corner 4: connected speed potential",
+          "lapId": "lap-7",
+          "modeledGain": {
+            "assumption": "Conditional on repeatable telemetry-supported capacity and the recorded path; absolute vehicle limit is unidentified. Lower zero on a recommendation means no assured gain; signed costs remain in full-lap diagnostics.",
+            "lowerSeconds": 0.1397526366687556,
+            "method": "Signed disjoint cell-time differences from two continuous cyclic combined-grip solutions. Quantile scenarios are sensitivity bounds, not confidence intervals.",
+            "upperSeconds": 0.2927320476485509
+          },
+          "observation": "The full-lap vehicle model assigns 0.14 to 0.29 s here, including connected entry/apex/exit and straight tradeoffs. This is simulated potential; neighboring costs remain in the lap total.",
+          "observedLossSeconds": null,
+          "priorityScore": 0.2129356485808933,
+          "referenceLapId": "lap-7",
+          "sectionId": "segment-6",
+          "startMeters": 196.5387972770023,
+          "startTime": 218.348737215876,
+          "status": "investigate",
+          "uncertainty": "Demand-derived calibration does not establish absolute grip or engine limits; range includes geometry and sustained-demand quantile sensitivity. Negative section costs elsewhere must be retained."
+        },
+        {
+          "action": "Corner 6 apex transition: test a smoother control transition through minimum speed while keeping the recorded line. Near 351 m the conditional model is 15.5 m/s versus 12.0 m/s recorded. Change one input at a time; verify repeatable measured time across this section and the following section, including any entry cost.",
+          "confidence": "low",
+          "endMeters": 354.1688986463747,
+          "endTime": 229.18531502381396,
+          "estimatedGainSeconds": null,
+          "evidence": [
+            {
+              "channelIds": [
+                "gps-speed"
+              ],
+              "id": "physics:segment-8:time",
+              "lapValue": 1.7232825755699537,
+              "metric": "Signed section time in continuous full-lap scenario",
+              "referenceValue": 1.4857836140828267,
+              "unit": "s"
+            }
+          ],
+          "fasterExampleCount": 0,
+          "gainRange": {
+            "assumption": "Conditional on repeatable telemetry-supported capacity and the recorded path; absolute vehicle limit is unidentified. Lower zero on a recommendation means no assured gain; signed costs remain in full-lap diagnostics.",
+            "basis": "hypothesis",
+            "lowerSeconds": 0.1930125173876418,
+            "method": "Signed disjoint cell-time differences from two continuous cyclic combined-grip solutions. Quantile scenarios are sensitivity bounds, not confidence intervals.",
+            "upperSeconds": 0.237498961487127
+          },
+          "id": "physics:lap-7:segment-8",
+          "kind": "physics",
+          "label": "Corner 6: connected speed potential",
+          "lapId": "lap-7",
+          "modeledGain": {
+            "assumption": "Conditional on repeatable telemetry-supported capacity and the recorded path; absolute vehicle limit is unidentified. Lower zero on a recommendation means no assured gain; signed costs remain in full-lap diagnostics.",
+            "lowerSeconds": 0.1930125173876418,
+            "method": "Signed disjoint cell-time differences from two continuous cyclic combined-grip solutions. Quantile scenarios are sensitivity bounds, not confidence intervals.",
+            "upperSeconds": 0.237498961487127
+          },
+          "observation": "The full-lap vehicle model assigns 0.19 to 0.24 s here, including connected entry/apex/exit and straight tradeoffs. This is simulated potential; neighboring costs remain in the lap total.",
+          "observedLossSeconds": null,
+          "priorityScore": 0.25238725775942356,
+          "referenceLapId": "lap-7",
+          "sectionId": "segment-8",
+          "startMeters": 331.2227446495673,
+          "startTime": 227.462032448244,
+          "status": "investigate",
+          "uncertainty": "Demand-derived calibration does not establish absolute grip or engine limits; range includes geometry and sustained-demand quantile sensitivity. Negative section costs elsewhere must be retained."
+        },
+        {
+          "action": "Corner 3 apex transition: test a smoother control transition through minimum speed while keeping the recorded line. Near 188 m the conditional model is 13.5 m/s versus 11.8 m/s recorded. Change one input at a time; verify repeatable measured time across this section and the following section, including any entry cost.",
+          "confidence": "low",
+          "endMeters": 196.5387972770023,
+          "endTime": 218.348737215876,
+          "estimatedGainSeconds": null,
+          "evidence": [
+            {
+              "channelIds": [
+                "gps-speed"
+              ],
+              "id": "physics:segment-5:time",
+              "lapValue": 1.4888986509658366,
+              "metric": "Signed section time in continuous full-lap scenario",
+              "referenceValue": 1.3591653512279314,
+              "unit": "s"
+            }
+          ],
+          "fasterExampleCount": 0,
+          "gainRange": {
+            "assumption": "Conditional on repeatable telemetry-supported capacity and the recorded path; absolute vehicle limit is unidentified. Lower zero on a recommendation means no assured gain; signed costs remain in full-lap diagnostics.",
+            "basis": "hypothesis",
+            "lowerSeconds": 0.09220659051533242,
+            "method": "Signed disjoint cell-time differences from two continuous cyclic combined-grip solutions. Quantile scenarios are sensitivity bounds, not confidence intervals.",
+            "upperSeconds": 0.12973329973790526
+          },
+          "id": "physics:lap-7:segment-5",
+          "kind": "physics",
+          "label": "Corner 3: connected speed potential",
+          "lapId": "lap-7",
+          "modeledGain": {
+            "assumption": "Conditional on repeatable telemetry-supported capacity and the recorded path; absolute vehicle limit is unidentified. Lower zero on a recommendation means no assured gain; signed costs remain in full-lap diagnostics.",
+            "lowerSeconds": 0.09220659051533242,
+            "method": "Signed disjoint cell-time differences from two continuous cyclic combined-grip solutions. Quantile scenarios are sensitivity bounds, not confidence intervals.",
+            "upperSeconds": 0.12973329973790526
+          },
+          "observation": "The full-lap vehicle model assigns 0.09 to 0.13 s here, including connected entry/apex/exit and straight tradeoffs. This is simulated potential; neighboring costs remain in the lap total.",
+          "observedLossSeconds": null,
+          "priorityScore": 0.12463991544980874,
+          "referenceLapId": "lap-7",
+          "sectionId": "segment-5",
+          "startMeters": 177.58327875790056,
+          "startTime": 216.85983856491018,
+          "status": "investigate",
+          "uncertainty": "Demand-derived calibration does not establish absolute grip or engine limits; range includes geometry and sustained-demand quantile sensitivity. Negative section costs elsewhere must be retained."
+        }
+      ],
+      "physics": {
+        "assumptions": [
+          "2D point mass on the recorded path; no downforce, banking, grade, tire temperature or mass identification. No absolute grip or engine limit is inferred from driver demand.",
+          "Separate 2 m/s propulsion and braking bands with median/MAD upper-outlier rejection from nonoverlapping 0.4 s windows. Bands need three observations; interpolate interior gaps, hold nearest supported capability at outer speeds. Combined-demand correction uses lateral utilization below 0.8 only.",
+          "Scenario limits use sustained 80th/98th percentile directional demand and 97th/99.5th percentile lateral demand. Maximum speed uses 99th/99.9th percentile recorded speed; power above that support remains unknown. No arbitrary performance uplift.",
+          "Section baselines use measured elapsed times; optimized times integrate the speed solution. Baseline speed-integral minus recorded duration is reported separately as alignment/integration residual.",
+          "Cyclic forward/backward reachability uses maximum endpoint lateral demand throughout each cell and a friction ellipse; every section includes entry/exit and downstream speed consequences. Section gains stay signed and partition one lap.",
+          "RPM/gear/throttle identification is insufficient for a reliable shift map; No explicit shift model; short interruptions and mandatory shift losses may be underrepresented by sustained upper-tail demand. No separate shift-saving or RPM recovery is attributed.",
+          "Calibration uses 476 sustained windows on 7 training laps; geometry chord 10.0 m; primary-path wider-chord curvature sensitivity retained (no geometry averaging across physically unaligned lap distances). 3 heldout laps excluded from capability fitting."
+        ],
+        "baselineIntegratedSeconds": 26.610131160257303,
+        "baselineIntegrationErrorSeconds": 0.02513116025729545,
+        "coverageFraction": 1.0,
+        "coveredMeters": 413.03077194253274,
+        "dynamicsSupport": {
+          "accelerationSamples": 251,
+          "accelerationSpeedMps": [
+            10.0,
+            22.0
+          ],
+          "brakingSamples": 104,
+          "brakingSpeedMps": [
+            8.0,
+            22.0
+          ],
+          "extrapolatedDistanceFraction": 0.0,
+          "maximumSpeedExtrapolationMps": 0.0
+        },
+        "gainRange": {
+          "assumption": "Conditional on repeatable telemetry-supported capacity and the recorded path; absolute vehicle limit is unidentified. Lower zero on a recommendation means no assured gain; signed costs remain in full-lap diagnostics.",
+          "basis": "hypothesis",
+          "lowerSeconds": 0.35605999310453385,
+          "method": "Signed disjoint cell-time differences from two continuous cyclic combined-grip solutions. Quantile scenarios are sensitivity bounds, not confidence intervals.",
+          "upperSeconds": 1.2793004648787942
+        },
+        "modeledLapSeconds": {
+          "lowerSeconds": 25.305699535121214,
+          "upperSeconds": 26.228940006895474
+        },
+        "rejectionReasons": [],
+        "sections": [
+          {
+            "baselineSeconds": 0.9448738799725618,
+            "conservativeSeconds": 0.9103651580713944,
+            "endMeters": 17.957859649675335,
+            "excludedReasons": [],
+            "gainRange": {
+              "assumption": "Conditional on repeatable telemetry-supported capacity and the recorded path; absolute vehicle limit is unidentified. Lower zero on a recommendation means no assured gain; signed costs remain in full-lap diagnostics.",
+              "basis": "hypothesis",
+              "lowerSeconds": 0.03450872190116738,
+              "method": "Signed disjoint cell-time differences from two continuous cyclic combined-grip solutions. Quantile scenarios are sensitivity bounds, not confidence intervals.",
+              "upperSeconds": 0.07900030379475642
+            },
+            "label": "Straight 1",
+            "nominalSeconds": 0.8658735761778054,
+            "sectionId": "segment-0",
+            "startMeters": 0.0
+          },
+          {
+            "baselineSeconds": 3.0357079361546653,
+            "conservativeSeconds": 2.9863884328287607,
+            "endMeters": 77.8173918152598,
+            "excludedReasons": [],
+            "gainRange": {
+              "assumption": "Conditional on repeatable telemetry-supported capacity and the recorded path; absolute vehicle limit is unidentified. Lower zero on a recommendation means no assured gain; signed costs remain in full-lap diagnostics.",
+              "basis": "hypothesis",
+              "lowerSeconds": 0.04931950332590462,
+              "method": "Signed disjoint cell-time differences from two continuous cyclic combined-grip solutions. Quantile scenarios are sensitivity bounds, not confidence intervals.",
+              "upperSeconds": 0.1247331956341764
+            },
+            "label": "Corner 1",
+            "nominalSeconds": 2.910974740520489,
+            "sectionId": "segment-1",
+            "startMeters": 17.957859649675335
+          },
+          {
+            "baselineSeconds": 2.209579074144159,
+            "conservativeSeconds": 2.31547072841759,
+            "endMeters": 123.70969980887455,
+            "excludedReasons": [],
+            "gainRange": {
+              "assumption": "Conditional on repeatable telemetry-supported capacity and the recorded path; absolute vehicle limit is unidentified. Lower zero on a recommendation means no assured gain; signed costs remain in full-lap diagnostics.",
+              "basis": "hypothesis",
+              "lowerSeconds": -0.10589165427343117,
+              "method": "Signed disjoint cell-time differences from two continuous cyclic combined-grip solutions. Quantile scenarios are sensitivity bounds, not confidence intervals.",
+              "upperSeconds": 0.021654603780053794
+            },
+            "label": "Straight 2",
+            "nominalSeconds": 2.187924470364105,
+            "sectionId": "segment-2",
+            "startMeters": 77.8173918152598
+          },
+          {
+            "baselineSeconds": 3.0278984073052015,
+            "conservativeSeconds": 3.0726029857563697,
+            "endMeters": 161.62073684707804,
+            "excludedReasons": [],
+            "gainRange": {
+              "assumption": "Conditional on repeatable telemetry-supported capacity and the recorded path; absolute vehicle limit is unidentified. Lower zero on a recommendation means no assured gain; signed costs remain in full-lap diagnostics.",
+              "basis": "hypothesis",
+              "lowerSeconds": -0.04470457845116815,
+              "method": "Signed disjoint cell-time differences from two continuous cyclic combined-grip solutions. Quantile scenarios are sensitivity bounds, not confidence intervals.",
+              "upperSeconds": 0.0996557117715069
+            },
+            "label": "Corner 2",
+            "nominalSeconds": 2.9282426955336947,
+            "sectionId": "segment-3",
+            "startMeters": 123.70969980887455
+          },
+          {
+            "baselineSeconds": 1.1117792673335885,
+            "conservativeSeconds": 1.0808390228362945,
+            "endMeters": 177.58327875790056,
+            "excludedReasons": [],
+            "gainRange": {
+              "assumption": "Conditional on repeatable telemetry-supported capacity and the recorded path; absolute vehicle limit is unidentified. Lower zero on a recommendation means no assured gain; signed costs remain in full-lap diagnostics.",
+              "basis": "hypothesis",
+              "lowerSeconds": 0.030940244497293934,
+              "method": "Signed disjoint cell-time differences from two continuous cyclic combined-grip solutions. Quantile scenarios are sensitivity bounds, not confidence intervals.",
+              "upperSeconds": 0.07554637128868502
+            },
+            "label": "Straight 3",
+            "nominalSeconds": 1.0362328960449034,
+            "sectionId": "segment-4",
+            "startMeters": 161.62073684707804
+          },
+          {
+            "baselineSeconds": 1.4888986509658366,
+            "conservativeSeconds": 1.3966920604505042,
+            "endMeters": 196.5387972770023,
+            "excludedReasons": [],
+            "gainRange": {
+              "assumption": "Conditional on repeatable telemetry-supported capacity and the recorded path; absolute vehicle limit is unidentified. Lower zero on a recommendation means no assured gain; signed costs remain in full-lap diagnostics.",
+              "basis": "hypothesis",
+              "lowerSeconds": 0.09220659051533242,
+              "method": "Signed disjoint cell-time differences from two continuous cyclic combined-grip solutions. Quantile scenarios are sensitivity bounds, not confidence intervals.",
+              "upperSeconds": 0.12973329973790526
+            },
+            "label": "Corner 3",
+            "nominalSeconds": 1.3591653512279314,
+            "sectionId": "segment-5",
+            "startMeters": 177.58327875790056
+          },
+          {
+            "baselineSeconds": 4.806716768172322,
+            "conservativeSeconds": 4.666964131503566,
+            "endMeters": 264.37960039799805,
+            "excludedReasons": [],
+            "gainRange": {
+              "assumption": "Conditional on repeatable telemetry-supported capacity and the recorded path; absolute vehicle limit is unidentified. Lower zero on a recommendation means no assured gain; signed costs remain in full-lap diagnostics.",
+              "basis": "hypothesis",
+              "lowerSeconds": 0.1397526366687556,
+              "method": "Signed disjoint cell-time differences from two continuous cyclic combined-grip solutions. Quantile scenarios are sensitivity bounds, not confidence intervals.",
+              "upperSeconds": 0.2927320476485509
+            },
+            "label": "Corner 4",
+            "nominalSeconds": 4.513984720523771,
+            "sectionId": "segment-6",
+            "startMeters": 196.5387972770023
+          },
+          {
+            "baselineSeconds": 4.306578464195667,
+            "conservativeSeconds": 4.341618943763316,
+            "endMeters": 331.2227446495673,
+            "excludedReasons": [],
+            "gainRange": {
+              "assumption": "Conditional on repeatable telemetry-supported capacity and the recorded path; absolute vehicle limit is unidentified. Lower zero on a recommendation means no assured gain; signed costs remain in full-lap diagnostics.",
+              "basis": "hypothesis",
+              "lowerSeconds": -0.03504047956764911,
+              "method": "Signed disjoint cell-time differences from two continuous cyclic combined-grip solutions. Quantile scenarios are sensitivity bounds, not confidence intervals.",
+              "upperSeconds": 0.08144469901017803
+            },
+            "label": "Corner 5",
+            "nominalSeconds": 4.225133765185489,
+            "sectionId": "segment-7",
+            "startMeters": 264.37960039799805
+          },
+          {
+            "baselineSeconds": 1.7232825755699537,
+            "conservativeSeconds": 1.5302700581823119,
+            "endMeters": 354.1688986463747,
+            "excludedReasons": [],
+            "gainRange": {
+              "assumption": "Conditional on repeatable telemetry-supported capacity and the recorded path; absolute vehicle limit is unidentified. Lower zero on a recommendation means no assured gain; signed costs remain in full-lap diagnostics.",
+              "basis": "hypothesis",
+              "lowerSeconds": 0.1930125173876418,
+              "method": "Signed disjoint cell-time differences from two continuous cyclic combined-grip solutions. Quantile scenarios are sensitivity bounds, not confidence intervals.",
+              "upperSeconds": 0.237498961487127
+            },
+            "label": "Corner 6",
+            "nominalSeconds": 1.4857836140828267,
+            "sectionId": "segment-8",
+            "startMeters": 331.2227446495673
+          },
+          {
+            "baselineSeconds": 2.560468603285301,
+            "conservativeSeconds": 2.562534092642007,
+            "endMeters": 389.08695907629897,
+            "excludedReasons": [],
+            "gainRange": {
+              "assumption": "Conditional on repeatable telemetry-supported capacity and the recorded path; absolute vehicle limit is unidentified. Lower zero on a recommendation means no assured gain; signed costs remain in full-lap diagnostics.",
+              "basis": "hypothesis",
+              "lowerSeconds": -0.0020654893567058075,
+              "method": "Signed disjoint cell-time differences from two continuous cyclic combined-grip solutions. Quantile scenarios are sensitivity bounds, not confidence intervals.",
+              "upperSeconds": 0.08005810697137239
+            },
+            "label": "Corner 7",
+            "nominalSeconds": 2.4804104963139286,
+            "sectionId": "segment-9",
+            "startMeters": 354.1688986463747
+          },
+          {
+            "baselineSeconds": 1.3692163729007518,
+            "conservativeSeconds": 1.365194392443356,
+            "endMeters": 413.03077194253274,
+            "excludedReasons": [],
+            "gainRange": {
+              "assumption": "Conditional on repeatable telemetry-supported capacity and the recorded path; absolute vehicle limit is unidentified. Lower zero on a recommendation means no assured gain; signed costs remain in full-lap diagnostics.",
+              "basis": "hypothesis",
+              "lowerSeconds": 0.0040219804573957685,
+              "method": "Signed disjoint cell-time differences from two continuous cyclic combined-grip solutions. Quantile scenarios are sensitivity bounds, not confidence intervals.",
+              "upperSeconds": 0.057243163754482795
+            },
+            "label": "Straight 4",
+            "nominalSeconds": 1.311973209146269,
+            "sectionId": "segment-10",
+            "startMeters": 389.08695907629897
+          }
+        ],
+        "totalMeters": 413.03077194253274,
+        "validation": {
+          "envelopeExceedanceFraction": 0.033816425120772944,
+          "feasibilityViolations": 0,
+          "maximumConstraintExcess": 3.552713678800501e-15,
+          "notes": [
+            "Leave-one-training-lap-out refits (7 of 7 omissions) produce 25.306\u201326.229 s across directional/lateral scenarios; published bounds include the slowest/fastest feasible refits.",
+            "Heldout residuals compare a minimum-time bound to a human-controlled lap, not a driver predictor. Exceedance counts speeds > bound +0.5 m/s; high exceedance indicates an underidentified capability envelope, not unsafe driver behavior."
+          ],
+          "prediction": {
+            "absoluteSpeedErrorP90Mps": 1.1739721387090842,
+            "coveredSectionTimeMaeSeconds": 0.02055321586935589,
+            "evaluatedLapIds": [
+              "lap-3",
+              "lap-6",
+              "lap-9"
+            ],
+            "horizonSeconds": 0.4,
+            "persistenceSpeedRmseMps": 0.9057916298086953,
+            "sampleCount": 195,
+            "speedRmseMps": 0.7516126917113709,
+            "target": "0.4 s forecast from preceding speed trend, projected onto training combined-grip capacity; no future control inputs. Section-time error uses teacher-forced windows over observed displacement, grouped by section, not an autonomous lap-time prediction. Persistence baseline holds current speed.",
+            "temporalCoverageFraction": 0.9562808032758748
+          },
+          "sectionTimeMaeSeconds": 0.15101444859048252,
+          "speedRmseMps": 1.207350923145719,
+          "target": "Withheld driver versus optimal capability bound; errors below are bound residuals, not a prediction of unknown driver controls.",
+          "testedCells": 414,
+          "trainingLapIds": [
+            "lap-1",
+            "lap-2",
+            "lap-4",
+            "lap-5",
+            "lap-7",
+            "lap-8",
+            "lap-10"
+          ],
+          "withheldLapIds": [
+            "lap-3",
+            "lap-6",
+            "lap-9"
+          ]
+        }
+      },
+      "previousHeuristicGainRange": {
+        "assumption": "Combine compatible alternatives over disjoint spatial intervals; corner-to-straight models replace every overlapping section. Validate boundary state, downstream sections and the complete lap.",
+        "basis": "hypothesis",
+        "lowerSeconds": 0.055859856433783335,
+        "method": "Sum the full-lap section budget once, independently of the three displayed recommendations. Seed each section from its exact compatible traditional source. An endpoint-preserving corner-complex model replaces all touched sections only if both scenario bounds dominate their combined budget; overlapping alternatives are never added. Additional supported sections may contribute beyond the three cards.",
+        "upperSeconds": 0.12611980541148787
+      },
+      "previousHeuristicProfileCount": 3,
+      "primaryOpportunityIds": [
+        "physics:lap-7:segment-6",
+        "physics:lap-7:segment-8",
+        "physics:lap-7:segment-5"
+      ],
+      "profiles": [
+        {
+          "baselineSeconds": 26.610131160257303,
+          "conservativeSeconds": 26.228940006895474,
+          "endMeters": 413.03077194253274,
+          "nominalSeconds": 25.305699535121214,
+          "pointCount": 208,
+          "seamConservativeSpeedDifferenceMps": 0.0,
+          "seamNominalSpeedDifferenceMps": 0.0,
+          "startMeters": 0.0,
+          "strategy": "full-lap"
+        }
+      ],
+      "recordedTheoreticalBestSeconds": 26.585000000000008,
+      "recording": "yash dalal_59_PURDUE GP IN_Warm-up_a_0362.xrk"
+    }
+  ],
+  "validation": {
+    "rustLibraryTests": "162 passed; 0 failed",
+    "focusedCoachWorkspaceVideoTests": "189 passed; 0 failed",
+    "productionFrontendBuild": "passed",
+    "browserWorkflow": "passed with real-XRK-derived IPC; dark/light at 1600, 760, 600 px; actual/optimized overlay, gain cards, inspection/video focus, cancellation, stale completion and cache provenance",
+    "independentReview": "No remaining acceptance blocker; real-recording solver and dense continuous-ellipse test independently reproduced",
+    "nativeWindows": "Not run; no platform-specific dependencies added",
+    "packaging": "Not run",
+    "finalAffectedCoachTests": "77 passed; 0 failed after actual-overlay endpoint and complete speed-gap interval corrections",
+    "finalAffectedUiTests": "27 passed; 0 failed after wording correction"
+  }
+}

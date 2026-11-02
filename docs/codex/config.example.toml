@@ -1,0 +1,14 @@
+# Merge selected keys into your PERSONAL config, before any table headers.
+# Never replace an existing config with this file or duplicate existing tables.
+# Select a model available in the Windows account; Mac used gpt-6.1-sol.
+model_reasoning_effort = "medium"
+personality = "pragmatic"
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+
+# Optional: only if Context7 is not already provided by a connected plugin.
+# This hosted transport avoids npx/Windows command-wrapper differences.
+[mcp_servers.context7]
+url = "https://mcp.context7.com/mcp"
+# If authenticated access is required, set this variable privately before launch.
+# bearer_token_env_var = "CONTEXT7_API_KEY"

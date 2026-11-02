@@ -51,6 +51,8 @@ function recordingDate(value: string): RecordingDate | undefined {
   }
   return { day: `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`, stamp, time: match[2] === undefined ? undefined : { hour, minute } };
 }
+export const recordingDay = (value:string):string => recordingDate(value)?.day??'';
+
 const normalized = (value: string) => value.trim().toLowerCase();
 const compareText = (a: string, b: string) => a.localeCompare(b, 'en') || (a < b ? -1 : a > b ? 1 : 0);
 function compareKnown<T extends string | number>(a: T | undefined, b: T | undefined, descending: boolean): number {

@@ -1,10 +1,10 @@
-import {launchBrowser,browserTestEntries} from './browser.mjs';
+import {launchBrowser,browserTestEntries,browserTestNoWatch} from './browser.mjs';
 import {expect} from '@playwright/test';
 import {createServer} from 'vite';
 import assert from 'node:assert/strict';
 let server,browser;
 try{
- server=await createServer({optimizeDeps:{entries:browserTestEntries},server:{host:'127.0.0.1',port:0,strictPort:false,hmr:false,watch:null}});await server.listen();
+ server=await createServer({plugins:[browserTestNoWatch],optimizeDeps:{entries:browserTestEntries},server:{host:'127.0.0.1',port:0,strictPort:false,hmr:false}});await server.listen();
  browser=await launchBrowser();
  const page=await browser.newPage({viewport:{width:1500,height:1100}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.addInitScript(()=>{
@@ -31,6 +31,9 @@ try{
    w.originalVideos=JSON.stringify([w.entry.workspace.video,w.secondEntry.workspace.video]);
   }
   w.__TAURI_INTERNALS__={convertFileSrc:path=>`https://asset.localhost/${encodeURIComponent(path)}`,invoke:async(cmd,args)=>{
+   if(cmd==='youtube_cache_status')return {limitBytes:10737418240,usedBytes:0,entries:[]};
+   if(cmd==='youtube_download_status')return null;
+   if(cmd==='resolve_cached_youtube_video')return null;
    if(cmd==='library_snapshot')return {entries:[...(w.mergedEntry?[w.mergedEntry]:[]),w.entry,w.secondEntry],activeSessionId:w.mergedEntry?'merged-video':'integration',warnings:[]};
    if(cmd==='load_library_session')return args.sessionId==='merged-video'?w.mergedSession:args.sessionId==='second'?w.secondSession:w.session;
    if(cmd==='save_workspace'){if(w.holdResetSave&&args.workspace.primary==='lap1'){w.holdResetSave=false;await new Promise(resolve=>w.releaseResetSave=resolve);}w.saves.push(args.workspace);(args.sessionId==='merged-video'?w.mergedEntry:args.sessionId==='second'?w.secondEntry:w.entry).workspace=args.workspace;return;}
@@ -46,6 +49,7 @@ try{
    return null;
   }};
   const times=new WeakMap(),sources=new WeakMap(),rates=new WeakMap();
+  Object.defineProperties(HTMLVideoElement.prototype,{videoWidth:{get(){return 1920;}},videoHeight:{get(){return 1080;}}});
   Object.defineProperties(HTMLMediaElement.prototype,{src:{get(){return sources.get(this)??'';},set(v){sources.set(this,v);}},duration:{get(){return w.duration;}},currentTime:{get(){return times.get(this)??0;},set(v){if(w.failSeek)throw new Error('Synthetic seek failure');w.seeks.push(v);const finish=()=>{times.set(this,v);this.dispatchEvent(new Event('timeupdate'));this.dispatchEvent(new Event('seeked'));};if(w.delaySeek)w.finishSeek=finish;else queueMicrotask(finish);}},playbackRate:{get(){return rates.get(this)??1;},set(v){rates.set(this,v);this.dispatchEvent(new Event('ratechange'));}},paused:{get(){return !this.dataset.playing;}}});
   HTMLMediaElement.prototype.load=function(){if(sources.has(this))queueMicrotask(()=>this.dispatchEvent(new Event('loadedmetadata')));};HTMLMediaElement.prototype.play=async function(){this.dataset.playing='1';this.dispatchEvent(new Event('playing'));};HTMLMediaElement.prototype.pause=function(){delete this.dataset.playing;this.dispatchEvent(new Event('pause'));};
   w.advance=t=>{const el=document.querySelector('video');times.set(el,t);el.dispatchEvent(new Event('timeupdate'));};
@@ -53,15 +57,17 @@ try{
  await page.goto(`${server.resolvedUrls.local[0]}tests/video-integration.html`);
  await expect(page.getByRole('button',{name:'Video',exact:true})).toBeVisible();
  await expect(page.getByRole('button',{name:'Play',exact:true})).toBeEnabled();
+ await expect(page.getByRole('button',{name:'Estimate sync'})).toHaveCount(0);
+ await expect(page.getByLabel('Automatic sync estimate',{exact:true})).toHaveCount(0);
  await expect(page.locator('.readout').first()).not.toContainText('—');
  // An attached source belongs only to Video; Advanced is always its dedicated workspace.
  await page.getByRole('button',{name:'Advanced',exact:true}).click();
  await expect(page.locator('.advanced-workspace')).toBeVisible();
  await expect(page.locator('.video-workspace')).toHaveCount(0);
- await expect(page.locator('video')).toHaveCount(0);
+ await expect(page.locator('video')).not.toBeVisible();
  await expect(page.getByRole('button',{name:'Attach MP4 / MOV',exact:true})).toHaveCount(0);
  await page.getByRole('button',{name:'Video',exact:true}).click();
- await expect(page.locator('.advanced-workspace')).toHaveCount(0);
+ await expect(page.locator('.advanced-workspace')).not.toBeVisible();
  await expect(page.getByRole('button',{name:'Play',exact:true})).toBeEnabled();
 
  // A valid segment may extend beyond the half-open recorded laps. Those frames cannot own sync.
@@ -150,7 +156,7 @@ try{
  await page.locator('.lap-select').nth(1).click();await expect(page.getByRole('status',{name:'Video sync status'})).toContainText('seeking');
  await page.evaluate(()=>{window.oldFinish=window.finishSeek;window.delaySeek=false;});
  await page.getByRole('button',{name:'Advanced',exact:true}).click();
- await expect(page.locator('video')).toHaveCount(0);
+ await expect(page.locator('video')).not.toBeVisible();
  assert(await page.evaluate(()=>window.beforeAdvanced.paused),'Leaving Video pauses disposed player');
  await page.locator('.lap-select').nth(0).click();await page.getByRole('tab',{name:'Shift Analysis',exact:true}).click();await expect(page.locator('.event-table tbody tr')).toHaveCount(1);
  before=await seeks();await page.locator('.event-table tbody tr button').first().click();
@@ -195,15 +201,16 @@ try{
  await expect.poll(()=>page.evaluate(()=>window.advancedRequests.at(-1)?.xChannel)).toBe(null);
  await expect.poll(()=>page.evaluate(()=>window.advancedRequests.at(-1)?.yChannel)).toBe(null);
  await page.getByRole('tab',{name:'Histograms',exact:true}).click();
- await page.getByRole('button',{name:'Video',exact:true}).click();await expect(page.getByRole('button',{name:'Attach MP4 / MOV',exact:true})).toBeVisible();await expect(page.locator('.advanced-workspace')).toHaveCount(0);
+ await page.getByRole('button',{name:'Video',exact:true}).click();await expect(page.getByRole('button',{name:'Attach MP4 / MOV',exact:true})).toBeVisible();await expect(page.locator('.advanced-workspace')).not.toBeVisible();
  await page.getByRole('button',{name:'Advanced',exact:true}).click();await expect(page.getByRole('tab',{name:'Histograms',exact:true})).toHaveAttribute('aria-selected','true');
  // Explicit Video entry repairs corrupt/stale state, while opaque future schemas stay read-only.
- await page.evaluate(()=>localStorage.setItem('video-fixture-mode','corrupt'));await page.reload();await page.getByRole('button',{name:'Video',exact:true}).click();await expect(page.getByRole('button',{name:'Attach MP4 / MOV',exact:true})).toBeVisible();await expect(page.getByText(/no mappings were restored/)).toBeVisible();await expect.poll(()=>page.evaluate(()=>window.saves.at(-1)?.video?.source)).toBe(null);
- await page.evaluate(()=>localStorage.setItem('video-fixture-mode','future'));await page.reload();await page.getByRole('button',{name:'Video',exact:true}).click();await expect(page.getByText(/This video workspace uses a newer version/)).toBeVisible();await expect(page.getByRole('button',{name:'Attach MP4 / MOV',exact:true})).toHaveCount(0);await expect.poll(()=>page.evaluate(()=>window.saves.at(-1)?.video?.version)).toBe(99);
+ await page.evaluate(()=>localStorage.setItem('video-fixture-mode','corrupt'));await page.reload();await page.getByRole('button',{name:'Video',exact:true}).click();await expect(page.getByRole('button',{name:'Attach MP4 / MOV',exact:true})).toBeVisible();await expect(page.getByText(/Video settings unavailable/)).toBeVisible();await expect.poll(()=>page.evaluate(()=>window.saves.at(-1)?.video?.source)).toBe(null);
+ await page.evaluate(()=>localStorage.setItem('video-fixture-mode','future'));await page.reload();await page.getByRole('button',{name:'Video',exact:true}).click();await expect(page.getByText(/Update Ten Tenths Telemetry to edit/)).toBeVisible();await expect(page.getByRole('button',{name:'Attach MP4 / MOV',exact:true})).toHaveCount(0);await expect.poll(()=>page.evaluate(()=>window.saves.at(-1)?.video?.version)).toBe(99);
  // Virtual merging uses original-source video contexts even when logger times overlap.
  await page.evaluate(()=>localStorage.setItem('video-fixture-mode','merge'));await page.reload();
  await expect(page.getByRole('heading',{name:'Merged · Synthetic circuit'})).toBeVisible();await expect(page.getByRole('button',{name:'Play',exact:true})).toBeEnabled();
  await expect(page.getByText('Video source · synthetic.xrk',{exact:true})).toBeVisible();
+
  await page.evaluate(()=>window.comparisonEvent=true);await page.getByRole('button',{name:'Compare lap 5',exact:true}).click();await page.getByRole('button',{name:'Advanced',exact:true}).click();await page.getByRole('tab',{name:'Shift Analysis',exact:true}).click();
  await expect(page.locator('.event-table tbody tr')).toHaveCount(2);const foreignEventSeeks=await page.evaluate(()=>window.seeks.length);await page.locator('.event-table tbody tr').nth(1).getByRole('button').first().click();await page.waitForTimeout(150);assert.equal(await page.evaluate(()=>window.seeks.length),foreignEventSeeks,'A comparison-source event cannot seek the primary source video');
  // Foreign-source map events must retain provenance for mouse and keyboard seeks.

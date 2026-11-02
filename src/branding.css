@@ -4,13 +4,5 @@
 .ttt-wordmark{display:flex;flex-direction:column;gap:3px;min-width:0;white-space:nowrap}
 .ttt-wordmark>span{font-size:18px;font-weight:700;letter-spacing:1px;line-height:1.15}
 .ttt-wordmark>small{font-size:9px;font-weight:450;letter-spacing:2px;text-transform:uppercase;color:var(--muted);line-height:1.2}
-.sidebar-brand{padding:16px 14px 14px;border-bottom:1px solid var(--border);flex-shrink:0}
-.sidebar-brand .ttt-brand{gap:9px;max-width:100%}
-.sidebar-brand .ttt-mark{width:32px;height:28px;flex-basis:32px}
-.sidebar-brand .ttt-wordmark>span{font-size:13px;letter-spacing:.6px}
-.sidebar-brand .ttt-wordmark>small{font-size:8px;letter-spacing:1.5px}
-.explorer-rail .ttt-mark{width:26px;height:24px;flex-basis:26px}
 .ttt-brand-compact{gap:0}
 @media(max-width:650px){.titlebar .ttt-brand{gap:8px}.titlebar .ttt-mark{width:30px;height:26px;flex-basis:30px}.titlebar .ttt-wordmark>span{font-size:14px;letter-spacing:.5px}.titlebar .ttt-wordmark>small{font-size:8px;letter-spacing:1.5px}}
-/* Keep the original short-window lap-list budget when adding the lockup. */
-@media(max-height:600px){.sidebar-brand{padding-block:6px}.sidebar-brand .ttt-mark{height:24px}}

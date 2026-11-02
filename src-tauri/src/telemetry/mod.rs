@@ -354,7 +354,7 @@ fn interpolate(t: &[f64], v: &[f64], x: f64) -> Option<f64> {
     Some(v[i - 1] + f * (v[i] - v[i - 1]))
 }
 // A median cadence needs several source intervals; sparse channels remain unclassified.
-fn source_gaps(c: &Channel) -> Vec<[f64; 2]> {
+pub(crate) fn source_gaps(c: &Channel) -> Vec<[f64; 2]> {
     if c.times.len() < 5 {
         return c.gaps.clone();
     }
@@ -382,7 +382,7 @@ fn source_gaps(c: &Channel) -> Vec<[f64; 2]> {
 fn gap_overlaps(gap: &[f64; 2], lap: &Lap) -> bool {
     gap[0] < lap.end && gap[1] > lap.start
 }
-fn sample_without_gaps(c: &Channel, t: f64, gaps: &[[f64; 2]]) -> Option<f64> {
+pub(crate) fn sample_without_gaps(c: &Channel, t: f64, gaps: &[[f64; 2]]) -> Option<f64> {
     if gaps.iter().any(|g| t > g[0] && t < g[1]) {
         None
     } else {
@@ -409,7 +409,7 @@ fn clipped(c: &Channel, lap: &Lap) -> (Vec<f64>, Vec<f64>) {
     }
     (t, v)
 }
-fn speed(s: &Session) -> Option<(&Channel, f64)> {
+pub(crate) fn speed(s: &Session) -> Option<(&Channel, f64)> {
     s.channels
         .iter()
         .filter(|c| c.id == "gps-speed")
@@ -435,6 +435,9 @@ struct Distance {
 }
 fn distance(s: &Session, l: &Lap) -> Option<Distance> {
     let (c, f) = speed(s)?;
+    if source_gaps(c).iter().any(|gap| gap_overlaps(gap, l)) {
+        return None;
+    }
     let mut steps: Vec<f64> = c.times.windows(2).take(8192).map(|w| w[1] - w[0]).collect();
     steps.sort_by(f64::total_cmp);
     let allowed_gap = steps.get(steps.len() / 2).copied().unwrap_or(0.) * 5.;

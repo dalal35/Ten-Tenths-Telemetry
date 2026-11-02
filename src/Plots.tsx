@@ -6,19 +6,32 @@ import type { Analysis, Axis, Series, TrackSegment, AdvancedEvent } from './type
 import { interpolate, mergeSeries } from './telemetry';
 const noEvents:AdvancedEvent[]=[];
 type Row={id:string;name:string;unit:string;primary:Series;comparison?:Series;primaryUnavailable?:boolean};
-export default function Plots({analysis,axis,onCursor,resetVersion,cursor=null,events=noEvents,focus=null,layout='comfortable',initialZoom=null,onZoom,onSeek}:{analysis:Analysis;axis:Axis;onCursor:(x:number|null)=>void;resetVersion:number;cursor?:number|null;events?:AdvancedEvent[];focus?:TrackSegment|null;layout?:Workspace['layout'];initialZoom?:{min:number;max:number}|null;onZoom?:(range:{min:number;max:number})=>void;onSeek?:(position:number)=>void}){
+// Keep callback captures outside the render scope retained by disposed uPlot instances.
+function callbackEffect<T>(ref:{current:T|undefined},value:T|undefined){
+  return()=>{ref.current=value;return()=>{ref.current=undefined;};};
+}
+export default function Plots({analysis,axis,onCursor,resetVersion,cursor=null,events=noEvents,focus=null,layout='comfortable',initialZoom=null,onZoom,onSeek,visibleChannels,active=true}:{visibleChannels?:string[];active?:boolean;analysis:Analysis;axis:Axis;onCursor:(x:number|null)=>void;resetVersion:number;cursor?:number|null;events?:AdvancedEvent[];focus?:TrackSegment|null;layout?:Workspace['layout'];initialZoom?:{min:number;max:number}|null;onZoom?:(range:{min:number;max:number})=>void;onSeek?:(position:number)=>void}){
+  // Freeze the render/initialization context while hidden. First construction
+  // and any data replacement happen only when this workspace is active.
+  const context=useRef<{analysis:Analysis;axis:Axis;layout:Workspace['layout']}|null>(null);
+  if(active)context.current={analysis,axis,layout};
+  if(context.current){analysis=context.current.analysis;axis=context.current.axis;layout=context.current.layout;}
+  const hasContext=context.current!==null;
   const applyingZoom=useRef(false);
+  const eventOverlay=useRef(events);eventOverlay.current=events;
   const applyingCursor=useRef(false),sharedCursor=useRef(cursor);sharedCursor.current=cursor;
   const host=useRef<HTMLDivElement>(null),plots=useRef<uPlot[]>([]),callback=useRef(onCursor);callback.current=onCursor;
   const zoomCallback=useRef(onZoom);zoomCallback.current=onZoom;
   const seekCallback=useRef(onSeek);seekCallback.current=onSeek;
+  useEffect(callbackEffect(zoomCallback,onZoom),[onZoom]);
+  useEffect(callbackEffect(seekCallback,onSeek),[onSeek]);
   const previousReset=useRef(resetVersion),previousFocus=useRef<TrackSegment|null>(null);
   const readouts=useRef(new Map<string,HTMLElement>());
-  const rows:Row[]=Array.from(new Map([...analysis.primary.series,...(analysis.comparison?.series??[])].map(s=>[s.channelId,s])).values()).map(s=>{const primary=analysis.primary.series.find(p=>p.channelId===s.channelId);return {id:s.channelId,name:s.name,unit:s.unit,primary:primary??{...s,x:[],values:[],gaps:[]},primaryUnavailable:!primary,comparison:analysis.comparison?.series.find(c=>c.channelId===s.channelId)};});
+  const rows:Row[]=!context.current?[]:Array.from(new Map([...analysis.primary.series,...(analysis.comparison?.series??[])].map(s=>[s.channelId,s])).values()).map(s=>{const primary=analysis.primary.series.find(p=>p.channelId===s.channelId);return {id:s.channelId,name:s.name,unit:s.unit,primary:primary??{...s,x:[],values:[],gaps:[]},primaryUnavailable:!primary,comparison:analysis.comparison?.series.find(c=>c.channelId===s.channelId)};});
   const samples=[...analysis.primary.series,...(analysis.comparison?.series??[])];
-  if(analysis.delta)rows.push({id:'__delta',name:analysis.delta.method==='spatial'?'Spatial time delta':'Estimated time delta',unit:'s',primary:{channelId:'__delta',name:analysis.delta.method==='spatial'?'Spatial time delta':'Estimated time delta',unit:'s',...analysis.delta}});
+  if(context.current&&analysis.delta)rows.push({id:'__delta',name:analysis.delta.method==='spatial'?'Spatial time delta':'Estimated time delta',unit:'s',primary:{channelId:'__delta',name:analysis.delta.method==='spatial'?'Spatial time delta':'Estimated time delta',unit:'s',...analysis.delta}});
   useEffect(()=>{
-    if(!host.current)return;
+    if(!host.current||!context.current)return;
     const nodes=host.current.querySelectorAll<HTMLDivElement>('[data-plot]');
     const theme=getComputedStyle(host.current);const ink=theme.getPropertyValue('--muted').trim(),grid=theme.getPropertyValue('--grid').trim();
     const cyan=theme.getPropertyValue('--cyan').trim(),amber=theme.getPropertyValue('--amber').trim();
@@ -26,7 +39,7 @@ export default function Plots({analysis,axis,onCursor,resetVersion,cursor=null,e
     const height=layout==='compact'?128:178;
     plots.current=rows.map((row,i)=>{
       const pairs=[row.primary,...(row.comparison?[row.comparison]:[])];
-      const plot=new uPlot({width:Math.max(nodes[i].clientWidth,200),height,padding:[14,18,0,0],legend:{show:false},cursor:{sync:{key:'telemetry'},drag:{x:true,y:false,setScale:true},points:{size:5}},select:{show:true,left:0,top:0,width:0,height:0},scales:{x:{time:false}},axes:[{stroke:ink,grid:{show:false},ticks:{stroke:grid},size:32,values:(_u,ticks)=>ticks.map(n=>`${Math.round(n*10)/10}`)},{stroke:ink,grid:{stroke:grid,width:1},ticks:{stroke:grid},size:54,gap:10}],series:[{},...pairs.map((s,index)=>({label:s.name,stroke:index?amber:cyan,width:1.5,spanGaps:false}))],hooks:{ready:[u=>{applyingCursor.current=true;try{const position=sharedCursor.current,left=position==null?-10:u.valToPos(position,'x');if(Number.isFinite(left))u.setCursor({left,top:30});}finally{applyingCursor.current=false;}}],draw:[u=>{if(!/rpm|engine.*(speed|revs)/i.test(row.name))return;for(const event of events){if(event.position==null)continue;const x=u.valToPos(event.position,'x',true);u.ctx.save();u.ctx.strokeStyle=event.lapId===analysis.primary.lapId?cyan:amber;u.ctx.fillStyle=u.ctx.strokeStyle;u.ctx.globalAlpha=.15;if(event.endPosition!=null&&event.endPosition>event.position)u.ctx.fillRect(x,u.bbox.top,u.valToPos(event.endPosition,'x',true)-x,u.bbox.height);u.ctx.globalAlpha=.8;u.ctx.beginPath();u.ctx.moveTo(x,u.bbox.top);u.ctx.lineTo(x,u.bbox.top+u.bbox.height);u.ctx.stroke();u.ctx.restore();}}],setCursor:[u=>{
+      const plot=new uPlot({width:Math.max(nodes[i].clientWidth,200),height,padding:[14,18,0,0],legend:{show:false},cursor:{sync:{key:'telemetry'},drag:{x:true,y:false,setScale:true},points:{size:5}},select:{show:true,left:0,top:0,width:0,height:0},scales:{x:{time:false}},axes:[{stroke:ink,grid:{show:false},ticks:{stroke:grid},size:32,values:(_u,ticks)=>ticks.map(n=>`${Math.round(n*10)/10}`)},{stroke:ink,grid:{stroke:grid,width:1},ticks:{stroke:grid},size:54,gap:10}],series:[{},...pairs.map((s,index)=>({label:s.name,stroke:index?amber:cyan,width:1.5,spanGaps:false}))],hooks:{ready:[u=>{applyingCursor.current=true;try{const position=sharedCursor.current,left=position==null?-10:u.valToPos(position,'x');if(Number.isFinite(left))u.setCursor({left,top:30});}finally{applyingCursor.current=false;}}],draw:[u=>{if(!/rpm|engine.*(speed|revs)/i.test(row.name))return;for(const event of eventOverlay.current){if(event.position==null)continue;const x=u.valToPos(event.position,'x',true);u.ctx.save();u.ctx.strokeStyle=event.lapId===analysis.primary.lapId?cyan:amber;u.ctx.fillStyle=u.ctx.strokeStyle;u.ctx.globalAlpha=.15;if(event.endPosition!=null&&event.endPosition>event.position)u.ctx.fillRect(x,u.bbox.top,u.valToPos(event.endPosition,'x',true)-x,u.bbox.height);u.ctx.globalAlpha=.8;u.ctx.beginPath();u.ctx.moveTo(x,u.bbox.top);u.ctx.lineTo(x,u.bbox.top+u.bbox.height);u.ctx.stroke();u.ctx.restore();}}],setCursor:[u=>{
         const x=u.cursor.left==null||u.cursor.left<0?null:u.posToVal(u.cursor.left,'x');
         // uPlot can fire this hook while constructing/destroying a plot, before scales exist.
         if(!initialized||(x!=null&&!Number.isFinite(x)))return;
@@ -41,16 +54,26 @@ export default function Plots({analysis,axis,onCursor,resetVersion,cursor=null,e
       el.tabIndex=0;el.setAttribute('aria-label',`${row.name} graph cursor`);
       const up=(e:PointerEvent)=>{if(intent?.eligible&&!pan&&Math.hypot(e.clientX-intent.x,e.clientY-intent.y)<4){const over=el.querySelector('.u-over')?.getBoundingClientRect();if(over&&e.clientX>=over.left&&e.clientX<=over.right&&e.clientY>=over.top&&e.clientY<=over.bottom){const position=plot.posToVal(e.clientX-over.left,'x');if(Number.isFinite(position))seekCallback.current?.(position);}}intent=null;pan=null;};
       el.addEventListener('pointerdown',down,true);el.addEventListener('pointermove',move);el.addEventListener('pointerup',up);el.addEventListener('keydown',key);
-      const observer=new ResizeObserver(()=>plot.setSize({width:Math.max(el.clientWidth,200),height}));observer.observe(el);
+      const observer=new ResizeObserver(()=>{const width=el.clientWidth;if(width>0&&(plot.width!==Math.max(width,200)||plot.height!==height))plot.setSize({width:Math.max(width,200),height});});observer.observe(el);
       (plot as uPlot & {dispose:()=>void}).dispose=()=>{observer.disconnect();el.removeEventListener('pointerdown',down,true);el.removeEventListener('pointermove',move);el.removeEventListener('pointerup',up);el.removeEventListener('keydown',key);plot.destroy();};
       return plot;
     });
     if(initialZoom){const max=Math.max(...samples.map(s=>s.x.at(-1)??0),analysis.delta?.x.at(-1)??0,1);if(initialZoom.min>=0&&initialZoom.max<=max)plots.current.forEach(p=>p.setScale('x',initialZoom));}
     initialized=true;
-    return()=>{initialized=false;plots.current.forEach(p=>(p as uPlot&{dispose:()=>void}).dispose());plots.current=[];};
-  },[analysis,axis,layout,events]);
+    return()=>{
+      initialized=false;
+      plots.current.forEach(p=>{
+        // A disposed uPlot can outlive its canvas in browser allocation caches.
+        // Release our closure so it cannot retain detached UI and recording props.
+        const plot=p as uPlot&{dispose?:()=>void},dispose=plot.dispose;
+        delete plot.dispose;
+        dispose?.();
+      });
+      plots.current=[];
+    };
+  },[analysis,axis,layout,hasContext]);
   useEffect(()=>{
-    if(!initialZoom||!Number.isFinite(initialZoom.min)||!Number.isFinite(initialZoom.max)||initialZoom.max<=initialZoom.min)return;
+    if(!active||!initialZoom||!Number.isFinite(initialZoom.min)||!Number.isFinite(initialZoom.max)||initialZoom.max<=initialZoom.min)return;
     const max=Math.max(...samples.map(s=>s.x.at(-1)??0),analysis.delta?.x.at(-1)??0,1);
     if(initialZoom.min<0||initialZoom.max>max)return;
     applyingZoom.current=true;
@@ -58,9 +81,15 @@ export default function Plots({analysis,axis,onCursor,resetVersion,cursor=null,e
       if(changed){applyingCursor.current=true;try{const position=sharedCursor.current;plots.current.forEach(p=>p.setCursor({left:position==null?-10:p.valToPos(position,'x'),top:30}));}finally{applyingCursor.current=false;}}
     }
     finally{applyingZoom.current=false;}
-  },[initialZoom?.min,initialZoom?.max,analysis,axis,layout,events]);
-  useEffect(()=>{if(previousReset.current===resetVersion)return;previousReset.current=resetVersion;plots.current.forEach(p=>p.setScale('x',{min:Math.min(...samples.map(s=>s.x[0]??0),0),max:Math.max(...samples.map(s=>s.x[s.x.length-1]??0),analysis.delta?.x.at(-1)??0,1)}));},[resetVersion]);
-  useEffect(()=>{if(previousFocus.current===focus)return;previousFocus.current=focus;if(focus&&focus.end>focus.start)plots.current.forEach(p=>{p.batch(()=>p.setScale('x',{min:focus.start,max:focus.end}));p.setCursor({left:p.valToPos((focus.start+focus.end)/2,'x'),top:30});});},[focus,analysis]);
-  useEffect(()=>{applyingCursor.current=true;try{plots.current.forEach(p=>p.setCursor({left:cursor==null?-10:p.valToPos(cursor,'x'),top:30}));}finally{applyingCursor.current=false;}},[cursor,analysis,axis,layout,events]);
-  return <div ref={host} className="plots">{rows.map(row=><section className="plot-row" key={row.id}><div className="plot-label"><span>{row.name}{row.primaryUnavailable&&<small> · Primary unavailable</small>}{analysis.comparison&&!row.comparison&&row.id!=='__delta'&&<small> · Comparison unavailable</small>}</span><span className="mono readout" ref={el=>{if(el)readouts.current.set(row.id,el);}} >— {row.unit}</span></div><div data-plot /></section>)}<div className="axis-label">{axis==='distance'?analysis.alignment?.method==='spatial'?'Reference track position · meters':'Distance into lap · meters':analysis.alignment?.method==='spatial'?'Primary lap time at aligned position · seconds':'Time into lap · seconds'}</div></div>;
+  },[initialZoom?.min,initialZoom?.max,analysis,axis,layout,active]);
+  useEffect(()=>{if(!active||previousReset.current===resetVersion)return;previousReset.current=resetVersion;plots.current.forEach(p=>p.setScale('x',{min:Math.min(...samples.map(s=>s.x[0]??0),0),max:Math.max(...samples.map(s=>s.x[s.x.length-1]??0),analysis.delta?.x.at(-1)??0,1)}));},[resetVersion,active]);
+  useEffect(()=>{if(!active||previousFocus.current===focus)return;previousFocus.current=focus;if(focus&&focus.end>focus.start)plots.current.forEach(p=>{p.batch(()=>p.setScale('x',{min:focus.start,max:focus.end}));p.setCursor({left:p.valToPos((focus.start+focus.end)/2,'x'),top:30});});},[focus,analysis,active]);
+  useEffect(()=>{if(!active)return;applyingCursor.current=true;try{plots.current.forEach(p=>p.setCursor({left:cursor==null?-10:p.valToPos(cursor,'x'),top:30}));}finally{applyingCursor.current=false;}rows.forEach(row=>{const readout=readouts.current.get(row.id);if(readout)readout.textContent=[row.primary,...(row.comparison?[row.comparison]:[])].map(series=>{const value=cursor==null?null:interpolate(series.x,series.values,cursor,series.gaps);return value==null?'—':value.toFixed(row.unit==='rpm'?0:1);}).join(' / ')+' '+row.unit;});},[cursor,analysis,axis,layout,active]);
+  useEffect(()=>{
+    // uPlot commits its initial auto-scales in a microtask. Never reset them with
+    // redraw() during construction; overlays only need a paint after that commit.
+    if(!active)return;const frame=requestAnimationFrame(()=>{applyingCursor.current=true;try{plots.current.forEach(plot=>{plot.redraw(false,false);const position=sharedCursor.current;plot.setCursor({left:position==null?-10:plot.valToPos(position,'x'),top:30});});}finally{applyingCursor.current=false;}});
+    return()=>cancelAnimationFrame(frame);
+  },[events,active]);
+  return <div ref={host} className="plots">{rows.map(row=><section className="plot-row" key={row.id} hidden={!!visibleChannels&&!visibleChannels.includes(row.id)&&row.id!=='__delta'}><div className="plot-label"><span>{row.name}{row.primaryUnavailable&&<small> · Primary unavailable</small>}{analysis.comparison&&!row.comparison&&row.id!=='__delta'&&<small> · Comparison unavailable</small>}</span><span className="mono readout" ref={el=>{if(el)readouts.current.set(row.id,el);}} >— {row.unit}</span></div><div data-plot /></section>)}<div className="axis-label">{axis==='distance'?analysis.alignment?.method==='spatial'?'Reference track position · meters':'Distance into lap · meters':analysis.alignment?.method==='spatial'?'Primary lap time at aligned position · seconds':'Time into lap · seconds'}</div></div>;
 }

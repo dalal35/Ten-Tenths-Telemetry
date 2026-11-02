@@ -29,7 +29,7 @@ static int fail(char *error, const char *message) {
     return -1;
 }
 
-void *apex_video_open(const char *path, ApexMetadata *meta, char *error) {
+void *apex_video_open(const char *path, double start, ApexMetadata *meta, char *error) {
     @autoreleasepool {
         @try {
             NSURL *url = [NSURL fileURLWithPath:[NSString stringWithUTF8String:path]];
@@ -62,6 +62,9 @@ void *apex_video_open(const char *path, ApexMetadata *meta, char *error) {
                 return NULL;
             }
             [reader addOutput:output];
+            // Read earlier than the target, rounded down, so frame selection remains strict.
+            double seek = floor(fmax(0, fmin(start, duration) - 1) * 600) / 600;
+            reader.timeRange = CMTimeRangeMake(CMTimeMakeWithSeconds(seek, 600), kCMTimePositiveInfinity);
             if (![reader startReading]) {
                 fail(error, reader.error.localizedDescription.UTF8String);
                 return NULL;

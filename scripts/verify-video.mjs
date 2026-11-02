@@ -1,17 +1,25 @@
-import {launchBrowser,browserTestEntries} from './browser.mjs';
+import {launchBrowser,browserTestEntries,browserTestNoWatch} from './browser.mjs';
 import {expect} from '@playwright/test';
 import {createServer} from 'vite';
 import assert from 'node:assert/strict';
 let server,browser;
 try {
-  server=await createServer({optimizeDeps:{entries:browserTestEntries},server:{host:'127.0.0.1',port:0,strictPort:false,hmr:false,watch:null}});await server.listen();
+  server=await createServer({plugins:[browserTestNoWatch],optimizeDeps:{entries:browserTestEntries},server:{host:'127.0.0.1',port:0,strictPort:false,hmr:false}});await server.listen();
   browser=await launchBrowser();
   const page=await browser.newPage({viewport:{width:1360,height:1000}});const errors=[];page.on('pageerror',e=>errors.push(e.message));
   // Simulated Tauri picker/authorization and media clock; native decode is checked separately.
   await page.addInitScript(()=>{
-    window.isTauri=true;window.__TAURI_INTERNALS__={convertFileSrc:path=>`https://asset.localhost/${encodeURIComponent(path)}`,
-      invoke:async(cmd,args)=>cmd==='plugin:dialog|open'?(window.fixturePick??null):cmd==='authorize_local_video'?{path:args.path,size:window.fixtureSize??100,modifiedMs:1,status:'ready'}:null};
+    const w=window;w.youtubeAsset={videoId:'M7lc1UVf-VE',url:'https://www.youtube.com/watch?v=M7lc1UVf-VE',path:'/cache/M7lc1UVf-VE.mp4',size:1200,modifiedMs:2,sha256:'a'.repeat(64),durationSeconds:60,trackStartSeconds:0,leaseId:'lease-1',cached:false};
+    w.youtubeStatus={jobId:'',videoId:'M7lc1UVf-VE',phase:'downloading',downloadedBytes:40,totalBytes:100,speedBytesPerSecond:10,etaSeconds:6,error:null};w.youtubeCalls=[];w.holdYoutubeDownload=false;w.youtubeCacheError=false;
+    w.isTauri=true;window.__TAURI_INTERNALS__={convertFileSrc:path=>`https://asset.localhost/${encodeURIComponent(path)}`,
+      invoke:async(cmd,args)=>{w.youtubeCalls.push([cmd,args]);if(cmd==='plugin:dialog|open')return window.fixturePick??null;if(cmd==='authorize_local_video')return {path:args.path,size:window.fixtureSize??100,modifiedMs:1,status:'ready'};
+        if(cmd==='youtube_cache_status'){if(w.youtubeCacheError)throw new Error('Cache index unavailable');return {limitBytes:10737418240,usedBytes:1200,entries:[]};}if(cmd==='youtube_download_status')return {...w.youtubeStatus,jobId:args.jobId};
+        if(cmd==='download_youtube_video')return w.holdYoutubeDownload?new Promise(resolve=>{w.finishYoutubeDownload=()=>resolve(w.youtubeAsset);}):w.youtubeAsset;
+        if(cmd==='cancel_youtube_download'||cmd==='release_youtube_video')return;
+        if(cmd==='resolve_cached_youtube_video')return w.resolvedYoutubeAsset??null;
+        if(cmd==='set_youtube_cache_limit'||cmd==='clean_youtube_cache'||cmd==='remove_youtube_cache_entry')return {limitBytes:10737418240,usedBytes:1200,entries:[]};return null;}};
     const times=new WeakMap(),rates=new WeakMap(),sources=new WeakMap();
+    Object.defineProperties(HTMLVideoElement.prototype,{videoWidth:{get(){return 1920;}},videoHeight:{get(){return 1080;}}});
     Object.defineProperties(HTMLMediaElement.prototype,{
       src:{get(){return sources.get(this)??'';},set(value){sources.set(this,value);}},duration:{get(){return window.fixtureUnknown?NaN:60;}},currentTime:{get(){return times.get(this)??0;},set(value){times.set(this,value);this.dispatchEvent(new Event('timeupdate'));queueMicrotask(()=>this.dispatchEvent(new Event('seeked')));}},
       playbackRate:{get(){return rates.get(this)??1;},set(value){rates.set(this,value);this.dispatchEvent(new Event('ratechange'));}},
@@ -22,6 +30,8 @@ try {
   });
   await page.goto(`${server.resolvedUrls.local[0]}tests/video.html`,{waitUntil:'domcontentloaded'});
   await expect(page.getByRole('region',{name:'Video synchronization'})).toBeVisible();
+ await expect(page.getByRole('button',{name:'Estimate sync'})).toHaveCount(0);
+ await expect(page.getByLabel('Automatic sync estimate',{exact:true})).toHaveCount(0);
   const state=()=>page.evaluate(()=>window.fixtureState);
   const pick=async(path='/fixture/onboard.mp4')=>{await page.evaluate(path=>window.fixturePick=path,path);};
   await page.getByRole('button',{name:'Attach MP4 / MOV',exact:true}).click();assert.equal((await state()).source,null,'cancel must not attach');
@@ -83,5 +93,47 @@ try {
   assert.equal((await state()).segments[0].anchorTelemetryTime,300,'removed anchor lap falls back to an available lap');
   await page.evaluate(()=>{window.fixtureAvailability('ready');window.fixtureUnknown=true;window.fixtureReset();});await pick();await page.getByRole('button',{name:'Attach MP4 / MOV',exact:true}).click();await expect(page.getByText('Waiting for a known video duration before creating segments.',{exact:true})).toBeVisible();await expect(page.getByRole('button',{name:'Sync Here',exact:true})).toBeDisabled();
   await page.evaluate(()=>{const video=document.querySelector('video');video.dispatchEvent(new Event('error'));});await expect(page.getByRole('alert')).toContainText(/codec|playback failed/i);
-  assert.deepEqual(errors,[]);console.log('PASS: video source cancel/replace/Locate, lap anchors, trim/add/validation/correction/removal, coverage, ambiguity, keyboard timeline/resize, semantic preferences, sticky dark/light player and readiness/errors (simulated clock; native playback checked separately)');
+  await page.evaluate(()=>{window.fixtureUnknown=false;window.fixtureRestore();window.holdYoutubeDownload=true;window.youtubeStatus={...window.youtubeStatus,phase:'downloading'};});await expect(page.getByRole('button',{name:'Play',exact:true})).toBeEnabled();
+  await page.getByLabel('YouTube URL').fill('https://youtu.be/M7lc1UVf-VE');await page.getByRole('button',{name:'Download YouTube',exact:true}).click();
+  await expect(page.getByText(/Downloading/)).toBeVisible({timeout:3000});await expect(page.getByText(/MiB\/s.*left/)).toBeVisible();await expect(page.getByRole('progressbar',{name:'YouTube download progress'})).toBeVisible();
+  await page.getByRole('button',{name:'Cancel download',exact:true}).click();await expect(page.getByText('Download cancelled',{exact:true})).toBeVisible();
+  await page.evaluate(()=>window.finishYoutubeDownload());await expect.poll(async()=>(await state()).source.path).toBe('/fixture/restore.mp4');
+  assert(await page.evaluate(()=>window.youtubeCalls.some(([cmd])=>cmd==='cancel_youtube_download')),'cancel forwards to native worker');
+  await page.evaluate(()=>{window.holdYoutubeDownload=false;window.youtubeStatus.phase='preparing';});
+  await page.getByRole('button',{name:'Download YouTube',exact:true}).click();await expect(page.getByRole('button',{name:'Replace and clear segments',exact:true})).toBeVisible();assert.equal((await state()).source.path,'/fixture/restore.mp4','existing footage remains until successful confirmation');await page.getByRole('button',{name:'Replace and clear segments',exact:true}).click();await expect(page.getByRole('button',{name:'Play',exact:true})).toBeEnabled();
+  const downloaded=await state();assert.deepEqual(downloaded.source,{type:'youtube',url:'https://www.youtube.com/watch?v=M7lc1UVf-VE',videoId:'M7lc1UVf-VE',cache:{sha256:'a'.repeat(64),size:1200,durationSeconds:60,trackStartSeconds:0}});
+  assert((await page.locator('video').evaluate(video=>video.src)).includes(encodeURIComponent('/cache/M7lc1UVf-VE.mp4')),'native YouTube uses authorized cached local playback');
+  const segment={id:'saved-anchor',videoStart:0,videoEnd:50,anchorVideoTime:0,anchorTelemetryTime:300,anchorLapId:'second-lap1',correctionSeconds:.25};
+  await page.evaluate(({asset,segment})=>{window.resolvedYoutubeAsset=asset;window.fixtureYouTube({type:'youtube',url:asset.url,videoId:asset.videoId,cache:{sha256:asset.sha256,size:asset.size,durationSeconds:asset.durationSeconds,trackStartSeconds:asset.trackStartSeconds}},[segment]);}, {asset:await page.evaluate(()=>window.youtubeAsset),segment});
+  await expect(page.getByRole('button',{name:'Play',exact:true})).toBeEnabled();
+  await expect.poll(()=>state().then(value=>value.segments[0]?.id)).toBe('saved-anchor');assert.equal((await state()).segments[0].id,'saved-anchor');
+  assert(await page.locator('video').evaluate(video=>video.src).then(src=>src.includes(encodeURIComponent('/cache/M7lc1UVf-VE.mp4'))));
+  const downloadsBefore=await page.evaluate(()=>window.youtubeCalls.filter(([cmd])=>cmd==='download_youtube_video').length);
+  await page.getByLabel('YouTube URL').fill('https://youtu.be/M7lc1UVf-VE');await page.getByRole('button',{name:'Download YouTube',exact:true}).click();await expect.poll(()=>state().then(value=>value.source.cache.sha256)).toBe('a'.repeat(64));
+  assert.deepEqual((await state()).segments,[segment],'reattaching the same YouTube ID with identical media retains manual alignment');
+  assert.equal(await page.evaluate(()=>window.youtubeCalls.filter(([cmd])=>cmd==='download_youtube_video').length),downloadsBefore+1);
+  const changed={...(await state()).source,cache:{...(await state()).source.cache,sha256:'b'.repeat(64)}};
+  await page.evaluate(({source,segment})=>{window.resolvedYoutubeAsset=window.youtubeAsset;window.fixtureYouTube(source,[segment]);},{source:changed,segment});
+  await expect(page.getByRole('button',{name:'Confirm mappings still apply'})).toBeVisible();assert.equal((await state()).source.cache.sha256,'b'.repeat(64));assert.deepEqual((await state()).segments,[segment]);
+  await page.getByRole('button',{name:'Confirm mappings still apply'}).click();await expect.poll(()=>state().then(value=>value.source.cache.sha256)).toBe('a'.repeat(64));assert.deepEqual((await state()).segments,[segment]);
+  await page.evaluate(()=>{window.resolvedYoutubeAsset=null;window.youtubeCacheError=true;window.fixtureAvailability('missing');});await page.waitForTimeout(20);await page.evaluate(()=>window.fixtureAvailability('ready'));
+  await expect(page.getByRole('button',{name:'Download saved URL',exact:true})).toBeVisible();await page.getByRole('button',{name:'Refresh cache status',exact:true}).click();await expect(page.getByText(/Cache status unavailable: Cache index unavailable/)).toBeVisible();await expect(page.getByRole('button',{name:'Remove cached YouTube copy',exact:true})).toBeEnabled();
+  await page.getByRole('button',{name:'Remove cached YouTube copy',exact:true}).click();await expect(page.getByRole('button',{name:'Download saved URL',exact:true})).toBeVisible();
+  await page.evaluate(()=>{window.holdYoutubeDownload=true;window.youtubeStatus.phase='downloading';});
+  await page.getByRole('button',{name:'Download saved URL',exact:true}).click();await expect(page.getByText(/Downloading/)).toBeVisible();
+  await page.getByRole('button',{name:'Correction +0.1 s',exact:true}).click();
+  await page.getByLabel('Segment start (s)').fill('1');await page.getByLabel('Video anchor (s)').fill('1');await page.getByLabel('Segment end (s)').fill('49');await page.getByLabel('Correction (s)').fill('0.35');await page.getByRole('button',{name:'Apply segment edits'}).click();
+  await page.getByRole('separator',{name:'Resize video panel'}).focus();await page.keyboard.press('ArrowDown');
+  await page.evaluate(()=>window.finishYoutubeDownload());await expect(page.getByRole('button',{name:'Play',exact:true})).toBeEnabled();
+  const recovered=await state();assert.equal(recovered.source.cache.sha256,'a'.repeat(64));assert.equal(recovered.segments[0].correctionSeconds,.35);assert.equal(recovered.segments[0].videoStart,1);assert.equal(recovered.segments[0].videoEnd,49);assert.equal(recovered.segments[0].anchorVideoTime,1);assert.equal(recovered.preferences.panelHeight,420,'same-media cache recovery preserves edits made while its download was pending');
+  await page.evaluate(()=>{window.holdYoutubeDownload=false;window.youtubeStatus.phase='preparing';});
+  const releasesBeforeReset=await page.evaluate(()=>window.youtubeCalls.filter(([cmd])=>cmd==='release_youtube_video').length);
+  await page.evaluate(()=>{window.releaseBlocked=true;window.fixtureReset();});await expect.poll(()=>page.evaluate(()=>window.releaseBarrier!==null)).toBe(true);
+  assert.equal(await page.evaluate(()=>window.youtubeCalls.filter(([cmd])=>cmd==='release_youtube_video').length),releasesBeforeReset,'an attached cache lease stays held while the durable workspace save is pending');
+  await page.evaluate(()=>{window.releaseBlocked=false;window.releaseBarrier();});await expect.poll(()=>page.evaluate(()=>window.youtubeCalls.filter(([cmd])=>cmd==='release_youtube_video').length)).toBeGreaterThan(releasesBeforeReset);
+  await page.evaluate(()=>{window.holdYoutubeDownload=true;window.youtubeStatus.phase='downloading';});await page.getByRole('button',{name:'Download YouTube',exact:true}).click();await expect(page.getByRole('button',{name:'Cancel download',exact:true})).toBeVisible();
+  await page.evaluate(()=>window.fixtureYouTube({type:'youtube',url:'https://www.youtube.com/watch?v=abcdefghijk',videoId:'abcdefghijk'}));await expect.poll(()=>state().then(value=>value.source?.videoId)).toBe('abcdefghijk');await page.evaluate(()=>window.finishYoutubeDownload());
+  await expect.poll(()=>state().then(value=>value.source?.videoId)).toBe('abcdefghijk');await expect(page.getByRole('button',{name:'Download YouTube',exact:true})).toBeEnabled();
+  assert(await page.evaluate(()=>window.youtubeCalls.filter(([cmd])=>cmd==='cancel_youtube_download').length>=2),'source changes cancel the active native job');await expect.poll(()=>page.evaluate(()=>window.youtubeCalls.filter(([cmd])=>cmd==='release_youtube_video').length)).toBeGreaterThan(3);
+  assert.deepEqual(errors,[]);console.log('PASS: local source cancel/replace/Locate, YouTube download progress/cancel/retry/cache identity/local playback/lease release, lap anchors, trim/add/validation/correction/removal, coverage, ambiguity, keyboard timeline/resize, semantic preferences, sticky dark/light player and readiness/errors (simulated clock; native playback checked separately)');
 } finally {await browser?.close();await server?.close();}

@@ -20,6 +20,7 @@ export const importFiles=async():Promise<Session[]>=>desktop();
 export const subscribeFileDrop=async(_callback:(paths:string[])=>void)=>()=>{};
 export async function librarySnapshot():Promise<LibrarySnapshot>{return {entries:[...sessions.values()].map((s,i)=>({id:s.id,contentVersion:version,source:s.source,name:s.name,driver:s.driver,track:s.track,recordedAt:s.recordedAt,lapCount:s.laps.length,channelCount:s.channels.length,status:'ready',workspace:workspaces.get(s.id)??workspaceFor(s),lastUsed:1781440000000-i*1000})),activeSessionId:sampleSessions[0].id,warnings:[]};}
 export const loadSession=async(id:string)=>get(id);
+export const updateLibraryDetails=async(_id:string,_name:string,_driver:string,_recordedAt:string):Promise<import('../../src/types').LibraryEntry>=>desktop();
 export const saveWorkspace=async(id:string,w:Workspace)=>{workspaces.set(id,w);};
 export const removeSession=async(_id:string):Promise<LibrarySnapshot>=>desktop();
 export const refreshSession=async(id:string)=>get(id);

@@ -188,7 +188,7 @@ impl Decoder {
         unreachable!()
     }
 }
-fn open(path: &Path, cancel: &CancellationToken) -> Result<Decoder> {
+fn open(path: &Path, start: f64, cancel: &CancellationToken) -> Result<Decoder> {
     cancel.check()?;
     let info = crate::video::inspect_local_video(path)
         .map_err(|e| VideoAnalysisError::new(ErrorKind::InvalidInput, e))?;
@@ -200,16 +200,20 @@ fn open(path: &Path, cancel: &CancellationToken) -> Result<Decoder> {
     }
     #[cfg(windows)]
     let decoder = Decoder::open(Path::new(&info.path), cancel)?;
-    #[cfg(not(windows))]
+    #[cfg(target_os = "macos")]
+    let decoder = Decoder::open(Path::new(&info.path), start)?;
+    #[cfg(not(any(windows, target_os = "macos")))]
     let decoder = Decoder::open(Path::new(&info.path))?;
+    #[cfg(not(target_os = "macos"))]
+    let _ = start;
     cancel.check()?;
     Ok(decoder)
 }
 pub fn inspect(path: &Path, cancel: &CancellationToken) -> Result<VideoAnalysisMetadata> {
-    Ok(open(path, cancel)?.metadata())
+    Ok(open(path, 0.0, cancel)?.metadata())
 }
 /// First presentation frame at or after `timestamp_seconds`, retaining its actual PTS.
-/// Scans sequentially for exact behavior across keyframes and variable frame rates.
+/// Decodes forward from an earlier point to preserve exact frame selection.
 pub fn extract_frame(
     path: &Path,
     timestamp_seconds: f64,
@@ -223,7 +227,7 @@ pub fn extract_frame(
             "Timestamp must be finite and nonnegative",
         ));
     }
-    let mut decoder = open(path, cancel)?;
+    let mut decoder = open(path, timestamp_seconds, cancel)?;
     let dims = resize.dimensions(&decoder.metadata())?;
     decoder
         .next(timestamp_seconds, dims, format, cancel)?
@@ -263,7 +267,7 @@ pub fn sample_frames(
                 "Invalid sampling time range or interval",
             ));
         }
-        let mut decoder = open(path, cancel)?;
+        let mut decoder = open(path, options.start_seconds, cancel)?;
         let meta = decoder.metadata();
         let dims = options.resize.dimensions(&meta)?;
         let end = options

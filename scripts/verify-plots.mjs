@@ -1,4 +1,4 @@
-import {launchBrowser,browserTestEntries} from './browser.mjs';
+import {launchBrowser,browserTestEntries,browserTestNoWatch} from './browser.mjs';
 // A local-only interaction check using real XRK analysis. No fixture data is uploaded.
 import { createServer } from 'vite';
 import { execFileSync } from 'node:child_process';
@@ -11,7 +11,7 @@ const output=execFileSync('cargo',['run','--manifest-path','src-tauri/Cargo.toml
 writeFileSync('.tools/analysis.json',output);
 let server,browser;
 try {
- server=await createServer({optimizeDeps:{entries:browserTestEntries},server:{host:'127.0.0.1',port:0,strictPort:false,hmr:false,watch:null}});await server.listen();
+ server=await createServer({plugins:[browserTestNoWatch],optimizeDeps:{entries:browserTestEntries},server:{host:'127.0.0.1',port:0,strictPort:false,hmr:false,watch:null}});await server.listen();
  browser=await launchBrowser();
  const page=await browser.newPage({viewport:{width:1100,height:950}});page.setDefaultTimeout(10000);
  const errors=[];page.on('pageerror',error=>errors.push(error.message));

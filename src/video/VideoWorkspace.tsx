@@ -1,7 +1,8 @@
 import {useEffect,useRef,useState} from 'react';
 import type {ReactNode} from 'react';
 import {convertFileSrc} from '@tauri-apps/api/core';
-import {authorizeLocalVideo,pickLocalVideo,isNative} from '../bridge';
+import {authorizeLocalVideo,pickLocalVideo,isNative,downloadYouTubeVideo,getYouTubeDownloadStatus,cancelYouTubeDownload,resolveCachedYouTubeVideo,releaseYouTubeVideo,getYouTubeCacheStatus,setYouTubeCacheLimit,cleanYouTubeCache,removeYouTubeCacheEntry} from '../bridge';
+import type {YouTubeAsset,YouTubeCacheStatus,YouTubeDownloadStatus} from '../bridge';
 import type {Session} from '../types';
 import {lapCoverage,lapMarkers,parseYouTubeUrl,telemetryToVideo,validateSegments} from './model';
 import type {VideoSegment,VideoSource,VideoStateV1} from './model';
@@ -21,27 +22,40 @@ export interface VideoWorkspaceProps {
   onPlayer:(player:VideoPlayer|null)=>void;
   onSeekTelemetry:(time:number,segmentId?:string)=>void;
   onSeekVideo:(time:number)=>void;
+  beforeRelease?:()=>Promise<void>;
+  saveReady?:boolean;
+  onSelectRecording?:(recordingId:string)=>void;
   children?:ReactNode;
+  active?:boolean;
 }
 const idle:PlayerSnapshot={time:0,duration:null,rate:1,state:'loading',observedAtMs:0,seeking:false};
 const message=(error:unknown)=>error instanceof Error?error.message:String(error);
 const clampHeight=(height:number)=>Math.max(240,Math.min(900,height));
 
 export function VideoWorkspace(props:VideoWorkspaceProps) {
-  const {session,state,availability,telemetryTime,onChange,onSeekTelemetry,onSeekVideo}=props;
+  const {session,state,availability,telemetryTime,onChange,onSeekTelemetry,onSeekVideo,active=true}=props;
+  const [opened,setOpened]=useState(active);
+  useEffect(()=>{if(active)setOpened(true);},[active]);
   const latest=useRef(props);latest.current=props;
+  const releaseLease=(leaseId:string)=>{void (async()=>{try{await latest.current.beforeRelease?.();}finally{await releaseYouTubeVideo(leaseId);}})().catch(()=>{});};
   const sticky=useRef<HTMLDivElement>(null);
   const host=useRef<HTMLDivElement>(null),video=useRef<HTMLVideoElement>(null),player=useRef<VideoPlayer|null>(null);
   const [sample,setSample]=useState<PlayerSnapshot>(idle);
   useEffect(()=>{
-    const panel=sticky.current,main=panel?.closest<HTMLElement>('main');if(!panel||!main)return;
+    const panel=sticky.current,main=panel?.closest<HTMLElement>('.workspace-viewport')??panel?.closest<HTMLElement>('main');if(!panel||!main||!active)return;
     const update=()=>main.style.setProperty('--video-scroll-offset',getComputedStyle(panel).position==='sticky'?`${Math.ceil(panel.getBoundingClientRect().height)+8}px`:'0px');
     const observer=new ResizeObserver(update);observer.observe(panel);observer.observe(main);update();
     return()=>{observer.disconnect();main.style.removeProperty('--video-scroll-offset');};
-  },[]);
+  },[active]);
 
   const [error,setError]=useState(''),[busy,setBusy]=useState(false),[url,setUrl]=useState('');
   const [pending,setPending]=useState<{source:VideoSource;preserve:boolean}|null>(null);
+  const [pendingAsset,setPendingAsset]=useState<YouTubeAsset|null>(null),[downloadStatus,setDownloadStatus]=useState<YouTubeDownloadStatus|null>(null),[cacheStatus,setCacheStatus]=useState<YouTubeCacheStatus|null>(null),[cacheLimit,setCacheLimit]=useState(''),[cacheMissing,setCacheMissing]=useState(false),[cacheError,setCacheError]=useState('');
+  const [playerGeneration,setPlayerGeneration]=useState(0);
+  const pendingAssetRef=useRef<YouTubeAsset|null>(null);
+  const activeJob=useRef<string|null>(null),readyAsset=useRef<{key:string;asset:YouTubeAsset}|null>(null);
+  const holdPendingAsset=(asset:YouTubeAsset|null)=>{const previous=pendingAssetRef.current;if(previous&&previous.leaseId!==asset?.leaseId)void releaseYouTubeVideo(previous.leaseId);pendingAssetRef.current=asset;setPendingAsset(asset);};
+  const refreshCacheStatus=async()=>{try{const status=await getYouTubeCacheStatus();setCacheStatus(status);setCacheLimit(String(status.limitBytes));setCacheError('');}catch(error){setCacheError(message(error));}};
   const [referenceStatus,setReferenceStatus]=useState<'ready'|'missing'|'changed'>('ready');
   const [acceptedKey,setAcceptedKey]=useState<string|null>(null);
   const [anchorLapId,setAnchorLapId]=useState(session.laps[0]?.id??'');
@@ -50,7 +64,8 @@ export function VideoWorkspace(props:VideoWorkspaceProps) {
   const effectiveAvailability=acceptedKey===sourceKey?'ready':availability;
   const currentAvailability=effectiveAvailability==='ready'?referenceStatus:effectiveAvailability;
   const usable=!!state.source&&currentAvailability==='ready';
-  const nativeYouTube=state.source?.type==='youtube'&&isNative&&!/^https?:$/.test(location.protocol);
+  const nativeYouTube=state.source?.type==='youtube'&&isNative&&!state.source.cache;
+  const needsYouTubeDownload=!!(nativeYouTube||cacheMissing);
   const selected=state.segments.find(segment=>segment.id===state.selectedSegmentId);
   const paused=sample.state==='paused'||sample.state==='ended';
   const knownDuration=sample.duration!==null&&Number.isFinite(sample.duration)&&sample.duration>0?sample.duration:null;
@@ -61,14 +76,18 @@ export function VideoWorkspace(props:VideoWorkspaceProps) {
   },[session.id,session.laps]);
   useEffect(()=>setAcceptedKey(null),[availability]);
   useEffect(()=>setHeight(clampHeight(state.preferences.panelHeight)),[state.preferences.panelHeight]);
-  useEffect(()=>{setReferenceStatus('ready');setPending(null);setError('');},[sourceKey]);
+  useEffect(()=>{if(pendingAssetRef.current)holdPendingAsset(null);setReferenceStatus('ready');setPending(null);setError('');setCacheMissing(false);},[sourceKey]);
+  useEffect(()=>()=>{const asset=pendingAssetRef.current;if(asset){pendingAssetRef.current=null;void releaseYouTubeVideo(asset.leaseId);}},[]);
+  useEffect(()=>{if(!isNative)return;let active=true;void getYouTubeCacheStatus().then(status=>{if(active){setCacheStatus(status);setCacheLimit(String(status.limitBytes));setCacheError('');}}).catch(error=>{if(active)setCacheError(message(error));});return()=>{active=false;};},[]);
+  useEffect(()=>()=>{const job=activeJob.current;if(job){activeJob.current=null;void cancelYouTubeDownload(job);setBusy(false);setDownloadStatus(previous=>previous?.jobId===job?{...previous,phase:'cancelled'}:previous);}},[session.id,sourceKey]);
 
   useEffect(()=>{
-    let active=true,restored=false;
+    let active=true,restored=false,ownedLease:string|null=null;
+    const releaseOwnedLease=()=>{if(!ownedLease)return;const lease=ownedLease;ownedLease=null;releaseLease(lease);};
     let adapter:VideoPlayer|null=null,unsubscribe:(()=>void)|undefined;
     setSample(idle);
     latest.current.onPlayer(null);
-    if(!state.source||effectiveAvailability!=='ready'||referenceStatus!=='ready'||nativeYouTube)return;
+    if(!opened||!state.source||effectiveAvailability!=='ready'||referenceStatus!=='ready'||nativeYouTube)return;
     const source=state.source;
     const initialize=async()=>{
       try {
@@ -78,8 +97,21 @@ export function VideoWorkspace(props:VideoWorkspaceProps) {
           const assessment=assessVideoReference(source,info.status==='ready'?info:null);
           if(!assessment.canPlay){setReferenceStatus(assessment.status);if(info.status==='ready')setPending({source:{type:'local',path:info.path,size:info.size,modifiedMs:info.modifiedMs},preserve:true});return;}
           adapter=createHtmlPlayer(video.current!,convertFileSrc(source.path));
+        }else if(isNative){
+          const downloaded=readyAsset.current?.key===sourceKey?readyAsset.current.asset:await resolveCachedYouTubeVideo(source.videoId);
+          if(!active){if(downloaded)void releaseYouTubeVideo(downloaded.leaseId);return;}
+          if(!downloaded){setCacheMissing(true);setError('Cached footage is missing. Download this video again to restore playback.');return;}
+          ownedLease=downloaded.leaseId;
+          const expected=source.cache;
+          const changed=expected&&(expected.sha256!==downloaded.sha256||expected.size!==downloaded.size||expected.durationSeconds!==downloaded.durationSeconds||expected.trackStartSeconds!==downloaded.trackStartSeconds);
+          if(changed||(!expected&&state.segments.length)){
+            const updated:VideoSource={...source,cache:{sha256:downloaded.sha256,size:downloaded.size,durationSeconds:downloaded.durationSeconds,trackStartSeconds:downloaded.trackStartSeconds}};
+            setPending({source:updated,preserve:true});holdPendingAsset(downloaded);ownedLease=null;return;
+          }
+          if(!expected){const updated:VideoSource={...source,cache:{sha256:downloaded.sha256,size:downloaded.size,durationSeconds:downloaded.durationSeconds,trackStartSeconds:downloaded.trackStartSeconds}};onChange({...state,source:updated});releaseLease(downloaded.leaseId);ownedLease=null;return;}
+          adapter=createHtmlPlayer(video.current!,convertFileSrc(downloaded.path));
         }else adapter=createYouTubePlayer(host.current!,source.videoId);
-        if(!active){adapter.dispose();return;}
+        if(!active){adapter?.dispose();releaseOwnedLease();return;}
         player.current=adapter;
         setSample(adapter.snapshot());
         let previousState=adapter.snapshot().state,previousRate=adapter.snapshot().rate,previousSeeking=false;
@@ -103,19 +135,26 @@ export function VideoWorkspace(props:VideoWorkspaceProps) {
         if(preferences.pausedVideoTime>0)await adapter.seek(Math.min(preferences.pausedVideoTime,adapter.snapshot().duration??preferences.pausedVideoTime),new AbortController().signal);
         if(!active)return;
         restored=true;setSample(adapter.snapshot());latest.current.onPlayer(adapter);
-      }catch(error){if(active)setError(message(error));}
+      }catch(error){if(active){releaseOwnedLease();adapter?.dispose();if(player.current===adapter)player.current=null;setError(message(error));}}
     };
     void initialize();
-    return()=>{active=false;unsubscribe?.();adapter?.dispose();if(player.current===adapter)player.current=null;latest.current.onPlayer(null);};
-  },[sourceKey,effectiveAvailability,referenceStatus,nativeYouTube,session.id]);
+    return()=>{active=false;unsubscribe?.();adapter?.dispose();if(player.current===adapter)player.current=null;latest.current.onPlayer(null);if(ownedLease){const lease=ownedLease;releaseOwnedLease();if(readyAsset.current?.asset.leaseId===lease)readyAsset.current=null;}};
+  },[sourceKey,effectiveAvailability,referenceStatus,nativeYouTube,session.id,opened,playerGeneration]);
+  useEffect(()=>{if(!active&&player.current)void player.current.pause().catch(error=>setError(message(error)));},[active]);
 
   const change=(next:VideoStateV1)=>{setError('');onChange(next);};
   const commitSource=(source:VideoSource,preserve:boolean)=>{
-    const chosen=chooseVideoReference(state.source,source,true);
+    const current=latest.current.state;
+    const chosen=chooseVideoReference(current.source,source,true);
     if(!chosen)return;
+    const held=pendingAssetRef.current;
+    if(held&&chosen.type==='youtube'&&chosen.cache?.sha256===held.sha256)readyAsset.current={key:JSON.stringify(chosen),asset:held};
+    else if(held)void releaseYouTubeVideo(held.leaseId);
+    pendingAssetRef.current=null;setPendingAsset(null);
     setAcceptedKey(JSON.stringify(chosen));setReferenceStatus('ready');setPending(null);setError('');
-    onChange({...state,source:chosen,segments:preserve?state.segments:[],selectedSegmentId:preserve?state.selectedSegmentId:null,
-      preferences:preserve?state.preferences:{...state.preferences,pausedVideoTime:0}});
+    setCacheMissing(false);if(JSON.stringify(current.source)===JSON.stringify(chosen))setPlayerGeneration(value=>value+1);
+    onChange({...current,source:chosen,segments:preserve?current.segments:[],selectedSegmentId:preserve?current.selectedSegmentId:null,
+      preferences:preserve?current.preferences:{...current.preferences,pausedVideoTime:0}});
   };
   const choose=async(preserve:boolean)=>{
     setBusy(true);setError('');
@@ -124,9 +163,34 @@ export function VideoWorkspace(props:VideoWorkspaceProps) {
       const info=await pickLocalVideo();if(!info||latest.current.session.id!==sessionId||JSON.stringify(latest.current.state.source)!==originalSourceKey)return;
       if(info.status!=='ready')throw new Error('Footage unavailable. Choose an existing MP4 or MOV file.');
       const source:VideoSource={type:'local',path:info.path,size:info.size,modifiedMs:info.modifiedMs};
-      if(state.source)setPending({source,preserve});else commitSource(source,false);
+      if(state.source){holdPendingAsset(null);setPending({source,preserve});}else commitSource(source,false);
     }catch(error){setError(message(error));}finally{setBusy(false);}
   };
+  const attachYouTube=async(source:Extract<VideoSource,{type:'youtube'}>)=>{
+    if(!isNative){if(state.source)setPending({source,preserve:false});else commitSource(source,false);return;}
+    const sessionId=session.id,originalSourceKey=sourceKey,jobId=crypto.randomUUID();
+    activeJob.current=jobId;setBusy(true);setError('');setDownloadStatus({jobId,videoId:source.videoId,phase:'preparing',downloadedBytes:0,totalBytes:null,speedBytesPerSecond:null,etaSeconds:null,error:null});
+    const poll=window.setInterval(()=>{void getYouTubeDownloadStatus(jobId).then(status=>{if(status&&activeJob.current===jobId)setDownloadStatus(status);}).catch(()=>{});},400);
+    try{
+      const asset=await downloadYouTubeVideo(source.url,jobId);
+      if(activeJob.current!==jobId||latest.current.session.id!==sessionId||JSON.stringify(latest.current.state.source)!==originalSourceKey){void releaseYouTubeVideo(asset.leaseId);return;}
+      const attached:VideoSource={...source,cache:{sha256:asset.sha256,size:asset.size,durationSeconds:asset.durationSeconds,trackStartSeconds:asset.trackStartSeconds}};
+      const current=latest.current.state;
+      const sameYoutube=current.source?.type==='youtube'&&current.source.videoId===source.videoId;
+      const savedCache=current.source?.type==='youtube'?current.source.cache:undefined;
+      const sameCache=sameYoutube&&!!savedCache&&savedCache.sha256===asset.sha256&&savedCache.size===asset.size&&savedCache.durationSeconds===asset.durationSeconds&&savedCache.trackStartSeconds===asset.trackStartSeconds;
+      if(sameCache||sameYoutube&&!current.segments.length){readyAsset.current={key:JSON.stringify(attached),asset};commitSource(attached,true);}
+      else if(sameYoutube&&current.segments.length){setPending({source:attached,preserve:true});holdPendingAsset(asset);}
+      else if(current.source){setPending({source:attached,preserve:false});holdPendingAsset(asset);}
+      else{readyAsset.current={key:JSON.stringify(attached),asset};commitSource(attached,false);}
+      setDownloadStatus({jobId,videoId:asset.videoId,phase:'complete',downloadedBytes:asset.size,totalBytes:asset.size,speedBytesPerSecond:null,etaSeconds:0,error:null});
+      void refreshCacheStatus();
+    }catch(error){
+      if(activeJob.current===jobId){const detail=message(error);setError(detail);setDownloadStatus(previous=>previous?.jobId===jobId?{...previous,phase:'error',error:detail}:previous);}
+    }finally{window.clearInterval(poll);if(activeJob.current===jobId){activeJob.current=null;setBusy(false);}}
+  };
+  const cancelDownload=()=>{const job=downloadStatus?.jobId??activeJob.current;if(!job)return;activeJob.current=null;setBusy(false);setDownloadStatus(previous=>previous?{...previous,phase:'cancelled'}:previous);void cancelYouTubeDownload(job).catch(error=>setError(message(error)));};
+  const refreshCache=async()=>{try{setCacheStatus(await getYouTubeCacheStatus());}catch(error){setError(message(error));}};
   const operation=async(run:(player:VideoPlayer)=>Promise<void>)=>{
     const adapter=player.current;if(!adapter)return;
     setBusy(true);setError('');
@@ -160,15 +224,16 @@ export function VideoWorkspace(props:VideoWorkspaceProps) {
     const panelHeight=clampHeight(value);setHeight(panelHeight);
     if(save){const current=latest.current.state;latest.current.onChange({...current,preferences:{...current.preferences,panelHeight}});}
   };
-  return <section className="video-workspace" aria-label="Video synchronization">
+  return <section className={active?"workspace-stage video-workspace":"workspace-stage"} aria-label={active?"Video synchronization":undefined}>
+    <div className="video-surfaces" hidden={!active} style={{display:active?'contents':'none'}}>
     <div ref={sticky} className="video-sticky-player">
-      <div className="video-section-title"><div><span className="eyebrow">ONBOARD FOOTAGE</span><h2>Video synchronization</h2></div><span className="video-status" role="status">{!state.source?'No footage':nativeYouTube?'YouTube unavailable':usable?sample.state:'Footage unavailable'}</span></div>
+      <div className="video-section-title"><div><span className="eyebrow">ONBOARD FOOTAGE</span><h2>Video synchronization</h2></div><span className="video-status" role="status">{!state.source?'No footage':nativeYouTube?'Download required':usable?sample.state:'Footage unavailable'}</span></div>
       {state.source&&<p className="video-source-name">{state.source.type==='local'?state.source.path:state.source.url}</p>}
-      {!usable||nativeYouTube?<div className="video-placeholder">
-        <strong>{state.source?'Footage unavailable':'Bring your onboard footage alongside telemetry'}</strong>
-        <p>{nativeYouTube?'YouTube playback is unavailable in this native WebView (Error 153: client identity). Attach a local MP4 / MOV, or use the HTTP browser version for YouTube.':currentAvailability==='missing'?'The saved file is missing. Locate it to preserve your segments.':currentAvailability==='changed'?'The file metadata changed. Confirm that the existing mappings still apply.':currentAvailability==='error'?'The video reference could not be checked. Locate the file or replace the footage.':'Attach a local MP4 / MOV or paste a YouTube link. Files stay on your computer.'}</p>
+      {!usable||needsYouTubeDownload?<div className="video-placeholder">
+        <strong>{state.source?.type==='youtube'&&isNative?'Download footage for desktop playback':state.source?'Footage unavailable':'Bring your onboard footage alongside telemetry'}</strong>
+        <p>{nativeYouTube?'Download this YouTube video to play an authorized local copy.':currentAvailability==='missing'?'The saved file is missing. Locate it to preserve your segments.':currentAvailability==='changed'?'The file metadata changed. Confirm that the existing mappings still apply.':currentAvailability==='error'?'The video reference could not be checked. Locate the file or replace the footage.':'Attach a local MP4 / MOV or paste a YouTube link. Files stay on your computer.'}</p>
       </div>:<div className="video-player-space" style={{height}}><div className="video-viewport">
-        {state.source?.type==='local'?<video ref={video} controls playsInline preload="metadata"/>:<div ref={host} className="video-youtube-host"/>}
+        {state.source?.type==='local'||isNative&&state.source?.type==='youtube'?<video ref={video} controls playsInline preload="metadata"/>:<div ref={host} className="video-youtube-host"/>}
       </div></div>}
       <div className="video-controls">
         <button disabled={!usable||!player.current||busy||nativeYouTube} onClick={()=>void operation(adapter=>sample.state==='playing'||sample.state==='buffering'?adapter.pause():adapter.play())}>{sample.state==='playing'||sample.state==='buffering'?'Pause':'Play'}</button>
@@ -176,7 +241,7 @@ export function VideoWorkspace(props:VideoWorkspaceProps) {
         <label>Playback speed<select disabled={!usable||!player.current||busy||nativeYouTube} value={sample.rate} onChange={event=>{const rate=Number(event.target.value);void operation(adapter=>adapter.setRate(rate));}}>{(player.current?.supportedRates()??[1]).map(rate=><option key={rate} value={rate}>{rate}×</option>)}</select></label>
         <span className="video-telemetry-time">Telemetry <span className="mono">{telemetryTime===null?'unavailable':`${telemetryTime.toFixed(2)}s`}</span></span>
       </div>
-      {state.source?.type==='youtube'&&<p className="video-note">YouTube synchronization uses approximate asynchronous timing. Native YouTube controls remain available in the player.</p>}
+      {state.source?.type==='youtube'&&<p className="video-note">{isNative?'Playing the cached copy. The original YouTube URL and verified media identity are saved.':'YouTube synchronization uses approximate asynchronous timing. Native YouTube controls remain available in the player.'}</p>}
       {state.source?.type==='local'&&<p className="video-note">Timing follows media timestamps and manual alignment; frame accuracy is not guaranteed.</p>}
       <div role="separator" tabIndex={0} aria-label="Resize video panel" aria-orientation="horizontal" aria-valuenow={height} aria-valuemin={240} aria-valuemax={900}
         className="video-resize" onKeyDown={event=>{if(['ArrowUp','ArrowDown','Home','End'].includes(event.key)){event.preventDefault();resize(event.key==='Home'?240:event.key==='End'?900:height+(event.key==='ArrowDown'?20:-20),true);}}}
@@ -187,13 +252,17 @@ export function VideoWorkspace(props:VideoWorkspaceProps) {
     <div className="video-source-controls">
       <button disabled={busy} onClick={()=>void choose(false)}>{state.source?'Replace footage':'Attach MP4 / MOV'}</button>
       {state.source&&currentAvailability!=='ready'&&<button disabled={busy} onClick={()=>void choose(true)}>Locate</button>}
-      <form onSubmit={event=>{event.preventDefault();const source=parseYouTubeUrl(url);if(!source){setError('Enter a valid YouTube watch, share or short video URL.');return;}if(state.source)setPending({source,preserve:false});else commitSource(source,false);}}>
-        <label>YouTube URL<input type="url" value={url} placeholder="https://www.youtube.com/watch?v=…" onChange={event=>setUrl(event.target.value)}/></label><button type="submit" disabled={busy}>Attach YouTube</button>
+      <form onSubmit={event=>{event.preventDefault();const source=parseYouTubeUrl(url);if(!source){setError('Enter a valid YouTube watch, share or short video URL.');return;}void attachYouTube(source);}}>
+        <label>YouTube URL<input type="url" value={url} placeholder="https://www.youtube.com/watch?v=…" onChange={event=>setUrl(event.target.value)}/></label><button type="submit" disabled={busy}>{isNative?'Download YouTube':'Attach YouTube'}</button>
       </form>
+      {needsYouTubeDownload&&state.source?.type==='youtube'&&<button disabled={busy} onClick={()=>void attachYouTube(state.source as Extract<VideoSource,{type:'youtube'}>)}>Download saved URL</button>}
+      {isNative&&state.source?.type==='youtube'&&<button disabled={busy||!!player.current&&!cacheMissing} onClick={()=>void removeYouTubeCacheEntry((state.source as Extract<VideoSource,{type:'youtube'}>).videoId).then(status=>{setCacheStatus(status);setCacheError('');setCacheMissing(true);}).catch(error=>setCacheError(message(error)))}>Remove cached YouTube copy</button>}
+      {downloadStatus&&['preparing','downloading','merging','validating'].includes(downloadStatus.phase)&&<button onClick={cancelDownload}>Cancel download</button>}
     </div>
+    {downloadStatus&&<div className="video-download-status" role="status"><span>{downloadStatus.phase==='complete'?'Download ready':downloadStatus.phase==='error'?downloadStatus.error:downloadStatus.phase==='cancelled'?'Download cancelled':`${downloadStatus.phase[0].toUpperCase()}${downloadStatus.phase.slice(1)}${downloadStatus.downloadedBytes===null?'':` · ${(downloadStatus.downloadedBytes/1048576).toFixed(1)} MiB`}${downloadStatus.totalBytes?` / ${(downloadStatus.totalBytes/1048576).toFixed(1)} MiB`:''}${downloadStatus.speedBytesPerSecond?` · ${(downloadStatus.speedBytesPerSecond/1048576).toFixed(1)} MiB/s`:''}${downloadStatus.etaSeconds===null?'':` · ${Math.ceil(downloadStatus.etaSeconds)}s left`}`}</span>{['preparing','downloading','merging','validating'].includes(downloadStatus.phase)&&<progress aria-label="YouTube download progress" max={downloadStatus.totalBytes??undefined} value={downloadStatus.totalBytes?downloadStatus.downloadedBytes??0:undefined}/>}</div>}
     {pending&&<div className="video-confirm" role="group" aria-label={pending.preserve?'Confirm relocated footage':'Confirm replacement'}>
-      <p>{pending.preserve?'File metadata cannot prove footage identity. Confirm that these segments still apply to the located file.':'Replacing footage clears all existing segments. The telemetry session stays available.'}</p>
-      <div className="video-actions"><button className="video-primary" onClick={()=>commitSource(pending.source,pending.preserve)}>{pending.preserve?'Confirm mappings still apply':'Replace and clear segments'}</button><button onClick={()=>setPending(null)}>Cancel</button></div>
+      <p>{pending.preserve?pending.source.type==='youtube'?'The cached media identity differs or was not recorded. Confirm that the existing sync mappings still apply to this downloaded copy.':'File metadata cannot prove footage identity. Confirm that these segments still apply to the located file.':'Replacing footage clears all existing segments. The telemetry session stays available.'}</p>
+      <div className="video-actions"><button className="video-primary" onClick={()=>commitSource(pending.source,pending.preserve)}>{pending.preserve?'Confirm mappings still apply':'Replace and clear segments'}</button><button onClick={()=>{holdPendingAsset(null);setPending(null);}}>Cancel</button></div>
     </div>}
     {(error||sample.error)&&<p role="alert" className="video-error">{error||sample.error} {state.source?.type==='local'?'If this file cannot decode, try a supported H.264 MP4 / MOV export.':''}</p>}
     <div className="video-anchor-controls">
@@ -210,6 +279,8 @@ export function VideoWorkspace(props:VideoWorkspaceProps) {
     {state.segments.length>0&&reverse.kind==='unavailable'&&<p className="video-note">Footage unavailable at this telemetry time.</p>}
     <div className="video-coverage" aria-label="Recorded lap coverage">{session.laps.map(lap=><span key={lap.id} data-coverage={coverage[lap.id]}>Lap {lap.number} · {coverage[lap.id]==='none'?'no':coverage[lap.id]} coverage</span>)}</div>
     <SegmentEditor segments={state.segments} laps={session.laps} duration={knownDuration} selectedSegmentId={state.selectedSegmentId} onSelect={id=>change({...state,selectedSegmentId:id})} onChange={segments=>saveSegments(segments)}/>
-    {props.children&&<div className="video-graphs">{props.children}</div>}
+    {isNative&&<section className="video-cache-controls" aria-label="Video cache"><div className="video-section-title"><h3>Downloaded video cache</h3>{cacheStatus&&<small>{(cacheStatus.usedBytes/1073741824).toFixed(2)} / {(cacheStatus.limitBytes/1073741824).toFixed(2)} GiB</small>}</div>{cacheError&&<p role="alert" className="video-error">Cache status unavailable: {cacheError}</p>}<label>Cache limit · GiB<input aria-label="Video cache limit in GiB" type="number" min="1" max="1000" step="1" value={cacheLimit?String(Number(cacheLimit)/1073741824):''} onChange={event=>setCacheLimit(event.target.value?String(Number(event.target.value)*1073741824):'')}/></label><div className="video-actions"><button disabled={!cacheLimit||Number(cacheLimit)<1073741824||Number(cacheLimit)>1000*1073741824||busy} onClick={()=>void setYouTubeCacheLimit(Number(cacheLimit)).then(status=>{setCacheStatus(status);setCacheError('');}).catch(error=>setCacheError(message(error)))}>Save cache limit</button><button disabled={busy} onClick={()=>void cleanYouTubeCache().then(status=>{setCacheStatus(status);setCacheError('');}).catch(error=>setCacheError(message(error)))}>Clean unused cache</button><button disabled={busy} onClick={()=>void refreshCacheStatus()}>Refresh cache status</button></div>{cacheStatus?.entries.map(entry=><div className="video-cache-entry" key={entry.videoId}><span>{entry.url} · {(entry.size/1048576).toFixed(1)} MiB{entry.referenced?' · referenced':''}{entry.inUse?' · in use':''}{entry.issue?` · ${entry.issue}`:''}{entry.automaticEvictionAllowed===false?' · excluded from automatic cleanup':''}</span><button disabled={entry.inUse||busy} onClick={()=>{if(entry.automaticEvictionAllowed===false&&!window.confirm(`This cache entry is excluded from automatic cleanup${entry.issue?`: ${entry.issue}`:''}. Remove it explicitly?`))return;void removeYouTubeCacheEntry(entry.videoId).then(status=>{setCacheStatus(status);setCacheError('');}).catch(error=>setCacheError(message(error)));}}>Remove cached copy</button></div>)}</section>}
+    </div>
+    {props.children&&<div className={active?"video-graphs":"workspace-graphs"}>{props.children}</div>}
   </section>;
 }

@@ -1,11 +1,13 @@
+pub mod coach;
 #[cfg(any(windows, test))]
 mod desktop;
-mod persistence;
 pub mod library;
 pub mod merging;
+mod persistence;
 pub mod telemetry;
 pub mod video;
 pub mod video_analysis;
+pub mod youtube;
 
 use library::{Library, LibrarySnapshot};
 use serde_json::Value;
@@ -82,6 +84,19 @@ async fn load_library_session(
     task(state.inner(), move |library| library.load(&session_id)).await
 }
 #[tauri::command]
+async fn update_library_details(
+    session_id: String,
+    name: String,
+    driver: String,
+    recorded_at: String,
+    state: State<'_, Store>,
+) -> Result<library::LibraryEntry, String> {
+    task(state.inner(), move |library| {
+        library.update_details(&session_id, &name, &driver, &recorded_at)
+    })
+    .await
+}
+#[tauri::command]
 async fn remove_library_session(
     session_id: String,
     state: State<'_, Store>,
@@ -112,9 +127,13 @@ async fn save_workspace(
     workspace: Value,
     expected_content_version: String,
     state: State<'_, Store>,
+    videos: State<'_, youtube::YouTubeService>,
 ) -> Result<(), String> {
+    let videos = videos.inner().clone();
     task(state.inner(), move |library| {
-        library.save_workspace_version(&session_id, workspace, &expected_content_version)
+        library.save_workspace_version(&session_id, workspace, &expected_content_version)?;
+        videos.protect_refs(&library.youtube_video_ids());
+        Ok(())
     })
     .await
 }
@@ -211,10 +230,26 @@ pub fn run() {
             }
             // A damaged/unsupported library stays read-only and is reported to the UI.
             app.manage(Arc::new(Mutex::new(library)) as Store);
+            app.manage(coach::service::CoachService::default());
+            app.manage(youtube::YouTubeService::default());
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            update_library_details,
+            coach::commands::analyze_driving_coach,
+            coach::commands::cancel_driving_coach,
+            coach::commands::driving_coach_status,
+            coach::commands::driving_coach_model_terms,
             video::authorize_local_video,
+            youtube::download_youtube_video,
+            youtube::resolve_cached_youtube_video,
+            youtube::youtube_download_status,
+            youtube::cancel_youtube_download,
+            youtube::release_youtube_video,
+            youtube::youtube_cache_status,
+            youtube::set_youtube_cache_limit,
+            youtube::clean_youtube_cache,
+            youtube::remove_youtube_cache_entry,
             import_session,
             analyze_session,
             analyze_advanced,
@@ -230,6 +265,11 @@ pub fn run() {
             save_workspace,
             set_corner_boundaries
         ])
-        .run(tauri::generate_context!())
-        .expect("Could not launch Ten Tenths Telemetry");
+        .build(tauri::generate_context!())
+        .expect("Could not launch Ten Tenths Telemetry")
+        .run(|app, event| {
+            if matches!(event, tauri::RunEvent::ExitRequested { .. }) {
+                app.state::<youtube::YouTubeService>().shutdown();
+            }
+        });
 }

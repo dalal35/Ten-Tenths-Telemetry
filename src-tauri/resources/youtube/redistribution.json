@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "releaseReady": false,
+  "unresolved": [
+    "yt-dlp official standalone GPLv3+ bundle: exact complete corresponding-source closure for bundled platform components is not yet assembled and audited.",
+    "Deno official standalone: complete bundled-component license/notice inventory is not yet audited."
+  ],
+  "verifiedSources": ["FFmpeg 9.0.2 source archive, detached signature, license and exact configure recipe"],
+  "writtenOffer": null
+}

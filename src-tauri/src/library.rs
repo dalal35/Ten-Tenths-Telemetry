@@ -13,6 +13,9 @@ use std::{
     path::{Path, PathBuf},
     time::{SystemTime, UNIX_EPOCH},
 };
+#[cfg(test)]
+#[path = "../tests/support/synthetic_xrk.rs"]
+mod cache_fixtures;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -22,6 +25,8 @@ pub struct LibraryEntry {
     pub id: String,
     pub source: String,
     pub name: String,
+    #[serde(default)]
+    metadata_edited: bool,
     pub driver: String,
     pub track: String,
     pub recorded_at: String,
@@ -81,6 +86,7 @@ pub struct Library {
     cache: HashMap<String, Arc<Session>>,
     advanced_cache: HashMap<String, Value>,
     warnings: Vec<String>,
+    write_error: Option<String>,
 }
 fn now() -> u64 {
     SystemTime::now()
@@ -132,7 +138,7 @@ fn read_manifest(path: &Path) -> Result<Manifest, String> {
     }
     Ok(manifest)
 }
-fn fingerprint(path: &Path) -> Result<String, String> {
+pub(crate) fn fingerprint(path: &Path) -> Result<String, String> {
     if !path
         .extension()
         .is_some_and(|x| x.eq_ignore_ascii_case("xrk"))
@@ -166,6 +172,39 @@ fn parse(path: &Path, digest: &str, id: &str) -> Result<Session, String> {
     Ok(session)
 }
 impl Library {
+    pub(crate) fn youtube_video_ids(&self) -> Vec<String> {
+        let mut ids = std::collections::BTreeSet::new();
+        for workspace in self
+            .manifest
+            .entries
+            .iter()
+            .chain(self.manifest.merges.iter().map(|merge| &merge.entry))
+            .filter_map(|entry| entry.workspace.as_ref())
+        {
+            let videos = workspace.get("video").into_iter().chain(
+                workspace
+                    .get("sourceVideos")
+                    .and_then(Value::as_object)
+                    .into_iter()
+                    .flat_map(|videos| videos.values()),
+            );
+            for source in videos.filter_map(|video| video.get("source")) {
+                if source.get("type").and_then(Value::as_str) != Some("youtube") {
+                    continue;
+                }
+                if let Some(id) = source.get("videoId").and_then(Value::as_str).filter(|id| {
+                    id.len() == 11
+                        && id
+                            .bytes()
+                            .all(|b| b.is_ascii_alphanumeric() || b == b'_' || b == b'-')
+                }) {
+                    ids.insert(id.to_owned());
+                }
+            }
+        }
+        ids.into_iter().collect()
+    }
+
     pub fn open(directory: PathBuf) -> Result<Self, String> {
         fs::create_dir_all(&directory)
             .map_err(|e| format!("Cannot open local library folder: {e}"))?;
@@ -194,9 +233,13 @@ impl Library {
             cache: HashMap::new(),
             advanced_cache: HashMap::new(),
             warnings,
+            write_error: None,
         })
     }
     fn commit(&mut self, next: Manifest) -> Result<(), String> {
+        if let Some(error) = &self.write_error {
+            return Err(error.clone());
+        }
         let primary = self.directory.join("library.json");
         // Only rotate a valid previous generation; recovery never destroys its valid backup.
         match read_manifest(&primary) {
@@ -208,19 +251,42 @@ impl Library {
             Err(_) => {}
         }
         let bytes = serde_json::to_vec_pretty(&next).map_err(|e| e.to_string())?;
-        // Windows has no fallible write after the committed primary: memory and disk
-        // must advance together. A backup-only interrupted first save is recoverable.
-        #[cfg(windows)]
+        // A backup-only interrupted first save is recoverable.
         if !self.directory.join("library.backup.json").exists() {
             atomic_write(&self.directory.join("library.backup.json"), &bytes)?;
         }
-        atomic_write(&primary, &bytes)?;
-        #[cfg(not(windows))]
-        if !self.directory.join("library.backup.json").exists() {
-            atomic_write(&self.directory.join("library.backup.json"), &bytes)?;
+        if let Err(error) = atomic_write(&primary, &bytes) {
+            match fs::read(&primary) {
+                Ok(saved) if saved == bytes => {
+                    self.manifest = next;
+                    self.cache.clear();
+                    self.advanced_cache.clear();
+                    return Err(format!("{error} Library references were kept, but disk durability could not be confirmed."));
+                }
+                Err(read_error) if read_error.kind() != std::io::ErrorKind::NotFound => {
+                    let error = format!("{error} Cannot verify the saved library: {read_error}. Restart the app before saving again.");
+                    self.write_error = Some(error.clone());
+                    return Err(error);
+                }
+                _ => return Err(error),
+            }
+        }
+        if self.manifest.active_session_id != next.active_session_id {
+            self.advanced_cache.clear();
         }
         self.manifest = next;
+        let manifest = &self.manifest;
+        self.cache
+            .retain(|id, _| Self::is_active_source(manifest, id));
         Ok(())
+    }
+    fn is_active_source(manifest: &Manifest, id: &str) -> bool {
+        let active = manifest.active_session_id.as_deref();
+        active == Some(id)
+            || manifest.merges.iter().any(|merge| {
+                Some(merge.entry.id.as_str()) == active
+                    && merge.sources.iter().any(|source| source.session_id == id)
+            })
     }
     fn entry(&self, id: &str) -> Result<&LibraryEntry, String> {
         self.manifest
@@ -313,6 +379,7 @@ impl Library {
             id: id.clone(),
             source: path.to_string_lossy().into(),
             name: session.name.clone(),
+            metadata_edited: false,
             driver: session.driver.clone(),
             track: session.track.clone(),
             recorded_at: session.recorded_at.clone(),
@@ -361,15 +428,91 @@ impl Library {
         if let Some(session) = self.cache.get(id) {
             return Ok(session.clone());
         }
-        let session = parse(Path::new(&entry.source), &entry.content_version, id)?;
+        let mut session = parse(Path::new(&entry.source), &entry.content_version, id)?;
+        Self::apply_metadata(&mut session, &entry);
         let session = Arc::new(session);
-        self.cache.insert(id.into(), session.clone());
+        if Self::is_active_source(&self.manifest, id) {
+            self.cache.insert(id.into(), session.clone());
+        }
         Ok(session)
     }
     pub fn load(&mut self, id: &str) -> Result<Session, String> {
         let session = self.current(id)?;
         self.touch(id)?;
+        if session.merge.is_none() {
+            self.cache
+                .entry(id.into())
+                .or_insert_with(|| Arc::new(session.clone()));
+        }
         Ok(session)
+    }
+    /// Take an owned, validated snapshot, then release storage before coaching/inference.
+    pub fn coach_input(
+        &mut self,
+        id: &str,
+        reference: Option<&str>,
+    ) -> Result<(Session, String, Option<Vec<f64>>), String> {
+        if let Some(definition) = self
+            .manifest
+            .merges
+            .iter()
+            .find(|m| m.entry.id == id)
+            .cloned()
+        {
+            // Samples live only in this owned coach snapshot, never the persisted
+            // virtual descriptor or a manufactured cross-recording time series.
+            let sources = self.merge_sources(&definition.sources)?;
+            let mut session = self.merged_session(&definition)?;
+            for (metadata, original) in session
+                .merge
+                .as_mut()
+                .unwrap()
+                .sources
+                .iter_mut()
+                .zip(sources)
+            {
+                metadata.session = original.as_ref().clone();
+            }
+            let best = session
+                .laps
+                .iter()
+                .filter(|l| crate::coach::analysis::valid(l))
+                .min_by(|a, b| {
+                    a.duration
+                        .total_cmp(&b.duration)
+                        .then_with(|| a.id.cmp(&b.id))
+                })
+                .ok_or("No complete valid lap available for coaching")?;
+            let (source, lap) = merging::split_id(&best.id)?;
+            let boundaries = self.merged_boundaries(&definition, &best.id, &source, &lap);
+            return Ok((
+                session,
+                format!(
+                    "{}:{}",
+                    definition.entry.id, definition.entry.content_version
+                ),
+                boundaries,
+            ));
+        }
+        let session = self.current(id)?;
+        let _ = reference; // Legacy saved selection never changes the fastest-lap target.
+        let lap = session
+            .laps
+            .iter()
+            .filter(|l| crate::coach::analysis::valid(l))
+            .min_by(|a, b| {
+                a.duration
+                    .total_cmp(&b.duration)
+                    .then_with(|| a.id.cmp(&b.id))
+            })
+            .ok_or("No complete valid lap available for coaching")?;
+        let entry = self.entry(id)?;
+        let boundaries = entry
+            .corners
+            .get(&lap.id)
+            .filter(|c| c.version == 1 && !c.automatic)
+            .map(|c| c.boundaries.clone());
+        Ok((session, entry.content_version.clone(), boundaries))
     }
     pub fn remove(&mut self, id: &str) -> Result<LibrarySnapshot, String> {
         if self.manifest.merges.iter().any(|m| m.entry.id == id) {
@@ -394,7 +537,8 @@ impl Library {
         if digest != entry.content_version {
             return Err("The selected file does not match this session. Choose its original XRK or use Refresh on the current source.".into());
         }
-        let session = parse(&path, &digest, id)?;
+        let mut session = parse(&path, &digest, id)?;
+        Self::apply_metadata(&mut session, &entry);
         let mut next = self.manifest.clone();
         let entry = next.entries.iter_mut().find(|e| e.id == id).unwrap();
         entry.source = path.to_string_lossy().into();
@@ -420,7 +564,10 @@ impl Library {
         {
             return Err("This file matches another session already in the library. Open that session instead.".into());
         }
-        let session = parse(path, &digest, id)?;
+        let mut session = parse(path, &digest, id)?;
+        if entry.metadata_edited {
+            Self::apply_metadata(&mut session, &entry);
+        }
         let mut next = self.manifest.clone();
         let entry = next.entries.iter_mut().find(|e| e.id == id).unwrap();
         if entry.content_version != digest {
@@ -439,6 +586,55 @@ impl Library {
         self.commit(next)?;
         self.cache.insert(id.into(), Arc::new(session.clone()));
         Ok(session)
+    }
+    fn apply_metadata(session: &mut Session, entry: &LibraryEntry) {
+        session.name = entry.name.clone();
+        session.driver = entry.driver.clone();
+        session.recorded_at = entry.recorded_at.clone();
+    }
+    /// Update local labels without reading or modifying the telemetry source.
+    pub fn update_details(
+        &mut self,
+        id: &str,
+        name: &str,
+        driver: &str,
+        recorded_at: &str,
+    ) -> Result<LibraryEntry, String> {
+        let previous = self.entry(id)?;
+        let name = name.trim();
+        let driver = driver.trim();
+        if name.is_empty()
+            || name.chars().count() > 200
+            || driver.chars().count() > 200
+            || name.chars().any(char::is_control)
+            || driver.chars().any(char::is_control)
+        {
+            return Err("Enter a session name and keep name and driver to 200 characters without line breaks.".into());
+        }
+        // Unchanged legacy timestamps remain valid; edited dates use strict ISO days.
+        if recorded_at != previous.recorded_at {
+            if recorded_at.len() != 10
+                || !recorded_at.is_ascii()
+                || recorded_at.as_bytes()[4] != b'-'
+                || recorded_at.as_bytes()[7] != b'-'
+                || merging::parse_recording_stamp(&format!("{recorded_at} 00:00:00")).is_err()
+            {
+                return Err("Choose a valid recording date between 1970 and 9999.".into());
+            }
+        }
+        let mut next = self.manifest.clone();
+        let entry = Self::entry_mut(&mut next, id)?;
+        entry.name = name.into();
+        entry.driver = driver.into();
+        entry.recorded_at = recorded_at.into();
+        entry.metadata_edited = true;
+        let updated = entry.clone();
+        self.commit(next)?;
+        if let Some(session) = self.cache.get_mut(id) {
+            Self::apply_metadata(Arc::make_mut(session), &updated);
+        }
+        self.advanced_cache.clear();
+        Ok(updated)
     }
     pub fn save_workspace_version(
         &mut self,
@@ -674,10 +870,12 @@ impl Library {
                 .map_err(|e| e.to_string())?;
         value["sourceContentVersion"] = Value::String(self.entry(id)?.content_version.clone());
         value["parameterKey"] = Value::String(format!("{:x}", Sha256::digest(key.as_bytes())));
-        if self.advanced_cache.len() >= 8 {
-            self.advanced_cache.clear();
+        if self.manifest.active_session_id.as_deref() == Some(id) {
+            if self.advanced_cache.len() >= 8 {
+                self.advanced_cache.clear();
+            }
+            self.advanced_cache.insert(key, value.clone());
         }
-        self.advanced_cache.insert(key, value.clone());
         Ok(value)
     }
 }
@@ -732,8 +930,16 @@ impl Library {
     pub fn preview_merge(&mut self, ids: &[String]) -> Result<MergePreview, String> {
         let mut refs = vec![];
         for id in ids {
-            if self.manifest.merges.iter().any(|m| m.entry.id == *id) {
-                return Err("Select original sessions; nested merges are not supported.".into());
+            if let Some(merged) = self.manifest.merges.iter().find(|m| m.entry.id == *id) {
+                for reference in &merged.sources {
+                    if !refs
+                        .iter()
+                        .any(|r: &SourceRef| r.session_id == reference.session_id)
+                    {
+                        refs.push(reference.clone());
+                    }
+                }
+                continue;
             }
             let e = self.entry(id)?;
             if !refs.iter().any(|r: &SourceRef| r.session_id == *id) {
@@ -751,10 +957,27 @@ impl Library {
     }
     fn merged_session(&mut self, definition: &MergeDefinition) -> Result<Session, String> {
         let sources = self.merge_sources(&definition.sources)?;
-        let preview = merging::preview_sources(
+        let mut preview = merging::preview_sources(
             &sources.iter().map(|s| s.as_ref()).collect::<Vec<_>>(),
             &definition.sources,
         )?;
+        // A saved merge keeps its original source blocks and lap numbers even
+        // when a source's local recording date is edited later.
+        let rank = |id: &str| {
+            definition
+                .sources
+                .iter()
+                .position(|r| r.session_id == id)
+                .unwrap_or(usize::MAX)
+        };
+        preview.laps.sort_by_key(|lap| rank(&lap.source_session_id));
+        for (index, lap) in preview.laps.iter_mut().enumerate() {
+            lap.display_number = index + 1;
+        }
+        preview
+            .channels
+            .sort_by_key(|channel| rank(&channel.source_session_id));
+        preview.sources = definition.sources.clone();
         let metadata = sources
             .iter()
             .zip(&definition.sources)
@@ -771,7 +994,7 @@ impl Library {
             name: definition.entry.name.clone(),
             driver: definition.entry.driver.clone(),
             track: definition.entry.track.clone(),
-            recorded_at: preview.day.clone(),
+            recorded_at: definition.entry.recorded_at.clone(),
             channels: preview.channels.iter().map(|c| c.channel.clone()).collect(),
             laps: preview.laps.iter().map(|l| l.lap.clone()).collect(),
             warnings,
@@ -866,7 +1089,30 @@ impl Library {
             config.insert("cornerId".into(), Value::Null);
             config.insert("excludedIds".into(), serde_json::json!([]));
         }
-        let mut videos = serde_json::Map::new();
+        let mut videos = original
+            .workspace
+            .as_ref()
+            .and_then(|w| w.get("sourceVideos"))
+            .and_then(Value::as_object)
+            .cloned()
+            .unwrap_or_default();
+        // Keep the initial workspace's mapping when selected merges share a source.
+        for selected in ids {
+            if let Some(mappings) = self
+                .entry(selected)?
+                .workspace
+                .as_ref()
+                .and_then(|w| w.get("sourceVideos"))
+                .and_then(Value::as_object)
+            {
+                for (source, video) in mappings {
+                    videos
+                        .entry(source.clone())
+                        .or_insert_with(|| video.clone());
+                }
+            }
+        }
+        videos.retain(|source, _| preview.sources.iter().any(|r| r.session_id == *source));
         for r in &preview.sources {
             if let Some(video) = self
                 .entry(&r.session_id)?
@@ -874,7 +1120,9 @@ impl Library {
                 .as_ref()
                 .and_then(|w| w.get("video"))
             {
-                videos.insert(r.session_id.clone(), video.clone());
+                videos
+                    .entry(r.session_id.clone())
+                    .or_insert_with(|| video.clone());
             }
         }
         workspace["sourceVideos"] = Value::Object(videos);
@@ -890,6 +1138,7 @@ impl Library {
                 id: id.clone(),
                 source: String::new(),
                 name: format!("Merged · {} recordings", preview.sources.len()),
+                metadata_edited: false,
                 driver: original.driver,
                 track: original.track,
                 recorded_at: preview.day.clone(),
@@ -1231,6 +1480,144 @@ mod merge_mapping_tests {
     }
 }
 
+#[cfg(test)]
+mod cache_tests {
+    use super::*;
+    #[cfg(not(windows))]
+    #[test]
+    fn failed_initial_backup_does_not_commit_a_hidden_import() {
+        let root =
+            std::env::temp_dir().join(format!("apex-first-backup-failure-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&root);
+        cache_fixtures::write_pair(&root).unwrap();
+        let store = root.join("store");
+        let mut library = Library::open(store.clone()).unwrap();
+        fs::create_dir(store.join("library.backup.tmp")).unwrap();
+        assert!(library.import(&root.join("synthetic-a.xrk")).is_err());
+        assert!(library.snapshot().unwrap().entries.is_empty());
+        assert!(Library::open(store.clone())
+            .unwrap()
+            .snapshot()
+            .unwrap()
+            .entries
+            .is_empty());
+        fs::remove_dir(store.join("library.backup.tmp")).unwrap();
+        let first = library.import(&root.join("synthetic-a.xrk")).unwrap();
+        let second = library.import(&root.join("synthetic-b.xrk")).unwrap();
+        let entries = Library::open(store).unwrap().snapshot().unwrap().entries;
+        assert_eq!(entries.len(), 2);
+        assert!(entries.iter().any(|entry| entry.id == first.id));
+        assert!(entries.iter().any(|entry| entry.id == second.id));
+        fs::remove_dir_all(root).unwrap();
+    }
+    #[cfg(not(windows))]
+    #[test]
+    fn committed_save_error_keeps_references_and_discards_stale_caches() {
+        let root = std::env::temp_dir().join(format!("apex-sync-error-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&root);
+        cache_fixtures::write_pair(&root).unwrap();
+        let store = root.join("store");
+        let mut library = Library::open(store.clone()).unwrap();
+        let a = library.import(&root.join("synthetic-a.xrk")).unwrap();
+        library
+            .advanced_cache
+            .insert("old".into(), serde_json::json!([1]));
+        crate::persistence::FAIL_DIRECTORY_SYNC
+            .with(|failure| *failure.borrow_mut() = Some(store.join("library.json")));
+        let failed = library.import(&root.join("synthetic-b.xrk"));
+        crate::persistence::FAIL_DIRECTORY_SYNC.with(|failure| *failure.borrow_mut() = None);
+        assert!(failed.unwrap_err().contains("directory sync failure"));
+        assert_eq!(library.snapshot().unwrap().entries.len(), 2);
+        assert!(library.cache.is_empty() && library.advanced_cache.is_empty());
+        library
+            .save_workspace(&a.id, serde_json::json!({"axis":"time"}))
+            .unwrap();
+        assert_eq!(
+            Library::open(store)
+                .unwrap()
+                .snapshot()
+                .unwrap()
+                .entries
+                .len(),
+            2
+        );
+        fs::remove_dir_all(root).unwrap();
+    }
+    #[test]
+    fn unreadable_save_outcome_blocks_writes_until_reopen() {
+        let root = std::env::temp_dir().join(format!("apex-unknown-save-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&root);
+        let mut library = Library::open(root.clone()).unwrap();
+        fs::create_dir(root.join("library.json")).unwrap();
+        assert!(library.commit(Manifest::default()).is_err());
+        fs::remove_dir(root.join("library.json")).unwrap();
+        assert!(
+            library.commit(Manifest::default()).is_err(),
+            "unknown save outcomes require a reload before another write"
+        );
+        Library::open(root.clone())
+            .unwrap()
+            .commit(Manifest::default())
+            .unwrap();
+        fs::remove_dir_all(root).unwrap();
+    }
+    #[test]
+    fn decoded_cache_follows_active_recording_and_merge_sources() {
+        let root = std::env::temp_dir().join(format!("apex-active-cache-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&root);
+        cache_fixtures::write_pair(&root).unwrap();
+        let mut library = Library::open(root.join("store")).unwrap();
+        let a = library.import(&root.join("synthetic-a.xrk")).unwrap();
+        let old_a = Arc::downgrade(&library.cache[&a.id]);
+        let b = library.import(&root.join("synthetic-b.xrk")).unwrap();
+        assert!(
+            old_a.upgrade().is_none(),
+            "inactive sample arrays must be released"
+        );
+        let old_b = Arc::downgrade(&library.cache[&b.id]);
+        library.load(&a.id).unwrap();
+        assert!(old_b.upgrade().is_none());
+        for _ in 0..3 {
+            library.validate_formulas(&b.id, &[]).unwrap();
+            library.coach_input(&b.id, None).unwrap();
+            library
+                .analyze_advanced(
+                    &b.id,
+                    "lap-1",
+                    None,
+                    "time",
+                    telemetry::advanced::AdvancedRequest {
+                        tool: "histogram".into(),
+                        hist_channel: Some("channel-0".into()),
+                        ..Default::default()
+                    },
+                    &[],
+                )
+                .unwrap();
+            assert!(library.advanced_cache.is_empty());
+            assert!(library.preview_merge(&[b.id.clone()]).is_err());
+            assert_eq!(library.cache.len(), 1);
+            assert!(library.cache.contains_key(&a.id));
+        }
+        let ids = vec![a.id.clone(), b.id.clone()];
+        let preview = library.preview_merge(&ids).unwrap();
+        let merged = library.merge(&ids, &preview.preview_version, true).unwrap();
+        library.load(&merged.id).unwrap();
+        assert_eq!(library.cache.len(), 2);
+        assert!(library.cache.contains_key(&a.id) && library.cache.contains_key(&b.id));
+        let old_b = Arc::downgrade(&library.cache[&b.id]);
+        library.load(&a.id).unwrap();
+        assert!(old_b.upgrade().is_none());
+        library
+            .advanced_cache
+            .insert("old-result".into(), serde_json::json!([1, 2, 3]));
+        library.load(&b.id).unwrap();
+        assert!(library.advanced_cache.is_empty());
+        assert_eq!(library.cache.len(), 1);
+        fs::remove_dir_all(root).unwrap();
+    }
+}
+
 #[cfg(all(windows, test))]
 mod windows_commit_tests {
     use super::*;
@@ -1288,5 +1675,51 @@ mod windows_commit_tests {
         assert_eq!(recovered.manifest.version, 1);
         assert!(!recovered.warnings.is_empty());
         fs::remove_dir_all(root).unwrap();
+    }
+}
+
+#[cfg(test)]
+mod youtube_reference_tests {
+    use super::*;
+
+    #[test]
+    fn cache_protection_includes_original_and_merged_workspace_sources() {
+        let entry = |id: &str, workspace: Value| -> LibraryEntry {
+            serde_json::from_value(serde_json::json!({
+                "id": id, "source": "fixture.xrk", "name": "fixture", "driver": "", "track": "",
+                "recordedAt": "", "lapCount": 0, "channelCount": 0, "contentVersion": "a".repeat(64),
+                "lastUsed": 0, "workspace": workspace
+            })).unwrap()
+        };
+        let youtube = |id: &str| serde_json::json!({"source":{"type":"youtube","videoId":id}});
+        let library = Library {
+            directory: PathBuf::new(),
+            manifest: Manifest {
+                version: 2,
+                entries: vec![entry(
+                    "original",
+                    serde_json::json!({"video":youtube("TySa_fqgccc")}),
+                )],
+                merges: vec![MergeDefinition {
+                    entry: entry(
+                        "merged",
+                        serde_json::json!({"sourceVideos":{
+                            "a":youtube("abcdefghijk"), "b":youtube("TySa_fqgccc"),
+                            "bad":youtube("../../outside"), "local":{"source":{"type":"local","videoId":"12345678901"}}
+                        }}),
+                    ),
+                    sources: vec![],
+                }],
+                active_session_id: None,
+            },
+            cache: HashMap::new(),
+            advanced_cache: HashMap::new(),
+            warnings: vec![],
+            write_error: None,
+        };
+        assert_eq!(
+            library.youtube_video_ids(),
+            vec!["TySa_fqgccc", "abcdefghijk"]
+        );
     }
 }
