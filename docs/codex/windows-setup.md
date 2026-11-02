@@ -1,5 +1,10 @@
 # Windows Codex handoff
 
+> Historical handoff for the mixed cache/auto-sync branch. On main, automatic
+> synchronization and OpenCV tooling are isolated on `feature/auto-video-sync`.
+> Skip OpenCV provisioning here; manual video sync and decoding remain supported.
+
+
 Audited 2026-11-01 against the Mac's current working tree and local instruction,
 skill, plugin and configuration files. This is a selective recreation, not a
 home-directory migration. No global settings were changed by this audit.
@@ -263,7 +268,7 @@ App-managed built-ins should be obtained from the Windows app, not copied.
   Test dialogs/drop, DPI, Unicode/UNC paths and codec errors on actual Windows.
 - [ ] Build NSIS; inspect the output and perform deliberate disposable-profile
   acceptance. Do not run the hosted-only install/runtime scripts locally.
-- [ ] Keep macOS verification separate. On Apple Silicon provision OpenCV,
+- [ ] Keep macOS verification separate. On Apple Silicon provision
   helpers and weights, then use `npm run build:mac` and native tests there.
 
 For debugging, keep the Developer PowerShell/Tauri terminal output, reproduce

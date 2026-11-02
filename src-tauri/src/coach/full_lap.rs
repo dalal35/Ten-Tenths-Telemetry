@@ -978,7 +978,8 @@ pub(super) fn analyze(
 mod recording_tests {
     use super::*;
     #[test]
-    fn purdue_recordings_report_full_lap_physics_and_holdout_residuals() {
+    #[ignore = "requires private XRKs; run npm run test:native:recordings"]
+    fn private_recording_purdue_recordings_report_full_lap_physics_and_holdout_residuals() {
         for file in ["0361", "0362"] {
             let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(format!(
                 "../data/yash dalal_59_PURDUE GP IN_Warm-up_a_{file}.xrk"

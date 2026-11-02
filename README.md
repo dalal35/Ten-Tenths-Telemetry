@@ -1,3 +1,8 @@
+> **Automatic video synchronization development:** estimator/matching work here
+> remains experimental and must not be merged into main. Manual synchronization
+> remains available. The main-only automatic-exclusion release check intentionally
+> rejects this branch. The legacy interval-coach experiment is preserved separately.
+
 <p align="center">
   <picture>
     <source media="(prefers-reduced-motion: reduce)" srcset="docs/readme/hero-static.svg" />
@@ -125,7 +130,7 @@ The application resolves its library through Tauri's app-data API, normally `%AP
 
 For shared agent instructions and a clean Windows Codex setup, see [AGENTS.md](AGENTS.md) and the [Windows setup checklist](docs/codex/windows-setup.md).
 
-Requires Node 20+ and stable Rust. Apple Silicon development also requires Apple's Command Line Tools (`xcode-select --install`), CMake and curl. Before running `npm run tauri dev` or native Rust tests, run `node scripts/prepare-opencv.mjs` once; this builds the bundled OpenCV libraries.
+Requires Node 22+ and stable Rust. Apple Silicon development also requires Apple's Command Line Tools (`xcode-select --install`), CMake and curl. Automatic video synchronization experiments are preserved on `feature/auto-video-sync`; this branch supports manual synchronization.
 
 ```sh
 npm ci

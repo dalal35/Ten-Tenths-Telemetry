@@ -1,5 +1,11 @@
 # Ten Tenths Telemetry
 
+> This is the automatic-video-sync development branch. On Apple Silicon run
+> `node scripts/prepare-opencv.mjs` before native builds/tests. Motion/scene
+> matching remains unsupported on Windows. Main keeps manual synchronization.
+> The no-auto release guard is intentionally main-only and rejects this branch.
+
+
 Read the current code and `git status --short` before editing. Preserve unrelated
 work, including untracked files. This guide describes the current source, which
 may be ahead of published releases. Start setup with
@@ -40,7 +46,7 @@ may be ahead of published releases. Start setup with
 | Coaching UI | `src/coach/` renders Rust evidence, potential and hypotheses. Current coaching commands require an original recording rather than a merged recording. |
 | Physics | Rust `coach/analysis.rs`, `modeled.rs`, `simulation.rs`, `full_lap.rs`, `prediction.rs`, `full_lap_coaching.rs`: deterministic evidence, observed capability, cyclic distance-domain speed profiles, scenarios and predictive validation. |
 | Offline interpretation | `coach/runtime.rs`, `service.rs`, `commands.rs`: directly linked pinned llama.cpp binding and Gemma 3 1B Q4_K_M. Integrity-checked model, bounded validated output, cancellation, single active inference, cache and computed fallback. No cloud/Ollama service is required. |
-| Video | `src/video/`: HTML/YouTube players, sync controller, mappings and segments. Rust `video.rs` authorizes media; `video_analysis/` decodes frames; `video_sync/` handles scan/matching/lap sequences/multi-recording assignment. |
+| Video | `src/video/`: HTML/YouTube players, sync controller, mappings and segments. Rust `video.rs` authorizes media; `video_analysis/` decodes frames. Automatic estimation lives on `feature/auto-video-sync`. |
 | Download cache | Rust `youtube/` manages validated URLs, bundled subprocesses, cancellation, protected cache references and leases. `scripts/prepare-youtube-tools.mjs` provisions pinned yt-dlp, Deno and source-built FFmpeg/ffprobe on the build host. |
 | Website | `website/`, `vite.website.config.ts`, `scripts/build-website.mjs`: static site and synthetic browser demo reusing the app with substituted bridge/plots/video. It does not exercise native IPC or inference. |
 
@@ -69,6 +75,7 @@ npm ci
 npm test
 npm run build
 npm run test:release
+npm run test:native:recordings # local private-XRK acceptance after native provisioning
 npx playwright install chromium
 npm run test:branding
 npm run test:sidebar
@@ -90,6 +97,9 @@ cargo test --locked --manifest-path src-tauri/Cargo.toml --lib --test persistenc
 npm run tauri dev
 ```
 
+Private coaching acceptance is explicit: `npm run test:native:recordings` preflights
+both local XRKs and discovers exactly 15 tests before running every original
+assertion. Public `--lib` checks skip those labeled private-fixture tests.
 Full `cargo test` includes integrations needing specific ignored `data/` XRKs;
 `test:plots`, `test:advanced`, `test:coach` also need private recordings/native
 examples. Inspect each test's inputs first. Missing private fixtures are not
@@ -105,8 +115,7 @@ Synthetic parity fixtures and checked-in Windows media provide public coverage.
   `npm run build:windows` for the unsigned per-user NSIS installer.
 - **macOS:** shipping build is Apple Silicon/macOS 13+, system WebKit and
   AVFoundation. Xcode command-line tools, CMake, Python 3, curl, make and clang
-  are build prerequisites. Run `node scripts/prepare-opencv.mjs` before native
-  development/tests. `npm run build:mac` builds/signs/verifies the app and DMG;
+  are build prerequisites. `npm run build:mac` builds/signs/verifies the app and DMG;
   the configured signature is ad hoc, not notarized.
 - Provision media helpers before native development/builds with
   `node scripts/prepare-youtube-tools.mjs --download`. Before packaging or real
@@ -115,9 +124,8 @@ Synthetic parity fixtures and checked-in Windows media provide public coverage.
   not runtime requirements. Do not commit weights, sidecars or `.tools/` caches.
 - Windows decoding uses Media Foundation/COM; macOS uses AVFoundation/Objective-C.
   Preserve presentation timestamps, rotation, pixel stride, bounded delivery and
-  cancellation. **Motion tracking and scene descriptors currently require Apple
-  Silicon** (`video_analysis/motion.rs`); Windows automatic video-sync parity
-  must not be claimed. Installing OpenCV on Windows does not enable that code.
+  cancellation. Automatic motion/scene matching is isolated on
+  `feature/auto-video-sync`; manual mappings remain supported on main.
 - Build each native installer on its target OS. Keep platform implementations
   gated and portable shared logic outside platform modules; do not port Mac
   framework commands or Unix environment syntax into PowerShell.

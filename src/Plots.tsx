@@ -60,7 +60,17 @@ export default function Plots({analysis,axis,onCursor,resetVersion,cursor=null,e
     });
     if(initialZoom){const max=Math.max(...samples.map(s=>s.x.at(-1)??0),analysis.delta?.x.at(-1)??0,1);if(initialZoom.min>=0&&initialZoom.max<=max)plots.current.forEach(p=>p.setScale('x',initialZoom));}
     initialized=true;
-    return()=>{initialized=false;plots.current.forEach(p=>(p as uPlot&{dispose:()=>void}).dispose());plots.current=[];};
+    return()=>{
+      initialized=false;
+      plots.current.forEach(p=>{
+        // A disposed uPlot can outlive its canvas in browser allocation caches.
+        // Release our closure so it cannot retain detached UI and recording props.
+        const plot=p as uPlot&{dispose?:()=>void},dispose=plot.dispose;
+        delete plot.dispose;
+        dispose?.();
+      });
+      plots.current=[];
+    };
   },[analysis,axis,layout,hasContext]);
   useEffect(()=>{
     if(!active||!initialZoom||!Number.isFinite(initialZoom.min)||!Number.isFinite(initialZoom.max)||initialZoom.max<=initialZoom.min)return;

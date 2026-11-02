@@ -1,5 +1,10 @@
 # Windows development handoff
 
+> Historical handoff for the mixed cache/auto-sync branch. On main, automatic
+> synchronization and OpenCV tooling are isolated on `feature/auto-video-sync`.
+> Skip OpenCV provisioning here; manual video sync and decoding remain supported.
+
+
 Reviewed 2026-11-01. Development source handoff only; native Windows acceptance
 is still required. No push, tag, publication, or remote workflow dispatch was
 performed.

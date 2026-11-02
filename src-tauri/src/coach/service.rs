@@ -713,7 +713,8 @@ mod tests {
     }
 
     #[test]
-    fn model_receives_fastest_telemetry_envelope_and_competing_simulations() {
+    #[ignore = "requires private XRKs; run npm run test:native:recordings"]
+    fn private_recording_model_receives_fastest_telemetry_envelope_and_competing_simulations() {
         let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
             .join("../data/yash dalal_59_PURDUE GP IN_Warm-up_a_0362.xrk");
         let session = crate::telemetry::parse_session(&path).unwrap();
@@ -765,7 +766,8 @@ mod tests {
     }
 
     #[test]
-    fn merged_model_input_keeps_all_corners_and_source_qualified_physics_facts() {
+    #[ignore = "requires private XRKs; run npm run test:native:recordings"]
+    fn private_recording_merged_model_input_keeps_all_corners_and_source_qualified_physics_facts() {
         use crate::{
             merging::{self, MergeInfo, MergeSource, SourceRef},
             telemetry::{self, Session},

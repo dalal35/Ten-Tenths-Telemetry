@@ -1,5 +1,5 @@
 // Actual application with IPC simulated from a real, read-only XRK diagnostic.
-import {launchBrowser,browserTestEntries} from './browser.mjs';
+import {launchBrowser,browserTestEntries,browserTestNoWatch} from './browser.mjs';
 import {expect} from '@playwright/test';
 import {createServer} from 'vite';
 import {readFileSync,readdirSync} from 'node:fs';
@@ -11,7 +11,7 @@ const data=process.env.COACH_UI_DATA?JSON.parse(readFileSync(process.env.COACH_U
 let server,browser;
 try{
  console.log('Coach UI: creating test server');
- server=await createServer({optimizeDeps:{entries:browserTestEntries},server:{host:'127.0.0.1',port:0,strictPort:false,hmr:false,watch:null}});await server.listen();console.log('Coach UI: launching browser');browser=await launchBrowser();console.log('Coach UI: browser ready');
+ server=await createServer({plugins:[browserTestNoWatch],optimizeDeps:{entries:browserTestEntries},server:{host:'127.0.0.1',port:0,strictPort:false,hmr:false,watch:null}});await server.listen();console.log('Coach UI: launching browser');browser=await launchBrowser();console.log('Coach UI: browser ready');
  console.log('Coach UI: opening page');const page=await browser.newPage({viewport:{width:1600,height:1100}});page.setDefaultTimeout(15000);page.setDefaultNavigationTimeout(15000);const errors=[];page.on('pageerror',e=>errors.push(e.message));
  console.log('Coach UI: transferring recording fixture');
  await page.addInitScript(serialized=>{

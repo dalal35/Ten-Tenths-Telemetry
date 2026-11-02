@@ -1622,7 +1622,8 @@ mod tests {
             .all(|p| p.lap_id == report.best_lap_id));
     }
     #[test]
-    fn real_recordings_offer_qualified_tradeoffs_without_claiming_subresolution_time() {
+    #[ignore = "requires private XRKs; run npm run test:native:recordings"]
+    fn private_recording_real_recordings_offer_qualified_tradeoffs_without_claiming_subresolution_time() {
         for file in ["0361", "0362"] {
             let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(format!(
                 "../data/yash dalal_59_PURDUE GP IN_Warm-up_a_{file}.xrk"
@@ -1665,7 +1666,8 @@ mod tests {
         }
     }
     #[test]
-    fn fastest_lap_alone_can_offer_an_apex_recovery_experiment() {
+    #[ignore = "requires private XRKs; run npm run test:native:recordings"]
+    fn private_recording_fastest_lap_alone_can_offer_an_apex_recovery_experiment() {
         let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
             .join("../data/yash dalal_59_PURDUE GP IN_Warm-up_a_0362.xrk");
         let mut session = telemetry::parse_session(&path).unwrap();
@@ -1862,7 +1864,8 @@ mod tests {
         assert!(r.segments.iter().all(|p| p.lap_id == r.best_lap_id));
     }
     #[test]
-    fn real_xrk_best_lap_alone_keeps_screening_without_inventing_findings_or_gains() {
+    #[ignore = "requires private XRKs; run npm run test:native:recordings"]
+    fn private_recording_real_xrk_best_lap_alone_keeps_screening_without_inventing_findings_or_gains() {
         let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
             .join("../data/yash dalal_59_PURDUE GP IN_Warm-up_a_0362.xrk");
         let mut s = telemetry::parse_session(&path).unwrap();
@@ -2141,7 +2144,8 @@ mod tests {
         assert!(!r.opportunities.iter().any(|o| o.kind == "measured-shift"));
     }
     #[test]
-    fn recorded_sample_evidence_and_partition_are_finite() {
+    #[ignore = "requires private XRKs; run npm run test:native:recordings"]
+    fn private_recording_recorded_sample_evidence_and_partition_are_finite() {
         let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
             .join("../data/yash dalal_59_PURDUE GP IN_Warm-up_a_0362.xrk");
         let s = telemetry::parse_session(&path).unwrap();
@@ -2175,7 +2179,8 @@ mod tests {
         }
     }
     #[test]
-    fn time_warped_real_xrk_detects_interior_momentum_interruption_without_faster_lap() {
+    #[ignore = "requires private XRKs; run npm run test:native:recordings"]
+    fn private_recording_time_warped_real_xrk_detects_interior_momentum_interruption_without_faster_lap() {
         let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
             .join("../data/yash dalal_59_PURDUE GP IN_Warm-up_a_0362.xrk");
         let mut s = telemetry::parse_session(&path).unwrap();
@@ -2232,7 +2237,8 @@ mod tests {
             && o.estimated_gain_seconds.is_none()));
     }
     #[test]
-    fn second_real_xrk_always_targets_best_and_keeps_subresolution_gains_out() {
+    #[ignore = "requires private XRKs; run npm run test:native:recordings"]
+    fn private_recording_second_real_xrk_always_targets_best_and_keeps_subresolution_gains_out() {
         let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
             .join("../data/yash dalal_59_PURDUE GP IN_Warm-up_a_0361.xrk");
         let s = telemetry::parse_session(&path).unwrap();
@@ -2243,7 +2249,8 @@ mod tests {
         assert_eq!(r.section_assessments.len(), 11);
     }
     #[test]
-    fn broken_speed_coverage_withholds_single_lap_momentum_findings() {
+    #[ignore = "requires private XRKs; run npm run test:native:recordings"]
+    fn private_recording_broken_speed_coverage_withholds_single_lap_momentum_findings() {
         let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
             .join("../data/yash dalal_59_PURDUE GP IN_Warm-up_a_0362.xrk");
         let mut s = telemetry::parse_session(&path).unwrap();
@@ -2268,7 +2275,8 @@ mod tests {
             .any(|o| o.kind == "momentum-interruption"));
     }
     #[test]
-    fn enhanced_best_uses_disjoint_validated_scenarios_even_without_faster_laps() {
+    #[ignore = "requires private XRKs; run npm run test:native:recordings"]
+    fn private_recording_enhanced_best_uses_disjoint_validated_scenarios_even_without_faster_laps() {
         let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
             .join("../data/yash dalal_59_PURDUE GP IN_Warm-up_a_0362.xrk");
         let mut s = telemetry::parse_session(&path).unwrap();
@@ -2359,7 +2367,8 @@ mod tests {
         assert!(scenario_dominates(&range(0.03, 0.2), &measured));
     }
     #[test]
-    fn full_session_preserves_local_hypotheses_and_recalibrates_physics() {
+    #[ignore = "requires private XRKs; run npm run test:native:recordings"]
+    fn private_recording_full_session_preserves_local_hypotheses_and_recalibrates_physics() {
         let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
             .join("../data/yash dalal_59_PURDUE GP IN_Warm-up_a_0362.xrk");
         let mut s = telemetry::parse_session(&path).unwrap();
@@ -2548,7 +2557,8 @@ mod tests {
         assert!((total - 1.75).abs() < 1e-9);
     }
     #[test]
-    fn real_recordings_have_a_single_integrated_full_lap_alternative() {
+    #[ignore = "requires private XRKs; run npm run test:native:recordings"]
+    fn private_recording_real_recordings_have_a_single_integrated_full_lap_alternative() {
         for file in ["0361", "0362"] {
             let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(format!(
                 "../data/yash dalal_59_PURDUE GP IN_Warm-up_a_{file}.xrk"
@@ -2619,7 +2629,8 @@ mod tests {
         }
     }
     #[test]
-    fn merged_real_recordings_keep_distinct_grounded_coaching_and_local_intervals() {
+    #[ignore = "requires private XRKs; run npm run test:native:recordings"]
+    fn private_recording_merged_real_recordings_keep_distinct_grounded_coaching_and_local_intervals() {
         let recordings = ["0361", "0362"]
             .iter()
             .map(|file| {

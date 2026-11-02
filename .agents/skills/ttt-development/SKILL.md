@@ -25,9 +25,8 @@ Choose verification by the behavior changed:
 | Website/demo | `npm run build:website` and `npm run test:website`; do not equate synthetic demo results with native coverage. |
 
 Windows uses MSVC for the app and Media Foundation for decoding. Apple Silicon
-uses AVFoundation and the separately provisioned OpenCV motion backend. Motion
-and scene descriptor extraction currently return UnsupportedPlatform elsewhere.
-Do not install OpenCV on Windows or remove platform guards to imply parity.
+uses AVFoundation. Automatic motion/scene matching lives on
+`feature/auto-video-sync`; manual synchronization does not require OpenCV.
 
 Reuse existing implementations and dependencies. Keep source authorization,
 recording integrity, calibration, uncertainty, cancellation and persistence
