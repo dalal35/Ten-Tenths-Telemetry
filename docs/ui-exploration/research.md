@@ -1,0 +1,39 @@
+# UI exploration research
+
+Research notes for the motorsport dashboard direction. Links are provided for review; visual references are for observation and should not be treated as reusable assets. The read-only research pass did not install tools; the completed setup and verified current state are recorded in [tooling.md](tooling.md).
+
+## Product and visual references
+
+| Reference | Factual observation | Design use / limitation |
+|---|---|---|
+| [F1 Live Timing](https://www.formula1.com/en/timing/f1-live) and [F1 redesign announcement](https://corp.formula1.com/formula-1-launches-newpersonalised-mobile-app-andwebsite/) | F1 describes personalized driver/team tracking, embedded timing telemetry, adaptive type sizing and dark/light modes. Live Timing features are subscription-gated. | Useful domain reference for timing and telemetry concepts. Access may be gated; do not assume all states can be inspected. |
+| [Linear Inbox documentation](https://linear.app/docs/inbox) | Priority and Other tabs, sidebar entry, keyboard navigation, item actions, and configurable display options are documented. | Useful reference for information hierarchy and navigation in a dense operational interface. Not motorsport-specific. |
+| [AiM RaceStudio 3](https://www.aimtechnologies.com/support/downloads/software-downloads/race-studio-3/) and [AiM PDM32 user guide](https://aimsports.com/download/doc/eng/pdm32-pdm08/PDM32_user_guide_eng.pdf) | Official materials describe multi-window analysis of channels, GPS, video and laps; layouts include time/distance, histogram and channel report. The guide includes desktop UI screenshots. | Strong professional engineering-software reference. UI and screenshots are proprietary; observe patterns only, do not copy their assets. |
+| [MoTeC i2](https://motec.com.au/products/i2) | Official product page describes data analysis capabilities and input from professional race teams. It does not offer a detailed public UI walkthrough in the page retrieved. | Potential domain reference, but less useful for concrete screen-level analysis than AiM material. |
+| [Awwwards RESN–VanMoof case study](https://assets.awwwards.com/awards/gallery/2020/10/resn-vanmoof.pdf) | Awwwards case-study PDF shows a dark electric-bike launch/product experience, red accenting and sequential product feature navigation. | Useful premium engineering presentation reference; this is campaign/product marketing, not operational software. Images remain third-party assets. |
+| [Godly website gallery](https://godly.design/sites/) | Curated site index with entries including Cofounder, Agentwork, LocalCan and Gumloop. | Discovery source only. No motorsport-specific entry was verified in the research; inspect individual work before drawing conclusions. |
+| [Mobbin](https://mobbin.com/) | Public landing page advertises Linear screenshots and describes its shipped-app design reference library. | A specific Linear desktop screen could not be verified publicly in this research. Screenshots are references, not assets for reuse; check Mobbin terms. |
+
+## Component and implementation references
+
+| Reference | Source details | Assessment / caveats |
+|---|---|---|
+| [21st Sidebar by @wensity](https://docs.21st.dev/@wensity/components/sidebar) | Public demo usage shows a collapsible React/Tailwind sidebar with icon-rail mode, section headings, badges, active state and user footer. Listed dependencies: `clsx`, `framer-motion`, `@base-ui/react`, `tailwind-merge`, `@tabler/icons-react`. Page lists MIT. | Relevant app-shell reference. 21st states component source requires an account; source retrieval was not completed. Do not claim the public usage demo is the component implementation. |
+| [21st Command Menu by UaibyVictor](https://21st.dev/@victor-teles/components/command-menu) | Public usage demonstrates grouped command items and shortcuts; described as keyboard navigable with reduced-motion support. Dependencies listed: `clsx`, `lucide-react`, `tailwind-merge`, `class-variance-authority`. Page lists MIT. | Could inform command/search patterns, but actual implementation source is account-gated. Review accessibility and behavior before adopting. |
+| [React Bits AnimatedList](https://raw.githubusercontent.com/DavidHDev/react-bits/main/src/content/Components/AnimatedList/AnimatedList.jsx) | Coordinator retrieved the raw upstream implementation; it has a large implementation and Hugeicons dependency. Repository license is [MIT + Commons Clause](https://raw.githubusercontent.com/DavidHDev/react-bits/main/LICENSE.md). | Consider only a small, adapted stagger/reveal pattern if useful. The Commons Clause is an additional restriction; review it before reuse. Avoid adopting the component wholesale for a data-dense dashboard. |
+| [React Bits CountUp](https://raw.githubusercontent.com/DavidHDev/react-bits/main/src/ts-default/TextAnimations/CountUp/CountUp.tsx) | Coordinator retrieved raw upstream TypeScript implementation. It is a large rolling/count component importing `motion/react`; coordinator is adapting only a lean Motion numeric animation for selected lap time, not cursor-driven tweening. License is MIT + Commons Clause (same repository license above). | Treat as inspiration for restrained selected-value feedback, not as a drop-in dependency. Confirm exact behavior and license scope before reuse. |
+| [shadcn MCP documentation](https://ui.shadcn.com/docs/mcp) and [official native-select registry JSON](https://ui.shadcn.com/r/styles/new-york-v4/native-select.json) | Official shadcn MCP provides registry search/view/install; registry configuration is in `components.json`. Coordinator initialized the MCP, searched native-select, and viewed native-select/dialog/tabs metadata; the raw native-select registry item was retrieved. | Use the native select as a foundation where it fits. Any adaptation should preserve local design and interaction requirements. Standard public registry use does not require private-registry authentication; private registries may need tokens. |
+
+## Generated design guidance
+
+The generated notes [Pro Max race](research/pro-max-race.md), [Pro Max lab](research/pro-max-lab.md), and [Pro Max cockpit](research/pro-max-cockpit.md) are verbatim tool outputs. They contain candidate recommendations, including some irrelevant marketing patterns and glass treatments rejected for this brief. Treat them as evidence of what the tool suggested, not as an approved visual system or blanket adoption instruction.
+
+## MCP/setup access notes
+
+- [21st MCP docs](https://docs.21st.dev/mcp): most MCP clients use an API key (`x-api-key`, or Bearer); Claude Desktop and Lovable use OAuth. CLI login saves a token locally. Search is free; free accounts are limited to two component-code retrievals per day. No setup was performed during this research.
+- [UI UX Pro Max official repository](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill): this is an MIT-licensed agent skill/CLI, not an MCP server; its setup does not require an API key. CLI installation uses `npx ui-ux-pro-max-cli init --ai <platform>`. Generated notes above are outputs only; nothing was installed as part of this research.
+- [React Bits MCP documentation](https://pro.reactbits.dev/docs/mcp): React Bits Pro uses the shadcn MCP flow and requires `REACTBITS_LICENSE_KEY`, both `@reactbits-starter` and `@reactbits-pro` registries in `components.json`, and shadcn CLI 3.0+. This is separate from the public upstream React Bits repository and its license.
+
+## Source and licensing cautions
+
+Use proprietary product screens and gallery imagery to study hierarchy and interaction only. Do not copy third-party screenshots, photography, logos or other artwork into the product without rights. For components, verify the exact source version, dependencies, license text and behavior before incorporating code; a listing’s displayed license does not replace review of upstream terms.

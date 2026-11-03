@@ -1,0 +1,95 @@
+{
+  "scope": "Synthetic isolated prototypes, Chromium; no native IPC/media/inference",
+  "results": [
+    {
+      "direction": "race",
+      "size": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 920
+      },
+      "documentHeight": 920,
+      "checks": "lap/reference, same-lap zero, corner keyboard focus, scoped slider, command empty/Escape, navigation preservation, no horizontal overflow"
+    },
+    {
+      "direction": "race",
+      "size": "medium",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "documentHeight": 917,
+      "checks": "lap/reference, same-lap zero, corner keyboard focus, scoped slider, command empty/Escape, navigation preservation, no horizontal overflow"
+    },
+    {
+      "direction": "race",
+      "size": "compact",
+      "viewport": {
+        "width": 600,
+        "height": 500
+      },
+      "documentHeight": 1333,
+      "checks": "lap/reference, same-lap zero, corner keyboard focus, scoped slider, command empty/Escape, navigation preservation, no horizontal overflow"
+    },
+    {
+      "direction": "lab",
+      "size": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 920
+      },
+      "documentHeight": 962,
+      "checks": "lap/reference, same-lap zero, corner keyboard focus, scoped slider, command empty/Escape, navigation preservation, no horizontal overflow"
+    },
+    {
+      "direction": "lab",
+      "size": "medium",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "documentHeight": 958,
+      "checks": "lap/reference, same-lap zero, corner keyboard focus, scoped slider, command empty/Escape, navigation preservation, no horizontal overflow"
+    },
+    {
+      "direction": "lab",
+      "size": "compact",
+      "viewport": {
+        "width": 600,
+        "height": 500
+      },
+      "documentHeight": 1271,
+      "checks": "lap/reference, same-lap zero, corner keyboard focus, scoped slider, command empty/Escape, navigation preservation, no horizontal overflow"
+    },
+    {
+      "direction": "cockpit",
+      "size": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 920
+      },
+      "documentHeight": 944,
+      "checks": "lap/reference, same-lap zero, corner keyboard focus, scoped slider, command empty/Escape, navigation preservation, no horizontal overflow"
+    },
+    {
+      "direction": "cockpit",
+      "size": "medium",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "documentHeight": 966,
+      "checks": "lap/reference, same-lap zero, corner keyboard focus, scoped slider, command empty/Escape, navigation preservation, no horizontal overflow"
+    },
+    {
+      "direction": "cockpit",
+      "size": "compact",
+      "viewport": {
+        "width": 600,
+        "height": 500
+      },
+      "documentHeight": 1457,
+      "checks": "lap/reference, same-lap zero, corner keyboard focus, scoped slider, command empty/Escape, navigation preservation, no horizontal overflow"
+    }
+  ]
+}

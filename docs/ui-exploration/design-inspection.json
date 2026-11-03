@@ -1,0 +1,106 @@
+{
+  "scope": "Production bundle; app-screen design inspector",
+  "results": [
+    {
+      "direction": "race",
+      "findings": [
+        {
+          "level": "WARN",
+          "id": "tiny-text",
+          "width": 1440,
+          "message": "83% of the text is under 13px.",
+          "fix": "Data and labels read at 13–14px; keep 11–12px for sublines and axis ticks.",
+          "alsoAt": [
+            1024,
+            600
+          ]
+        }
+      ],
+      "widths": [
+        {
+          "width": 1440,
+          "height": 900
+        },
+        {
+          "width": 1024,
+          "height": 768
+        },
+        {
+          "width": 600,
+          "height": 375
+        }
+      ]
+    },
+    {
+      "direction": "lab",
+      "findings": [
+        {
+          "level": "WARN",
+          "id": "tiny-text",
+          "width": 1440,
+          "message": "91% of the text is under 13px.",
+          "fix": "Data and labels read at 13–14px; keep 11–12px for sublines and axis ticks.",
+          "alsoAt": [
+            1024,
+            600
+          ]
+        }
+      ],
+      "widths": [
+        {
+          "width": 1440,
+          "height": 900
+        },
+        {
+          "width": 1024,
+          "height": 768
+        },
+        {
+          "width": 600,
+          "height": 375
+        }
+      ]
+    },
+    {
+      "direction": "cockpit",
+      "findings": [
+        {
+          "level": "WARN",
+          "id": "mixed-font-headline",
+          "width": 1440,
+          "message": "2 headline(s) switch typeface or to italic mid-line (the \"one italic serif word\" move).",
+          "fix": "Set the whole headline in one face. Emphasis comes from the words.",
+          "alsoAt": [
+            1024,
+            600
+          ]
+        },
+        {
+          "level": "WARN",
+          "id": "tiny-text",
+          "width": 1440,
+          "message": "78% of the text is under 13px.",
+          "fix": "Data and labels read at 13–14px; keep 11–12px for sublines and axis ticks.",
+          "alsoAt": [
+            1024,
+            600
+          ]
+        }
+      ],
+      "widths": [
+        {
+          "width": 1440,
+          "height": 900
+        },
+        {
+          "width": 1024,
+          "height": 768
+        },
+        {
+          "width": 600,
+          "height": 375
+        }
+      ]
+    }
+  ]
+}
