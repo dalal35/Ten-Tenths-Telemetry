@@ -34,7 +34,13 @@ export default function SessionDetails({entry,onSave,onClose}:Props){
     initial={reduced?false:{scale:.985,y:6,opacity:0}} animate={{scale:1,y:0,opacity:1}} exit={reduced?{opacity:0,transition:{duration:0}}:{scale:.995,y:2,opacity:0,transition:{duration:.12}}} transition={reduced?{duration:0}:motionTokens.spring}
     onKeyDown={e=>{e.stopPropagation();}} onCancel={e=>{e.preventDefault();if(!busy)onClose();}}>
     <form onSubmit={e=>{e.preventDefault();void save();}}>
+      <div className="library-dialog-kicker">SESSION LIBRARY <span> / </span> DETAILS</div>
       <h2 id="session-details-title">Edit session details</h2>
+      <p className="library-dialog-intro">Keep the details in your library easy to recognize. Your original recording stays in place.</p>
+      <div className="recording-summary" aria-label="Recording summary">
+        <div className="recording-summary-source"><span>{entry.mergeSources?'Combined session':'Original recording'}</span><strong title={entry.source}>{entry.mergeSources?`${entry.mergeSources.length} source recordings`:entry.source.split(/[\\/]/).pop()||'Source unavailable'}</strong></div>
+        <div className="recording-summary-stats"><span><strong>{entry.lapCount}</strong> laps</span><span><strong>{entry.channelCount}</strong> channels</span><span><strong>{entry.track.trim()||'Unknown'}</strong> circuit</span></div>
+      </div>
       <label>Session name<input autoFocus required maxLength={200} value={name} disabled={busy} onChange={e=>setName(e.target.value)}/></label>
       <label>Recording date<input type="date" min="1970-01-01" max="9999-12-31" value={date} disabled={busy} onChange={e=>setDate(e.target.value)}/></label>
       <label>Driver<input maxLength={200} value={driver} disabled={busy} onChange={e=>setDriver(e.target.value)}/></label>

@@ -17,6 +17,7 @@
     "test:branding": "node scripts/verify-branding.mjs",
     "test:plots": "node scripts/verify-plots.mjs",
     "test:sidebar": "node scripts/verify-sidebar.mjs",
+    "test:library:premium": "node scripts/verify-library-premium.mjs",
     "test:workflow": "node scripts/verify-workflow.mjs",
     "test:advanced": "node scripts/verify-advanced.mjs",
     "test:coach": "node scripts/verify-coach.mjs",

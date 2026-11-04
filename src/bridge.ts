@@ -27,31 +27,38 @@ export async function authorizeLocalVideo(path: string): Promise<LocalVideoInfo>
   if (!isNative) throw new Error('Open the native app to attach a local video.');
   return invoke<LocalVideoInfo>('authorize_local_video', { path });
 }
-export async function importPaths(paths: string[]): Promise<Session[]> {
+export type ImportProgress = {index:number;total:number;path:string} & ({status:'reading'}|{status:'ready';session:Session}|{status:'error';error:string});
+export async function importPaths(paths: string[], observe?: (progress:ImportProgress)=>void): Promise<Session[]> {
   if (!isNative) throw new Error('Open the desktop app to import XRK files.');
   const results: Session[] = [];
   const errors: string[] = [];
-  for (const path of paths) {
-    try { results.push(await invoke<Session>('import_session', { path })); }
-    catch (error) { errors.push(`${path.split(/[\\/]/).pop() || path}: ${String(error)}`); }
+  for (const [index,path] of paths.entries()) {
+    const file={index,total:paths.length,path};
+    observe?.({...file,status:'reading'});
+    let result:Session;
+    try { result=await invoke<Session>('import_session', { path }); }
+    catch (error) { errors.push(`${path.split(/[\\/]/).pop() || path}: ${String(error)}`);observe?.({...file,status:'error',error:String(error)});continue; }
+    results.push(result);
+    observe?.({...file,status:'ready',session:result});
   }
   if (errors.length && !results.length) throw new Error(errors.join('\n'));
   if (errors.length) results[0].warnings.push(...errors.map(error=>`Import failed: ${error}`));
   return results;
 }
-export async function importFiles(): Promise<Session[]> {
+export async function importFiles(observe?: (progress:ImportProgress)=>void): Promise<Session[]> {
   if (!isNative) throw new Error('Open the desktop app to import XRK files.');
   const selected = await open({ multiple: true, directory: false, filters: [{ name: 'AiM telemetry', extensions: ['xrk'] }] });
-  return selected ? importPaths(Array.isArray(selected) ? selected : [selected]) : [];
+  return selected ? importPaths(Array.isArray(selected) ? selected : [selected],observe) : [];
 }
 export async function analyzeSession(sessionId: string, primaryId: string, comparisonId: string | null, axis: Axis, channelIds: string[],formulas:import('./advancedState').Formula[]=[]): Promise<Analysis> {
   return invoke<Analysis>('analyze_session', { sessionId, primaryId, comparisonId, axis, channelIds,formulas });
 }
 export const analyzeAdvanced=(sessionId:string,primaryId:string,comparisonId:string|null,axis:Axis,request:import('./advancedState').AdvancedConfig,formulas:import('./advancedState').Formula[])=>invoke<import('./types').AdvancedResult>('analyze_advanced',{sessionId,primaryId,comparisonId,axis,request,formulas});
 export const validateFormulas=(sessionId:string,formulas:import('./advancedState').Formula[])=>invoke<{id:string;name:string;unit:string}[]>('validate_formulas',{sessionId,formulas});
-export async function subscribeFileDrop(callback: (paths: string[]) => void): Promise<() => void> {
+export async function subscribeFileDrop(callback: (paths: string[]) => void,onPresence?:(active:boolean)=>void): Promise<() => void> {
   if (!isNative) return () => {};
   return getCurrentWebview().onDragDropEvent(event => {
+    onPresence?.(event.payload.type==='enter'||event.payload.type==='over');
     if (event.payload.type === 'drop') callback(event.payload.paths);
   });
 }

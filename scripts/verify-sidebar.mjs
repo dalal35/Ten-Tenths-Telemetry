@@ -8,7 +8,7 @@ import {mkdirSync} from 'node:fs';
 let server, browser;
 try {
   mkdirSync('.tools', {recursive:true});
-  server=await createServer({plugins:[browserTestNoWatch],optimizeDeps:{entries:browserTestEntries},server:{host:'127.0.0.1',port:0,strictPort:false,hmr:false}});
+  server=await createServer({configLoader:'runner',plugins:[browserTestNoWatch],optimizeDeps:{entries:browserTestEntries},server:{host:'127.0.0.1',port:0,strictPort:false,hmr:false}});
   await server.listen();
   console.log('Sidebar verification: Vite ready');
   browser=await launchBrowser();
@@ -219,11 +219,12 @@ try {
   for(const view of ['Telemetry','Advanced','Video']){
     await page.getByRole('button',{name:view,exact:true}).click();
     if(view==='Advanced'){
-      const canvas=page.locator('.analysis-surface canvas');await canvas.waitFor();await canvas.hover({position:{x:180,y:120}});await page.mouse.wheel(0,-120);await page.waitForTimeout(120);
-      await page.evaluate(()=>window.sidebarAdvancedTicks=window.sidebarCanvasTicks.get(document.querySelector('.analysis-surface canvas')));
+      const canvas=page.locator('.analysis-surface canvas:not(.analysis-cursor-layer)');await canvas.waitFor();await canvas.hover({position:{x:180,y:120}});await page.mouse.wheel(0,-120);await page.waitForTimeout(120);
+      await page.evaluate(()=>window.sidebarAdvancedTicks=window.sidebarCanvasTicks.get(document.querySelector('.analysis-surface canvas:not(.analysis-cursor-layer)')));
     }
     if(view==='Video'){
-      await page.getByRole('button',{name:'Attach MP4 / MOV',exact:true}).click();
+      await page.locator('.workspace-viewport').evaluate(el=>{el.scrollTop=0;});
+      await page.getByRole('button',{name:'Attach footage',exact:true}).click();
       await expect(page.getByRole('button',{name:'Play',exact:true})).toBeEnabled();
       await page.getByRole('button',{name:'Play',exact:true}).click();
       await page.evaluate(()=>{document.querySelector('video').currentTime=7;});
@@ -231,14 +232,14 @@ try {
       await page.getByRole('button',{name:'Sync Here',exact:true}).click();
     }
     await page.locator('.uplot').first().waitFor();
-    await page.evaluate(()=>{window.sidebarPlot=document.querySelector('.uplot');window.sidebarCanvas=document.querySelector('.analysis-surface canvas');window.sidebarVideo=document.querySelector('video');});
+    await page.evaluate(()=>{window.sidebarPlot=document.querySelector('.uplot');window.sidebarCanvas=document.querySelector('.analysis-surface canvas:not(.analysis-cursor-layer)');window.sidebarVideo=document.querySelector('video');});
     const calls=await page.evaluate(()=>window.sidebarCalls.filter(c=>c.cmd==='analyze_session'||c.cmd==='analyze_advanced').length);
     for(const [width,height] of [[600,500],[800,600],[1024,640],[1280,800],[1920,1080],[2560,1440],[600,500]]){
       await page.setViewportSize({width,height});await page.waitForTimeout(180);await modeCycle();await page.waitForTimeout(180);
       await layoutCheck(`${view} at ${width}×${height}`);
       assert.equal(await page.evaluate(()=>window.sidebarPlot===document.querySelector('.uplot')),true,'Navigation/resizing must not remount plots');
       if(view==='Advanced'){
-        assert.equal(await page.evaluate(()=>window.sidebarCanvas===document.querySelector('.analysis-surface canvas')),true,'Navigation/resizing must not remount advanced canvas');
+        assert.equal(await page.evaluate(()=>window.sidebarCanvas===document.querySelector('.analysis-surface canvas:not(.analysis-cursor-layer)')),true,'Navigation/resizing must not remount advanced canvas');
         assert.deepEqual(await page.evaluate(()=>window.sidebarCanvasTicks.get(window.sidebarCanvas)),await page.evaluate(()=>window.sidebarAdvancedTicks),'Advanced local zoom axis labels survive resize');
       }
       if(view==='Video')assert.equal(await page.evaluate(()=>window.sidebarVideo===document.querySelector('video')),true,'Navigation/resizing must not remount video');
@@ -266,7 +267,7 @@ try {
       await page.waitForTimeout(180);
       assert.deepEqual(await page.evaluate(()=>({draws:window.sidebarCanvasDraws.get(window.sidebarCanvas),requests:window.sidebarCalls.filter(c=>c.cmd==='analyze_advanced').length})),idle,'Hidden Advanced ignores telemetry cursor movement without redrawing or requesting analysis');
       await page.getByRole('button',{name:'Advanced',exact:true}).click();await expect(page.locator('.analysis-surface')).toBeVisible();
-      assert.equal(await page.evaluate(()=>window.sidebarCanvas===document.querySelector('.analysis-surface canvas')),true,'Advanced navigation retains the canvas node');
+      assert.equal(await page.evaluate(()=>window.sidebarCanvas===document.querySelector('.analysis-surface canvas:not(.analysis-cursor-layer)')),true,'Advanced navigation retains the canvas node');
       await expect.poll(()=>page.evaluate(()=>window.sidebarCanvasTicks.get(window.sidebarCanvas))).toEqual(ticks);
     }
     if(view==='Video'){
@@ -291,7 +292,7 @@ try {
   await page.evaluate(()=>{const db=JSON.parse(localStorage.getItem('sidebar-library'));db.entries=db.entries.slice(0,1);db.activeSessionId=db.entries[0].id;localStorage.setItem('sidebar-library',JSON.stringify(db));});
   await page.reload({waitUntil:'domcontentloaded'});await page.locator('.uplot').first().waitFor();assert.equal(await sessionButtons.count(),1);await layoutCheck('Single-entry library');
   await page.evaluate(()=>localStorage.setItem('sidebar-library',JSON.stringify({entries:[],activeSessionId:null,warnings:[]})));
-  await page.reload({waitUntil:'domcontentloaded'});await expect(page.getByRole('button',{name:/^Open telemetry/})).toBeVisible();assert.equal(await sessionButtons.count(),0);await layoutCheck('Empty library');
+  await page.reload({waitUntil:'domcontentloaded'});await expect(page.getByRole('button',{name:'Import XRK recordings',exact:true})).toBeVisible();assert.equal(await sessionButtons.count(),0);await layoutCheck('Empty library');
   await page.setViewportSize({width:600,height:500});await page.waitForTimeout(180);await layoutCheck('Empty library at minimum size');
   await page.getByRole('button',{name:'Open session explorer',exact:true}).click();await expect(page.getByText('Your sessions stay on this computer.')).toBeVisible();await page.keyboard.press('Escape');
   assert.deepEqual(errors,[]);
