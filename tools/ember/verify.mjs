@@ -2,7 +2,7 @@
 import {createServer} from 'vite';
 import {readFileSync,writeFileSync,mkdirSync,existsSync} from 'node:fs';
 import {launchBrowser,browserTestEntries,browserTestNoWatch} from '../../scripts/browser.mjs';
-import {initFixture} from './fixture.mjs';
+import {initFixture,settleCursor} from './fixture.mjs';
 import {contrast} from './contrast.mjs';
 import AxeBuilder from '@axe-core/playwright';
 import pixelmatch from 'pixelmatch';
@@ -20,7 +20,7 @@ try{
  for(const theme of ['dark','light']){
   const context=await browser.newContext({viewport:{width:1440,height:900},deviceScaleFactor:1,reducedMotion:'reduce'});
   const page=await context.newPage();await page.addInitScript(initFixture,{data,coach,fixed,theme});
-  await page.goto(server.resolvedUrls.local[0]);await page.locator('.uplot').first().waitFor();await page.evaluate(()=>document.fonts.ready);
+  await page.goto(server.resolvedUrls.local[0]);await settleCursor(page);
   await page.waitForTimeout(500);
   const axe=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa']).analyze();
   const result={theme,axe:axe.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary,html:n.html}))}))};
@@ -29,7 +29,7 @@ try{
    const canvas=getComputedStyle(document.querySelector('.plot-row')).backgroundColor;
    const pairs=[];
    for(const bg of ['--surface-0','--surface-1','--surface-2','--surface-3','--surface-4'])for(const fg of ['--ink','--muted','--subtle'])pairs.push({foreground:fg,background:bg,fg:color(fg),bg:color(bg),minimum:4.5});
-   for(const fg of ['--trace-primary','--trace-comparison','--delta-ahead','--delta-behind'])pairs.push({foreground:fg,background:'actual plot background',fg:color(fg),bg:canvas,minimum:3});
+   for(const fg of ['--trace-primary','--trace-comparison','--delta-trace','--delta-ahead','--delta-behind'])pairs.push({foreground:fg,background:'actual plot background',fg:color(fg),bg:canvas,minimum:3});
    for(const bg of ['--bg','--panel','--raised'])for(const fg of ['--accent-focus','--control'])pairs.push({foreground:fg,background:bg,fg:color(fg),bg:color(bg),minimum:3});
    return pairs;
   });
@@ -39,20 +39,45 @@ try{
   const graph=page.locator('[data-plot]').first();await graph.focus();await page.keyboard.press('ArrowRight');await page.keyboard.press('ArrowLeft');await page.waitForTimeout(100);
   result.cursor=await page.evaluate(()=>({sameCanvas:window.__emberIdentity.every((c,i)=>c===document.querySelectorAll('.uplot canvas')[i]),commits:window.__emberCommits.length,plotUpdates:window.__emberCommits.reduce((n,c)=>n+(c.Plots||0),0),focusOutline:getComputedStyle(document.activeElement).outlineStyle}));
   await page.getByRole('button',{name:`Switch to ${theme==='dark'?'light':'dark'} theme`}).click();await page.waitForTimeout(150);
-  result.themeSwitch=await page.evaluate(()=>({sameCanvas:window.__emberIdentity.every((c,i)=>c===document.querySelectorAll('.uplot canvas')[i]),theme:document.documentElement.dataset.theme}));
+  result.themeSwitch=await page.evaluate(()=>{
+   const strokes=[...document.querySelectorAll('.uplot canvas')].map(c=>window.__emberStrokes.get(c)||[]),style=getComputedStyle(document.documentElement);
+   const primary=style.getPropertyValue('--trace-primary').trim().toLowerCase(),comparison=style.getPropertyValue('--trace-comparison').trim().toLowerCase(),delta=style.getPropertyValue('--delta-trace').trim().toLowerCase();
+   const axis=style.getPropertyValue('--muted').trim().toLowerCase();
+   const ctx=document.createElement('canvas').getContext('2d'),normalize=c=>{ctx.fillStyle=c;return ctx.fillStyle.toLowerCase();};
+   const dotColors=[...document.querySelectorAll('.u-cursor-pt')].map(p=>normalize(getComputedStyle(p).backgroundColor));
+   return {sameCanvas:window.__emberIdentity.every((c,i)=>c===document.querySelectorAll('.uplot canvas')[i]),theme:document.documentElement.dataset.theme,primaryPainted:strokes.some(s=>s.some(p=>p.color===primary&&!p.dash.length)),comparisonDashed:strokes.some(s=>s.some(p=>p.color===comparison&&p.dash.length)),deltaPainted:strokes.some(s=>s.some(p=>p.color===delta)),axisPainted:window.__emberCanvasColors.map(c=>c.toLowerCase()).includes(axis),dotColors,cursorDotsCurrent:dotColors.length>0&&dotColors.every(c=>[primary,comparison,delta].includes(c))};
+  });
   await page.getByRole('button',{name:`Switch to ${theme} theme`}).click();await page.waitForTimeout(100);
   const over=page.locator('.u-over').first(),b=await over.boundingBox();
   const zoom=()=>page.evaluate(()=>window.__emberCalls.filter(c=>c.cmd==='save_workspace').at(-1)?.args.workspace.zoom);
   await page.mouse.move(b.x+b.width*.2,b.y+20);await page.mouse.down();await page.mouse.move(b.x+b.width*.7,b.y+20,{steps:8});await page.mouse.up();await page.waitForTimeout(850);const narrowed=await zoom();
   await page.keyboard.down('Shift');await page.mouse.move(b.x+b.width*.6,b.y+30);await page.mouse.down();await page.mouse.move(b.x+b.width*.5,b.y+30,{steps:6});await page.mouse.up();await page.keyboard.up('Shift');await page.waitForTimeout(850);const panned=await zoom();
   await page.getByRole('button',{name:'↔ Reset zoom',exact:true}).click();await page.waitForTimeout(850);const reset=await zoom();
-  result.zoomPan={narrowed,panned,reset,narrowedRange:!!narrowed&&narrowed.max-narrowed.min<fixed.zoom.max-fixed.zoom.min,panPreservesRange:!!panned&&!!narrowed&&Math.abs((panned.max-panned.min)-(narrowed.max-narrowed.min))<.01&&panned.min!==narrowed.min,resetCleared:reset==null};
+  const fullMax=Math.max(...data.analysis.primary.series.map(s=>s.x.at(-1)||0),data.analysis.delta.x.at(-1)||0);
+  result.zoomPan={narrowed,panned,reset,narrowedRange:!!narrowed&&narrowed.max-narrowed.min<fixed.zoom.max-fixed.zoom.min,panPreservesRange:!!panned&&!!narrowed&&Math.abs((panned.max-panned.min)-(narrowed.max-narrowed.min))<.01&&panned.min!==narrowed.min,resetCleared:reset==null||(Math.abs(reset.min)<.01&&Math.abs(reset.max-fullMax)<.01)};
   result.interactionIdentity=await page.evaluate(()=>window.__emberIdentity.every((c,i)=>c===document.querySelectorAll('.uplot canvas')[i]));
+  // Restore the exact fixed zoom/cursor before the CVD and narrow-window checks.
+  await page.reload();await settleCursor(page);await page.waitForTimeout(200);
   if(theme==='dark'){
    const cdp=await context.newCDPSession(page);
    for(const type of ['protanopia','deuteranopia']){await cdp.send('Emulation.setEmulatedVisionDeficiency',{type});await page.screenshot({path:`docs/ember/screenshots/after/telemetry-1440x900-dark-${type}.png`,animations:'disabled',caret:'hide'});}
    await cdp.detach();
   }
+  await page.setViewportSize({width:600,height:500});await page.waitForTimeout(200);
+  result.narrow={controls:[]};
+  for(const selector of ['.channel-control>button','[data-plot]','.corner-controls button:not(:disabled)','.track-position-control input','.segment-card']){
+   const controls=page.locator(selector);
+   for(let i=0;i<await controls.count();i++){const control=controls.nth(i);await control.scrollIntoViewIfNeeded();const box=await control.boundingBox();result.narrow.controls.push({selector,index:i,reachable:!!box&&box.x>=0&&box.x+box.width<=600.5&&box.y<472&&box.y+box.height>52});}
+  }
+  await page.locator('.channel-control>button').click();
+  result.narrow.channelMenu=await page.locator('.channel-menu').evaluate(e=>{const b=e.getBoundingClientRect();return {x:b.x,right:b.right,top:b.top,bottom:b.bottom,height:b.height};});
+  await page.locator('.channel-menu input').last().focus();
+  const lastChannel=await page.locator('.channel-menu input').last().boundingBox();
+  result.narrow.lastChannelReachable=!!lastChannel&&lastChannel.y>=result.narrow.channelMenu.top&&lastChannel.y+lastChannel.height<=Math.min(result.narrow.channelMenu.bottom,472);
+  await page.locator('.channel-control>button').click();
+  result.narrow.overflow=await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth||document.body.scrollWidth>innerWidth);
+  result.narrow.plotHeights=await page.locator('[data-plot]').evaluateAll(elements=>elements.map(e=>e.getBoundingClientRect().height));
+  result.narrow.axe=(await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa']).analyze()).violations.map(v=>({id:v.id,nodes:v.nodes.length}));
   report.themes.push(result);await context.close();
  }
  for(const capture of baseline.captures.filter(c=>c.workspace==='telemetry')){
@@ -61,7 +86,7 @@ try{
   const pixels=pixelmatch(a.data,b.data,diff.data,a.width,a.height,{threshold:.1});
   const path=after.replace('.png','-diff.png');writeFileSync(path,PNG.sync.write(diff));report.differences.push({before:capture.path,after,path,pixels,fraction:pixels/(a.width*a.height)});
  }
- for(const r of report.themes){if(r.axe.length)report.failures.push(`${r.theme}: axe violations`);if(r.smallText.length)report.failures.push(`${r.theme}: text below 11px`);if(r.contrast.some(p=>!p.pass))report.failures.push(`${r.theme}: contrast failures`);if(!r.themeSwitch.sameCanvas||!r.cursor.sameCanvas||!r.interactionIdentity)report.failures.push(`${r.theme}: canvas remount`);if(!r.zoomPan.narrowedRange||!r.zoomPan.panPreservesRange||!r.zoomPan.resetCleared)report.failures.push(`${r.theme}: zoom/pan/reset`);}
+ for(const r of report.themes){if(r.axe.length||r.narrow.axe.length)report.failures.push(`${r.theme}: axe violations`);if(r.smallText.length)report.failures.push(`${r.theme}: text below 11px`);if(r.contrast.some(p=>!p.pass))report.failures.push(`${r.theme}: contrast failures`);if(!r.themeSwitch.sameCanvas||!r.cursor.sameCanvas||!r.interactionIdentity)report.failures.push(`${r.theme}: canvas remount`);if(!r.themeSwitch.primaryPainted||!r.themeSwitch.comparisonDashed||!r.themeSwitch.deltaPainted||!r.themeSwitch.axisPainted||!r.themeSwitch.cursorDotsCurrent)report.failures.push(`${r.theme}: resolved canvas palette`);if(!r.zoomPan.narrowedRange||!r.zoomPan.panPreservesRange||!r.zoomPan.resetCleared)report.failures.push(`${r.theme}: zoom/pan/reset`);if(r.narrow.overflow||r.narrow.controls.some(c=>!c.reachable)||r.narrow.plotHeights.some(h=>h<119.5)||r.narrow.channelMenu.x<0||r.narrow.channelMenu.right>600||r.narrow.channelMenu.bottom>472||!r.narrow.lastChannelReachable)report.failures.push(`${r.theme}: narrow layout`);}
  mkdirSync('tools/ember',{recursive:true});writeFileSync('tools/ember/verification.json',JSON.stringify(report,null,2)+'\n');
  console.log(JSON.stringify(report.themes.map(r=>({theme:r.theme,axe:r.axe.map(v=>[v.id,v.nodes.length]),smallText:r.smallText,cursor:r.cursor,themeSwitch:r.themeSwitch,zoomPan:r.zoomPan,contrastFailures:r.contrast.filter(p=>!p.pass)})),null,2));
  if(report.failures.length){console.error(report.failures);process.exitCode=1;}

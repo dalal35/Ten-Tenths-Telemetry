@@ -102,7 +102,7 @@ try {
   const headerActions=page.getByRole('button',{name:'Session explorer actions',exact:true});
   await headerActions.click();await page.setViewportSize({width:1200,height:800});
   await expect(page.getByRole('menu')).toHaveCount(0);await expect(headerActions).toBeFocused();
-  await page.getByRole('button',{name:'Sort and group sessions',exact:true}).click();
+  await page.getByRole('button',{name:'Sort & group sessions',exact:true}).click();
   await page.setViewportSize({width:600,height:500});
   const drawerOpener=page.getByRole('button',{name:'Open session explorer',exact:true});
   await expect(drawerOpener).toBeFocused();await drawerOpener.click();
@@ -117,7 +117,7 @@ try {
   await page.locator('#session-explorer').getByRole('button',{name:'Close session explorer',exact:true}).click();
   await page.setViewportSize({width:1280,height:800});
 
-  await page.getByRole('button',{name:'Sort and group sessions',exact:true}).click();
+  await page.getByRole('button',{name:'Sort & group sessions',exact:true}).click();
   await expect(page.getByLabel('Group sessions',{exact:true})).toHaveValue('date');
   const sessionButtons=page.locator('.session-button');
   assert.equal(await sessionButtons.count(),100,'All entries are available in independently scrolling session list');
@@ -135,7 +135,7 @@ try {
   const group=page.getByLabel('Group sessions',{exact:true});
   for(const value of ['driver','circuit','none','date']){await group.selectOption(value);assert.equal(await selected().getAttribute('title'),activeTitle,'Changing grouping preserves selection');}
   await sort.selectOption(initialSort);
-  await page.getByRole('button',{name:'Sort and group sessions',exact:true}).click();
+  await page.getByRole('button',{name:'Sort & group sessions',exact:true}).click();
   const firstGroup=page.locator('.session-group-heading').first();
   await firstGroup.click();await expect(firstGroup).toHaveAttribute('aria-expanded','false');
   assert.equal(await sessionButtons.first().isVisible(),false,'Group collapse hides its session rows');
@@ -208,12 +208,12 @@ try {
       await page.keyboard.press('Escape');await expect(page.getByRole('button',{name:'Open session explorer',exact:true})).toBeFocused();return;
     }
     if(await shell.getAttribute('data-sidebar-state')==='collapsed')await page.getByRole('button',{name:'Expand sidebar',exact:true}).click();
-    if(await shell.getAttribute('data-sidebar-state')==='expanded')await page.getByRole('button',{name:'Hide sessions',exact:true}).click();
+    if(await shell.getAttribute('data-sidebar-state')==='expanded')await page.locator('.explorer-section-toggle').click();
     await expect(shell).toHaveAttribute('data-sidebar-state','analysis');await expect(page.locator('.lap-list')).toBeVisible();await layoutCheck('Analysis sidebar');
     await page.getByRole('button',{name:'Collapse sidebar',exact:true}).click();await expect(shell).toHaveAttribute('data-sidebar-state','collapsed');
     await layoutCheck('Fully collapsed sidebar');
     await page.getByRole('button',{name:'Expand sidebar',exact:true}).click();
-    if(await shell.getAttribute('data-sidebar-state')==='analysis')await page.getByRole('button',{name:'Show sessions',exact:true}).click();
+    if(await shell.getAttribute('data-sidebar-state')==='analysis')await page.locator('.explorer-section-toggle').click();
     await expect(shell).toHaveAttribute('data-sidebar-state','expanded');
   };
   for(const view of ['Telemetry','Advanced','Video']){
@@ -284,9 +284,9 @@ try {
   await page.setViewportSize({width:1024,height:500});await page.waitForTimeout(180);await modeCycle();
   const geometry=await page.evaluate(()=>{const sessions=document.querySelector('.session-list'),laps=document.querySelector('.lap-list'),s=sessions.getBoundingClientRect(),l=laps.getBoundingClientRect();return {sessionHeight:s.height,lapHeight:l.height,sessionScroll:sessions.scrollHeight>sessions.clientHeight,lapScroll:laps.scrollHeight>laps.clientHeight,lapBottom:l.bottom,height:innerHeight};});
   assert(geometry.sessionScroll&&geometry.lapScroll,'100 sessions and 24 laps scroll independently');assert(geometry.lapHeight>=80&&geometry.lapBottom<=geometry.height,'Lap access remains usable in a short window');
-  await page.getByRole('button',{name:'Hide sessions',exact:true}).click();await page.reload({waitUntil:'domcontentloaded'});await page.locator('.uplot').first().waitFor();await expect(shell).toHaveAttribute('data-sidebar-state','analysis');
+  await page.locator('.explorer-section-toggle').click();await page.reload({waitUntil:'domcontentloaded'});await page.locator('.uplot').first().waitFor();await expect(shell).toHaveAttribute('data-sidebar-state','analysis');
   await page.getByRole('button',{name:'Collapse sidebar',exact:true}).click();await page.reload({waitUntil:'domcontentloaded'});await page.locator('.uplot').first().waitFor();await expect(shell).toHaveAttribute('data-sidebar-state','collapsed');
-  await page.getByRole('button',{name:'Expand sidebar',exact:true}).click();if(await shell.getAttribute('data-sidebar-state')==='analysis')await page.getByRole('button',{name:'Show sessions',exact:true}).click();await page.reload({waitUntil:'domcontentloaded'});await page.locator('.uplot').first().waitFor();await expect(shell).toHaveAttribute('data-sidebar-state','expanded');
+  await page.getByRole('button',{name:'Expand sidebar',exact:true}).click();if(await shell.getAttribute('data-sidebar-state')==='analysis')await page.locator('.explorer-section-toggle').click();await page.reload({waitUntil:'domcontentloaded'});await page.locator('.uplot').first().waitFor();await expect(shell).toHaveAttribute('data-sidebar-state','expanded');
   await verifyDetails();
   // The same shell must also handle a minimal and an empty library.
   await page.evaluate(()=>{const db=JSON.parse(localStorage.getItem('sidebar-library'));db.entries=db.entries.slice(0,1);db.activeSessionId=db.entries[0].id;localStorage.setItem('sidebar-library',JSON.stringify(db));});

@@ -21,3 +21,36 @@
   .app.premium .plots .plot-label{gap:4px 10px}
   .app.premium .plots .readout{gap:5px 10px}
 }
+
+/* Container-relative sizing changes only Telemetry, and is consumed by uPlot's ResizeObserver. */
+.app.premium [data-workspace=telemetry] .plots [data-plot]{height:clamp(120px,calc(72cqh / var(--plot-count) - 27px),260px)}
+.app.premium.compact [data-workspace=telemetry] .plots [data-plot]{height:120px}
+.app.premium [data-workspace=telemetry] .plots{border:1px solid var(--border);border-radius:var(--radius-surface);overflow:clip}
+.app.premium [data-workspace=telemetry] .plots .plot-row{padding:6px 14px 0;border-bottom-color:var(--grid);background:var(--panel)}
+.app.premium [data-workspace=telemetry] .plots .plot-label{font-size:12px;min-height:20px;line-height:1.35}
+.app.premium [data-workspace=telemetry] .plots .plot-title{font-weight:600}
+.app.premium [data-workspace=telemetry] .plots .plot-title small{font-size:11px;margin-left:6px}
+.app.premium [data-workspace=telemetry] .plots .readout{font-size:12px;gap:16px;letter-spacing:-.2px}
+.app.premium [data-workspace=telemetry] .plots .reading-key{font-size:12px;color:var(--muted)}
+.app.premium [data-workspace=telemetry] .plots .primary-reading::before,.app.premium [data-workspace=telemetry] .plots .comparison-reading::before{content:'';width:16px;align-self:center;border-top:2px solid var(--trace-primary)}
+.app.premium [data-workspace=telemetry] .plots .comparison-reading::before{border-color:var(--trace-comparison);border-top-style:dashed}
+.app.premium [data-workspace=telemetry] .plots .plot-delta .primary-reading::before{border-color:var(--delta-trace)}
+.app.premium .plots .plot-delta .plot-reading{color:var(--delta-trace)}
+.app.premium .plots .plot-delta .plot-reading[data-delta=ahead]{color:var(--delta-ahead)}
+.app.premium .plots .plot-delta .plot-reading[data-delta=behind]{color:var(--delta-behind)}
+.app.premium [data-workspace=telemetry] .plots .axis-label{border-radius:0;margin:0;padding:8px 14px;font-size:11px;background:var(--surface-2)}
+.app.premium [data-workspace=telemetry] .chart-toolbar{min-height:54px;padding:10px 0;gap:12px}
+.app.premium [data-workspace=telemetry] .chart-tools>button,.app.premium [data-workspace=telemetry] .channel-control>button{color:var(--muted);border:1px solid transparent}
+.app.premium [data-workspace=telemetry] .channel-control>button{background:var(--surface-2);border-color:var(--control)}
+.app.premium [data-workspace=telemetry] .axis-switch button.active{box-shadow:inset 0 -2px var(--accent);font-weight:600}
+.app.premium [data-workspace=telemetry] .channel-control>button[aria-expanded=true]{border-color:var(--accent);color:var(--ink)}
+.app.premium [data-workspace=telemetry] .channel-menu{max-height:max(80px,min(400px,calc(100cqh - 64px)))}
+.app.premium [data-workspace=telemetry] .chart-help{margin:10px 0 14px;gap:16px}
+.app.premium [data-workspace=telemetry] .alignment-note{margin-top:10px}
+@media(max-width:700px){
+ .app.premium [data-workspace=telemetry] .plots .plot-row{padding-inline:8px}
+ .app.premium [data-workspace=telemetry] .plots .plot-label{flex-wrap:wrap;gap:6px;align-items:center}
+ .app.premium [data-workspace=telemetry] .plots .readout{gap:10px}
+ .app.premium [data-workspace=telemetry] .plots .primary-reading::before,.app.premium [data-workspace=telemetry] .plots .comparison-reading::before{width:12px}
+ .app.premium [data-workspace=telemetry] .chart-tools{gap:4px}
+}

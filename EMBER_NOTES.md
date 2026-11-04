@@ -1,41 +1,49 @@
-# Ember visual refinement — execution notes
+# Project Ember — Pass 0/A/B checkpoint
 
-Scope: execute Pass 0, A, B from 72786c8; stop for visual review. No Rust, website, video lifecycle, motion implementation, push, merge or release.
+Branch: `ember/visual-motion`, from `72786c8c9708c9bcb84ccfbe66001e606418bdd6`. Pass 0: `8a09193`; Pass A: `d5b3d7a`; Pass B: this commit (`ember: refine telemetry composition and charts`). Stop for review here. No Pass C/D, Rust, website, video lifecycle, calculation, push, merge or release work.
 
-## Plan and ownership
-- Pass 0: tools/ember reusable actual-0361 simulated IPC fixture; freeze full before matrix, measure geometry/fonts/contrast/rendering, commit baseline. Production UI untouched.
-- Pass A: extend src/design-system.css semantic elevations, text, brand, trace/delta roles, typography floors and shared primitives; update Plots.tsx theme in place and remove theme key in App.tsx; capture only 1440 dark/light; commit foundation.
-- Pass B: telemetry-local shell/plots/inspector composition; adaptive bounded plot heights, readable comparison and numerical hierarchy; same full fixture matrix plus axe, contrast, CVD, identity/render/interaction checks; focused tests + TypeScript/build; commit and stop.
+## Execution and artifacts
+Reused the clean primary checkout; preserved the separate exploration worktree. Started with ~43.5 GiB free. Local generated screenshots/diffs total ~3.6 MiB, below 200 MB. No generated PNG/video/trace is committed.
 
-Design: carbon instrument surfaces, vermilion for action/selection, blue primary and amber dashed reference, teal ahead and magenta behind. Existing IBM Plex Sans UI and IBM Plex Mono numerical fonts (bundled OFL licenses). Preserve current three-column desktop layout; short/narrow layouts scroll.
+Pass 0 changed only test tooling, ignore rules and these notes. Fourteen baseline PNGs were captured and frozen before any production changes. Real parsed 0361 diagnostic caches supply lap 9/10, GPS speed/RPM, spatial delta, distance 30–350 m and keyboard-set cursor 158 m. All IPC is explicitly simulated; unsupported analysis combinations reject. Fixtures remain private/ignored. No recording values were fabricated.
 
-## Pass 0 (in progress)
-- Clean primary checkout at requested starting commit; created ember/visual-motion there. Other exploration worktree preserved.
-- Disk: approximately 43.5 GiB free before work. Generated image budget <200 MB.
-- Existing private .tools parsed 0361 JSON reused, never committed. All browser IPC is simulated; data values are real parsed telemetry. No Rust rebuild.
-- Baseline production files remain unchanged until screenshots and measurements are frozen.
+- Before: `docs/ember/screenshots/before/` (14 PNGs, full requested workspace matrix; Library is its existing session-details dialog).
+- Pass A: `docs/ember/screenshots/after/pass-a/` (only 1440×900 dark/light).
+- Pass B: `docs/ember/screenshots/after/` (six matching Telemetry PNGs, two CVD captures, six diagnostic pixel diffs).
+- Reproduction, frozen manifest, measurements and checks: `tools/ember/README.md`, `before-manifest.json`, `{before,pass-a,after}-measurements.json`, `verification.json`.
 
-## Verification limitations
-Browser simulated IPC does not establish native Tauri, WebView2, codec, dialog, DPI or filesystem behavior. Native inspection depends on an existing binary; do not rebuild Rust for it.
+All captures: DPR 1, exact viewport, fonts/data/charts settled, reduced motion, animations disabled and caret hidden. Before images were never recreated.
 
-### Pass 0 result
-All 14 before PNGs are frozen in docs/ember/screenshots/before/ (never recreate). Manifest and measurements in tools/ember/. Canonical utilization denominator: .workspace-viewport (central scrollable analysis area); main.main ratio is also reported to expose geometry.
+## What changed
+Pass A centralized Ember elevations 0–4, text, dividers/control borders, vermilion action states, independent primary/reference and ahead/behind/delta colors, spacing/radii/elevation and existing timing tokens. Reused local IBM Plex Sans/Mono, verified SIL OFL 1.1 notices. No production dependency or additional font. Removed theme chart key; resolved canvas palette redraws in place.
 
-| Telemetry viewport | Chart utilization | Plot panel height |
+Pass B preserves the three desktop columns, strengthens lap timing/selection hierarchy, adds explicit Primary/Reference and Ahead/Behind labels, solid/dashed traces, restrained grids, wider numerical axes, readable GPS corner numbers and a bounded short-window channel menu. Container-driven sizes use ResizeObserver/setSize, without React sizing state. The review-found stationary cursor-dot theme issue is fixed through a guarded post-redraw cursor refresh with hooks suppressed. Independent review has no remaining important findings.
+
+## Measurements (both themes)
+Canonical ratio is summed visible plot-row height / `.workspace-viewport` height (central scrollable analysis area, below recording/lap chrome). `mainWorkspace` ratios are also retained in JSON, not substituted for this denominator.
+
+| Viewport | Before → after utilization | After plot panel / canvas |
 | --- | --- | --- |
-| 1440×900 dark/light | 90.0% | 188px |
-| 1920×1080 dark/light | 72.3% | 188px |
-| 600×500 dark/light | 80.9% visible; scrolling | 188px |
+| 1440×900 | 90.0% → 73.8% | 147 / 120 px |
+| 1920×1080 | 72.3% → 72.0% | 186.6 / 159.6 px |
+| 600×500 | ratio not targeted; vertical scrolling | 147 / 120 px |
 
-Baseline: UI/legend 12px; canvas axes 12px system font. No document horizontal overflow. Cursor keyboard pair: 2 development React commits / 2 Plots updates, canvases retained. Theme switch replaces canvases (existing theme key). Approximate DevTools fiber update counts are available, not React Profiler timings. Axe: dark 3 prohibited aria attributes + 13 label/name mismatches; light additionally 4 contrast nodes. Shared fixture and capture/contrast syntax checks passed; helper black/white contrast 21:1.
+No document horizontal overflow. At 600×500, 17 representative controls are reachable, all canvases are 120px high, and the last channel is focusable within the scrolling menu. Body text is ≥12px; secondary labels and canvas axes ≥11px; chart legends/readouts ≥12px, tabular numerical figures.
 
-Remaining baseline weaknesses (5): crowded 900px chart stack; understated timing hierarchy; tiny shell/legend key labels; low-contrast light-mode elements; theme-triggered chart remount.
+Text-tier/surface contrast minima: dark 6.06:1, light 5.30:1. Tested essential control/focus/meaningful trace pairs: dark ≥4.49:1, light ≥4.09:1. Axe cannot inspect canvas: resolved colors and actual canvas paints were checked independently, including both theme directions. Axe has zero violations in dark/light at desktop and 600×500. Keyboard graph focus is visible. CDP protanopia/deuteranopia captures retain labels, signs and solid/dashed identification. Pixel differences are diagnostic only; inspected screenshots show no unintended clipping.
 
-Focused baseline frontend checks: 72 tests passed across workspace, navigation, motion, session explorer, telemetry. Vitest configLoader runner avoids sandbox ancestor-directory access errors. No production UI changes in Pass 0.
+## Stability and tests
+Two cursor keys: baseline and after both 2 development React commits / 2 Plots updates. These are approximate DevTools fiber counts, not Profiler timing or a complete performance profile. uPlot canvases retain identity through cursor/zoom/pan/reset/theme; actual axis, solid/dashed trace and stationary cursor-dot colors update correctly. Broader explorer suite retains chart/canvas/player identities during resizing and checks saved lap/channel/zoom/video mappings.
 
-## Pass A — foundation
-Baseline commit: 8a09193. Added authoritative Ember elevations, text/control/action roles, independent lap and ahead/behind/delta trace roles, aliases for existing callers, spacing/radii/elevation and existing timing tokens. Reused bundled OFL IBM Plex Sans/Mono; no added font/dependency in production. Shared labels now ≥11px. Canvas axes explicitly 11px IBM Plex Mono; custom chart readouts remain 12px.
+- 132 focused frontend tests passed (10 files).
+- Explorer browser regression passed, 600×500–2560×1440 (simulated IPC/media).
+- Workflow browser regression passed in isolation. One earlier concurrent run failed a timing-sensitive boundary assertion; starting-source control and updated-source isolated reruns passed.
+- Final Ember axe/contrast/CVD/interaction/narrow checks passed; TypeScript and production build passed. Existing >500kB Vite chunk advisory remains.
+- Contrast helper black/white self-check: 21:1. Script syntax and `git diff --check` passed.
 
-Only foundation and theme behavior changed: removed theme React key; canvas palette snapshots refresh with root theme mutation and redraw existing charts. Pass A screenshots: docs/ember/screenshots/after/pass-a/telemetry-1440x900-{dark,light}.png. Layout untouched (188px rows). Two cursor keys still 2 commits / 2 Plots updates; theme change now retains canvases. WCAG helper: all resolved text/surface pairs ≥4.5 and meaningful trace/control pairs ≥3 in both themes; axe light contrast failures eliminated. Production build (tsc -b + Vite) passed; existing >500kB chunk advisory remains.
+## Remaining visual issues and limits
+1. 900px-tall composition uses fewer vertical speed/RPM ticks to preserve readable 120px canvases.
+2. 600×500 needs vertical scrolling between channels and GPS/section evidence.
+3. Long recording source names remain ellipsized with full-path hover information.
 
-Remaining weaknesses (5): crowded 900px stack; timing hierarchy; wider mono axes need more gutter (RPM digits clipped); existing 13 accessible-name mismatches; narrow composition needs final visual/overflow verification. Those screen-specific changes belong to Pass B.
+Native Tauri/WebView2, codecs, dialogs, filesystem behavior and physical DPI were not verified. An existing debug binary was found, but no matching native acceptance session was run; no Rust rebuild was triggered. Browser IPC/media simulation is not native verification. Cross-workspace baseline images are evidence only; Pass D composition and Pass C motion remain deferred.

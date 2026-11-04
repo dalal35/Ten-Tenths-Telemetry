@@ -97,3 +97,27 @@
   .premium .delta-instrument strong{font-size:17px}
   .app.premium .inspector>.reading-guide,.app.premium .inspector>.warnings{grid-column:1/-1}
 }
+
+/* Inspector remains secondary to the channel stack. */
+.premium [data-workspace=telemetry] .inspector{padding-top:10px}
+.premium [data-workspace=telemetry] .track-map-frame{background:var(--surface-2);border-color:var(--border)}
+.premium [data-workspace=telemetry] .track-underlay{stroke:var(--surface-4);stroke-width:11}
+.premium [data-workspace=telemetry] .map-section-labels text{font-size:22px}
+.premium [data-workspace=telemetry] .map-section-labels circle{r:12px}
+.premium [data-workspace=telemetry] .primary-line{stroke:var(--trace-primary);stroke-width:2.4}
+.premium [data-workspace=telemetry] .comparison-line{stroke:var(--trace-comparison);stroke-width:2;opacity:1;stroke-dasharray:5 4}
+.premium [data-workspace=telemetry] .speed-instrument strong{font-size:38px;line-height:1.1;letter-spacing:-2px}
+.premium [data-workspace=telemetry] .delta-instrument strong{font-size:20px;letter-spacing:-1px}
+.premium [data-workspace=telemetry] .delta-instrument[data-delta=ahead] strong{color:var(--delta-ahead)}
+.premium [data-workspace=telemetry] .delta-instrument[data-delta=behind] strong{color:var(--delta-behind)}
+.premium [data-workspace=telemetry] .track-map-meta{background:var(--surface-2);font-size:11px}
+.premium [data-workspace=telemetry] .segment-card.selected{background:var(--surface-3);box-shadow:inset 2px 0 var(--accent);padding-left:10px}
+.premium [data-workspace=telemetry] .segment-index{font:400 16px/1 var(--font-mono);letter-spacing:-.5px;color:var(--subtle);width:24px}
+.premium [data-workspace=telemetry] .segment-overview{gap:10px}
+.premium [data-workspace=telemetry] .segment-identity b{font-size:12px}
+.premium [data-workspace=telemetry] .segment-delta[data-delta=ahead]{color:var(--delta-ahead)}
+.premium [data-workspace=telemetry] .segment-delta[data-delta=behind]{color:var(--delta-behind)}
+.premium [data-workspace=telemetry] .track .track-segment.selected{stroke:var(--accent);stroke-opacity:.4}
+.premium [data-workspace=telemetry] .corner-controls button:not(:disabled){border-color:var(--control);color:var(--ink)}
+.premium [data-workspace=telemetry] .segment-note,.premium [data-workspace=telemetry] .map-caption{line-height:1.55}
+.app.premium [data-workspace=telemetry] .segment-details,.app.premium [data-workspace=telemetry] .segment-note,.app.premium [data-workspace=telemetry] .section-finding p,.app.premium [data-workspace=telemetry] .alignment-note{font-size:12px}
