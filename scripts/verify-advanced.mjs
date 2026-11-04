@@ -2,12 +2,12 @@ import {launchBrowser,browserTestEntries,browserTestNoWatch} from './browser.mjs
 // Actual App, IPC simulation backed by read-only real-XRK Rust diagnostic outputs.
 import {expect} from '@playwright/test';
 import {createServer} from 'vite';
-import {readdirSync} from 'node:fs';
+import {readFileSync,readdirSync} from 'node:fs';
 import {execFileSync} from 'node:child_process';
 import assert from 'node:assert/strict';
 const fixture=readdirSync('data').filter(n=>n.toLowerCase().endsWith('.xrk')).sort()[0];
 assert(fixture,'Place real XRK fixtures in data/ before running advanced checks.');
-const data=JSON.parse(execFileSync('cargo',['run','--offline','--manifest-path','src-tauri/Cargo.toml','--example','advanced_check','--',`data/${fixture}`],{encoding:'utf8',maxBuffer:64*1024*1024,stdio:['ignore','pipe','inherit']}));
+const data=JSON.parse(process.env.ADVANCED_FIXTURE_JSON?readFileSync(process.env.ADVANCED_FIXTURE_JSON,'utf8'):execFileSync('cargo',['run','--offline','--manifest-path','src-tauri/Cargo.toml','--example','advanced_check','--',`data/${fixture}`],{encoding:'utf8',maxBuffer:64*1024*1024,stdio:['ignore','pipe','inherit']}));
 let server,browser;
 try {
  server=await createServer({plugins:[browserTestNoWatch],optimizeDeps:{entries:browserTestEntries},server:{host:'127.0.0.1',port:0,strictPort:false,hmr:false,watch:null}});await server.listen();
@@ -36,7 +36,7 @@ try {
  await page.getByRole('button',{name:'Advanced',exact:true}).click();
  await page.getByRole('tab',{name:'Scatter Plot',exact:true}).click();
  await page.waitForFunction(()=>window.__advancedCalls.some(c=>c.cmd==='analyze_advanced'&&c.args.request.tool==='scatter'));
- const canvas=page.locator('.advanced-workspace canvas');await canvas.waitFor();const points=data.variants.scatter.laps.flatMap(l=>l.points);const xs=points.map(p=>p.x),ys=points.map(p=>p.y);const minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);const point=points[Math.floor(points.length/3)];const box=await canvas.boundingBox();await canvas.click({position:{x:62+(point.x-minX)/(maxX-minX)*(box.width-80),y:box.height-44-(point.y-minY)/(maxY-minY)*(box.height-62)}});await page.locator('.point-inspector').waitFor();await page.waitForFunction(()=>window.advancedPlotCursors().some(p=>p.left>0));
+ const canvas=page.locator('.advanced-workspace canvas:not(.analysis-cursor-layer)');await canvas.waitFor();const points=data.variants.scatter.laps.flatMap(l=>l.points);const xs=points.map(p=>p.x),ys=points.map(p=>p.y);const minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);const point=points[Math.floor(points.length/3)];const box=await canvas.boundingBox();await canvas.click({position:{x:62+(point.x-minX)/(maxX-minX)*(box.width-80),y:box.height-44-(point.y-minY)/(maxY-minY)*(box.height-62)}});await page.locator('.point-inspector').waitFor();await page.waitForFunction(()=>window.advancedPlotCursors().some(p=>p.left>0));
  // Speed controls display mph, while IPC keeps original channel units.
  const speed=data.session.channels.find(c=>c.id===data.ids.speed);
  assert(speed,'Real fixture must contain the speed channel');
@@ -48,7 +48,7 @@ try {
  await page.waitForFunction(id=>window.__advancedCalls.some(c=>c.cmd==='analyze_advanced'&&c.args.request.xChannel===id),speed.id);
  const speedMin=data.variants.scatter.laps[0].yStats.min*speedFactor;
  const shownMin=speedMin.toLocaleString(undefined,{maximumFractionDigits:2});
- await page.waitForFunction(expected=>document.querySelector('.analysis-statistics')?.textContent.includes(`Min ${expected}`),shownMin);
+ await page.waitForFunction(expected=>Array.from(document.querySelectorAll('.analysis-statistics .primary-stat dt')).some(dt=>dt.textContent==='Min'&&dt.nextElementSibling?.textContent?.includes(expected)),shownMin);
  assert.match(await page.locator('.analysis-statistics').innerText(),/mph/);
  await page.getByLabel('Value filter channel').selectOption(speed.id);
  await page.getByLabel('Filter min',{exact:true}).fill('40');
@@ -59,7 +59,7 @@ try {
  await page.locator('.axis-options summary').click();
  await page.getByLabel('X max',{exact:true}).fill('120');
  await page.getByLabel('X min',{exact:true}).fill('20');
- await page.waitForFunction(factor=>window.__advancedCalls.some(c=>c.cmd==='analyze_advanced'&&Math.abs((c.args.request.xRange?.[0]??-1)-20/factor)<1e-7&&Math.abs((c.args.request.xRange?.[1]??-1)-120/factor)<1e-7),speedFactor);
+ await page.waitForFunction(factor=>{const r=JSON.parse(localStorage.getItem('advanced-library')||'{}').entries?.[0]?.workspace?.advanced?.config?.xRange;return r&&Math.abs(r[0]-20/factor)<1e-7&&Math.abs(r[1]-120/factor)<1e-7;},speedFactor);
  assert(close(Number(await page.getByLabel('X min',{exact:true}).inputValue()),20));
  await page.getByRole('button',{name:'Automatic ranges',exact:true}).click();
  await page.getByLabel('X channel',{exact:true}).selectOption(data.ids.rpm);

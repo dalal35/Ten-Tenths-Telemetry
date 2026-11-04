@@ -1,6 +1,6 @@
 // Viewport constraints affect rendering only; the saved resize preference stays intact.
 export function analysisPanelHeight(preferred:number,viewportHeight:number){
- return Math.min(preferred,Math.max(240,viewportHeight-220));
+ return Math.min(preferred,Math.max(240,viewportHeight-260));
 }
 export function analysisPlotRect(width:number,height:number,bounds:readonly number[],equalScale:boolean){
  let left=62,right=width-18,top=18,bottom=height-44;
