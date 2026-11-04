@@ -32,3 +32,10 @@ Baseline: UI/legend 12px; canvas axes 12px system font. No document horizontal o
 Remaining baseline weaknesses (5): crowded 900px chart stack; understated timing hierarchy; tiny shell/legend key labels; low-contrast light-mode elements; theme-triggered chart remount.
 
 Focused baseline frontend checks: 72 tests passed across workspace, navigation, motion, session explorer, telemetry. Vitest configLoader runner avoids sandbox ancestor-directory access errors. No production UI changes in Pass 0.
+
+## Pass A — foundation
+Baseline commit: 8a09193. Added authoritative Ember elevations, text/control/action roles, independent lap and ahead/behind/delta trace roles, aliases for existing callers, spacing/radii/elevation and existing timing tokens. Reused bundled OFL IBM Plex Sans/Mono; no added font/dependency in production. Shared labels now ≥11px. Canvas axes explicitly 11px IBM Plex Mono; custom chart readouts remain 12px.
+
+Only foundation and theme behavior changed: removed theme React key; canvas palette snapshots refresh with root theme mutation and redraw existing charts. Pass A screenshots: docs/ember/screenshots/after/pass-a/telemetry-1440x900-{dark,light}.png. Layout untouched (188px rows). Two cursor keys still 2 commits / 2 Plots updates; theme change now retains canvases. WCAG helper: all resolved text/surface pairs ≥4.5 and meaningful trace/control pairs ≥3 in both themes; axe light contrast failures eliminated. Production build (tsc -b + Vite) passed; existing >500kB chunk advisory remains.
+
+Remaining weaknesses (5): crowded 900px stack; timing hierarchy; wider mono axes need more gutter (RPM digits clipped); existing 13 accessible-name mismatches; narrow composition needs final visual/overflow verification. Those screen-specific changes belong to Pass B.

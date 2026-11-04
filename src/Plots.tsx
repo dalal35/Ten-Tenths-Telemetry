@@ -47,18 +47,25 @@ export default function Plots({analysis,axis,onCursor,resetVersion,cursor=null,e
   useEffect(()=>{
     if(!host.current||!context.current)return;
     const nodes=host.current.querySelectorAll<HTMLDivElement>('[data-plot]');
-    const theme=getComputedStyle(host.current);const ink=theme.getPropertyValue('--muted').trim(),grid=theme.getPropertyValue('--grid').trim();
-    const cyan=theme.getPropertyValue('--cyan').trim(),amber=theme.getPropertyValue('--amber').trim();
+    // Canvas does not resolve CSS variables: snapshot the active semantic colors
+    // and refresh them on theme changes without replacing the uPlot instances.
+    const readPalette=()=>{
+      const style=getComputedStyle(host.current!);
+      const color=(name:string,fallback:string)=>style.getPropertyValue(name).trim()||style.getPropertyValue(fallback).trim();
+      return {ink:color('--muted','--ink'),grid:color('--grid','--border'),primary:color('--trace-primary','--cyan'),comparison:color('--trace-comparison','--amber'),delta:color('--delta-trace','--cyan')};
+    };
+    let palette=readPalette();
+    const axisFont="11px 'IBM Plex Mono', ui-monospace, monospace";
     let initialized=false;
     const height=layout==='compact'?112:152;
     plots.current=rows.map((row,i)=>{
       const pairs=[row.primary,...(row.comparison?[row.comparison]:[])];
-      const plot=new uPlot({width:Math.max(nodes[i].clientWidth,200),height,padding:[14,18,0,0],legend:{show:false},cursor:{sync:{key:'telemetry'},drag:{x:true,y:false,setScale:true},points:{size:5}},select:{show:true,left:0,top:0,width:0,height:0},scales:{x:{time:false}},axes:[{stroke:ink,grid:{show:false},ticks:{stroke:grid},size:32,values:(_u,ticks)=>ticks.map(n=>`${Math.round(n*10)/10}`)},{stroke:ink,grid:{stroke:grid,width:1},ticks:{stroke:grid},size:54,gap:10}],series:[{},...pairs.map((s,index)=>({label:s.name,stroke:index?amber:cyan,width:index?1.25:1.7,dash:index?[5,4]:undefined,spanGaps:false}))],hooks:{ready:[u=>{applyingCursor.current=true;try{const position=sharedCursor.current,left=position==null?-10:u.valToPos(position,'x');if(Number.isFinite(left))u.setCursor({left,top:30});}finally{applyingCursor.current=false;}}],draw:[u=>{
+      const plot=new uPlot({width:Math.max(nodes[i].clientWidth,200),height,padding:[14,18,0,0],legend:{show:false},cursor:{sync:{key:'telemetry'},drag:{x:true,y:false,setScale:true},points:{size:5}},select:{show:true,left:0,top:0,width:0,height:0},scales:{x:{time:false}},axes:[{font:axisFont,stroke:()=>palette.ink,grid:{show:false},ticks:{stroke:()=>palette.grid},size:32,values:(_u,ticks)=>ticks.map(n=>`${Math.round(n*10)/10}`)},{font:axisFont,stroke:()=>palette.ink,grid:{stroke:()=>palette.grid,width:1},ticks:{stroke:()=>palette.grid},size:54,gap:10}],series:[{},...pairs.map((s,index)=>({label:s.name,stroke:()=>row.id==='__delta'?palette.delta:index?palette.comparison:palette.primary,width:index?1.25:1.7,dash:index?[5,4]:undefined,spanGaps:false}))],hooks:{ready:[u=>{applyingCursor.current=true;try{const position=sharedCursor.current,left=position==null?-10:u.valToPos(position,'x');if(Number.isFinite(left))u.setCursor({left,top:30});}finally{applyingCursor.current=false;}}],draw:[u=>{
         // Zero is a meaningful reference only when it falls inside the visible delta scale.
         if(row.id==='__delta'&&u.scales.y.min!=null&&u.scales.y.max!=null&&u.scales.y.min<=0&&u.scales.y.max>=0){
-          const y=u.valToPos(0,'y',true);u.ctx.save();u.ctx.strokeStyle=ink;u.ctx.globalAlpha=.45;u.ctx.lineWidth=window.devicePixelRatio;u.ctx.setLineDash([4*window.devicePixelRatio,4*window.devicePixelRatio]);u.ctx.beginPath();u.ctx.moveTo(u.bbox.left,y);u.ctx.lineTo(u.bbox.left+u.bbox.width,y);u.ctx.stroke();u.ctx.restore();
+          const y=u.valToPos(0,'y',true);u.ctx.save();u.ctx.strokeStyle=palette.ink;u.ctx.globalAlpha=.45;u.ctx.lineWidth=window.devicePixelRatio;u.ctx.setLineDash([4*window.devicePixelRatio,4*window.devicePixelRatio]);u.ctx.beginPath();u.ctx.moveTo(u.bbox.left,y);u.ctx.lineTo(u.bbox.left+u.bbox.width,y);u.ctx.stroke();u.ctx.restore();
         }
-        if(!/rpm|engine.*(speed|revs)/i.test(row.name))return;for(const event of eventOverlay.current){if(event.position==null)continue;const x=u.valToPos(event.position,'x',true);u.ctx.save();u.ctx.strokeStyle=event.lapId===analysis.primary.lapId?cyan:amber;u.ctx.fillStyle=u.ctx.strokeStyle;u.ctx.globalAlpha=.15;if(event.endPosition!=null&&event.endPosition>event.position)u.ctx.fillRect(x,u.bbox.top,u.valToPos(event.endPosition,'x',true)-x,u.bbox.height);u.ctx.globalAlpha=.8;u.ctx.beginPath();u.ctx.moveTo(x,u.bbox.top);u.ctx.lineTo(x,u.bbox.top+u.bbox.height);u.ctx.stroke();u.ctx.restore();}}],setCursor:[u=>{
+        if(!/rpm|engine.*(speed|revs)/i.test(row.name))return;for(const event of eventOverlay.current){if(event.position==null)continue;const x=u.valToPos(event.position,'x',true);u.ctx.save();u.ctx.strokeStyle=event.lapId===analysis.primary.lapId?palette.primary:palette.comparison;u.ctx.fillStyle=u.ctx.strokeStyle;u.ctx.globalAlpha=.15;if(event.endPosition!=null&&event.endPosition>event.position)u.ctx.fillRect(x,u.bbox.top,u.valToPos(event.endPosition,'x',true)-x,u.bbox.height);u.ctx.globalAlpha=.8;u.ctx.beginPath();u.ctx.moveTo(x,u.bbox.top);u.ctx.lineTo(x,u.bbox.top+u.bbox.height);u.ctx.stroke();u.ctx.restore();}}],setCursor:[u=>{
         const x=u.cursor.left==null||u.cursor.left<0?null:u.posToVal(u.cursor.left,'x');
         // uPlot can fire this hook while constructing/destroying a plot, before scales exist.
         if(!initialized||(x!=null&&!Number.isFinite(x)))return;
@@ -87,7 +94,13 @@ export default function Plots({analysis,axis,onCursor,resetVersion,cursor=null,e
     });
     if(initialZoom){const max=Math.max(...samples.map(s=>s.x.at(-1)??0),analysis.delta?.x.at(-1)??0,1);if(initialZoom.min>=0&&initialZoom.max<=max)plots.current.forEach(p=>p.setScale('x',initialZoom));}
     initialized=true;
+    const themeObserver=new MutationObserver(()=>{
+      palette=readPalette();
+      plots.current.forEach(plot=>plot.redraw(false,true));
+    });
+    themeObserver.observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
     return()=>{
+      themeObserver.disconnect();
       initialized=false;
       plots.current.forEach(p=>{
         // A disposed uPlot can outlive its canvas in browser allocation caches.
@@ -118,5 +131,5 @@ export default function Plots({analysis,axis,onCursor,resetVersion,cursor=null,e
     if(!active)return;const frame=requestAnimationFrame(()=>{applyingCursor.current=true;try{plots.current.forEach(plot=>{plot.redraw(false,false);const position=sharedCursor.current;plot.setCursor({left:position==null?-10:plot.valToPos(position,'x'),top:30});});}finally{applyingCursor.current=false;}});
     return()=>cancelAnimationFrame(frame);
   },[events,active]);
-  return <div ref={host} className="plots">{rows.map(row=><section className={`plot-row${row.id==='__delta'?' plot-delta':''}`} key={row.id} hidden={!!visibleChannels&&!visibleChannels.includes(row.id)&&row.id!=='__delta'}><div className="plot-label"><span className="plot-title">{row.name} <small className="plot-unit">{row.unit}</small>{row.primaryUnavailable&&<small> · Primary unavailable</small>}{analysis.comparison&&!row.comparison&&row.id!=='__delta'&&<small> · Comparison unavailable</small>}</span><span className="mono readout" ref={el=>{if(el)readouts.current.set(row.id,el);}}><span className="plot-reading primary-reading"><span className="plot-sr-only">{row.id==='__delta'?'Delta':'Primary lap'} </span><span className="reading-key" aria-hidden="true">{row.id==='__delta'?'Δ':'P'}</span><span data-primary-value>—</span></span>{row.id!=='__delta'&&analysis.comparison&&<span className="plot-reading comparison-reading"><span className="plot-sr-only">Comparison lap </span><span className="reading-key" aria-hidden="true">R</span><span data-comparison-value>—</span></span>}</span></div><div data-plot title="Move over a graph or use arrow keys to inspect. Drag to zoom; Shift and drag to pan." /></section>)}<div className="axis-label">{axis==='distance'?analysis.alignment?.method==='spatial'?'Reference track position · meters':'Distance into lap · meters':analysis.alignment?.method==='spatial'?'Primary lap time at aligned position · seconds':'Time into lap · seconds'}</div></div>;
+  return <div ref={host} className="plots">{rows.map(row=><section className={`plot-row${row.id==='__delta'?' plot-delta':''}`} key={row.id} hidden={!!visibleChannels&&!visibleChannels.includes(row.id)&&row.id!=='__delta'}><div className="plot-label"><span className="plot-title">{row.name} <small className="plot-unit">{row.unit}</small>{row.primaryUnavailable&&<small> · Primary unavailable</small>}{analysis.comparison&&!row.comparison&&row.id!=='__delta'&&<small> · Comparison unavailable</small>}</span><span className="mono readout" ref={el=>{if(el)readouts.current.set(row.id,el);}}><span className="plot-reading primary-reading"><span className="plot-sr-only">{row.id==='__delta'?'Delta':'Primary lap'} </span><span className="reading-key" aria-hidden="true">{row.id==='__delta'?'Δ':'P'}</span><span data-primary-value>—</span></span>{row.id!=='__delta'&&analysis.comparison&&<span className="plot-reading comparison-reading"><span className="plot-sr-only">Comparison lap </span><span className="reading-key" aria-hidden="true">R</span><span data-comparison-value>—</span></span>}</span></div><div data-plot role="group" title="Move over a graph or use arrow keys to inspect. Drag to zoom; Shift and drag to pan." /></section>)}<div className="axis-label">{axis==='distance'?analysis.alignment?.method==='spatial'?'Reference track position · meters':'Distance into lap · meters':analysis.alignment?.method==='spatial'?'Primary lap time at aligned position · seconds':'Time into lap · seconds'}</div></div>;
 }

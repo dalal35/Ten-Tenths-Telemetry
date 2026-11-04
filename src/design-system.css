@@ -8,25 +8,32 @@
 :root{
   --font-sans:'IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
   --font-mono:'IBM Plex Mono',ui-monospace,monospace;
-  --font-display:'Barlow Condensed','IBM Plex Sans',sans-serif;
-  --chrome:#101214;--control:#49535b;--hover:#ffffff08;
-  --bg:#141618;--panel:#101214;--surface:#191c1f;--raised:#232a2f;
-  --border:#2b3034;--line:var(--border);--grid:#252b2f;
-  --ink:#e6ebee;--text:var(--ink);--muted:#a1aab2;--subtle:#89949c;
-  --cyan:#75c7e9;--amber:#e3c49c;--soft:#222a2f;
-  --positive:#a6cdb9;--negative:#e3b7a1;
-  --space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-6:24px;--space-8:32px;
+  --font-display:var(--font-mono);--font-ui:var(--font-sans);--font-data:var(--font-mono);
+  /* Ember is authoritative here; legacy role names are compatibility aliases. */
+  --surface-0:#101113;--surface-1:#171A1E;--surface-2:#202328;--surface-3:#26292D;--surface-4:#30343A;
+  --bg:var(--surface-0);--chrome:var(--surface-0);--panel:var(--surface-1);--surface:var(--surface-2);--raised:var(--surface-3);
+  --border:#3C434B;--divider:var(--border);--line:var(--divider);--control:#84909C;--grid:#2D333A;--hover:#FFFFFF0A;
+  --text-primary:#DDE7ED;--text-secondary:#B4C0CA;--text-tertiary:#AAB6C1;
+  --ink:var(--text-primary);--text:var(--ink);--muted:var(--text-secondary);--subtle:var(--text-tertiary);
+  --accent:#FF6049;--accent-hover:#FF806B;--accent-pressed:#F45B45;--accent-focus:#FF9B89;--accent-ink:#101113;
+  --trace-primary:#79C9F2;--trace-comparison:#FFC27B;--delta-ahead:#65DCC3;--delta-behind:#F59BDB;--delta-trace:#D8B6FF;
+  --cyan:var(--trace-primary);--amber:var(--trace-comparison);--positive:var(--delta-ahead);--negative:var(--delta-behind);--soft:var(--surface-3);
+  --space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:20px;--space-6:24px;--space-8:32px;--space-10:40px;
+  --text-body:12px;--text-label:11px;--text-data:12px;--text-title:28px;
   --radius-control:4px;--radius-surface:4px;--radius-floating:8px;
   --feedback-duration:140ms;--surface-duration:220ms;--exit-duration:120ms;
   --ease-settle:cubic-bezier(.22,1,.36,1);
-  --shadow-floating:0 16px 48px #0006;
+  --shadow-surface:0 1px 2px #0003;--shadow-floating:0 16px 48px #0008;--shadow-float:var(--shadow-floating);
   font-family:var(--font-sans);font-size:13px;line-height:1.45;color:var(--ink);background:var(--bg);color-scheme:dark;
 }
 :root[data-theme=light]{
-  --bg:#e9eceb;--panel:#fff;--surface:#f4f6f5;--raised:#dce2df;
-  --border:#c8d0cc;--grid:#e5e9e7;--ink:#24322d;--muted:#52615a;--subtle:#58695f;
-  --cyan:#246d83;--amber:#805c30;--soft:#dce5e4;--positive:#306b50;--negative:#915137;
-  --shadow-floating:0 16px 48px #15221b22;--chrome:#e9eceb;--control:#9faea6;--hover:#00000006;
+  --surface-0:#EDF0F3;--surface-1:#FFFFFF;--surface-2:#F6F8FA;--surface-3:#E4E9EE;--surface-4:#D8E0E7;
+  --border:#B7C2CC;--control:#65717C;--grid:#E1E6EB;--hover:#10111308;
+  --text-primary:#19232C;--text-secondary:#424F5B;--text-tertiary:#4D5A66;
+  --accent:#B72E1D;--accent-hover:#9F2517;--accent-pressed:#892013;--accent-focus:#B72E1D;--accent-ink:#FFFFFF;
+  --trace-primary:#006396;--trace-comparison:#805000;--delta-ahead:#00695C;--delta-behind:#9F2577;--delta-trace:#74419C;
+  --shadow-surface:0 1px 2px #19232C10;--shadow-floating:0 16px 48px #19232C24;
+  color-scheme:light;
 }
 html,body,#root{min-width:600px;background:var(--bg)}
 body{font-family:var(--font-sans);color:var(--ink)}
@@ -34,8 +41,8 @@ button,input,select,textarea{font-family:inherit;font-size:inherit}
 button{touch-action:manipulation}
 button,input,select,textarea{transition:background-color var(--feedback-duration) var(--ease-settle),color var(--feedback-duration) var(--ease-settle),border-color var(--feedback-duration) var(--ease-settle)}
 button:disabled{opacity:.46;cursor:default}
-button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
-::selection{background:color-mix(in srgb,var(--cyan) 30%,transparent)}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent-focus);outline-offset:3px}
+::selection{background:color-mix(in srgb,var(--accent) 30%,transparent)}
 *{scrollbar-width:thin;scrollbar-color:var(--border) transparent}
 .mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
 .app.premium .section-heading{font-size:12px;font-weight:500;letter-spacing:0;color:var(--muted);text-transform:none;align-items:center;gap:8px}
@@ -82,3 +89,24 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:0s!important;scroll-behavior:auto!important}
 }
+/* Shared Ember primitives; workspace composition stays in its owning stylesheets. */
+.app.premium{color:var(--ink);font-size:13px}
+.app.premium .titlebar .ttt-mark{color:var(--accent)}
+.app.premium .workspace-selection,.app.premium .selection-rail{background:var(--accent)}
+.app.premium .titlebar .import-button{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-size:12px}
+.app.premium .titlebar .import-button:hover:not(:disabled){background:var(--accent-hover);border-color:var(--accent-hover);color:var(--accent-ink)}
+.app.premium .titlebar .import-button:active:not(:disabled){background:var(--accent-pressed)}
+.app.premium .titlebar .import-button kbd{font-size:11px;opacity:1}
+.app.premium :is(button,input,select,textarea,[tabindex]):focus-visible{outline-color:var(--accent-focus)}
+.app.premium .titlebar .workspace-switch.segmented button{font-size:12px}
+.app.premium .titlebar .ttt-wordmark>small,.app.premium .header-actions .local-badge,.app.premium .explorer-section-toggle span,.app.premium .laps-heading>span,.app.premium .lap-table-head,.app.premium .lap-time small,.app.premium .sidebar-footer,.app.premium>.statusbar,.app.premium .best-stat>span,.app.premium .lap-chip small,.app.premium .overall-delta small,.app.premium .compact-lap-selectors label{font-size:var(--text-label)}
+.app.premium .workspace-heading p{font-size:var(--text-body)}
+.app.premium .session-group-heading small,.app.premium .row-actions{opacity:1}
+.app.premium .session-group-heading,.app.premium .explorer-tools>button:first-child span,.app.premium .library-entry :is(.session-meta,.session-facts,.session-source){font-size:var(--text-label)}
+.app.premium input:not([type=checkbox]),.app.premium select{border-color:var(--control)}
+.app.premium input[type=range]{accent-color:var(--trace-primary)}
+.app.premium .uplot{font:var(--text-data) var(--font-mono)}
+.app.premium .plots .reading-key{font-size:var(--text-label);font-family:var(--font-sans)}
+.app.premium .u-select{background:color-mix(in srgb,var(--accent) 16%,transparent)!important}
+.app.premium .u-cursor-x{border-color:var(--muted)!important}
+.app.premium .plots [data-plot]:focus-visible{outline-color:var(--accent-focus)}
