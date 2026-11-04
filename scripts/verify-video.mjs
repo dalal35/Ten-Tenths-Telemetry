@@ -4,7 +4,7 @@ import {createServer} from 'vite';
 import assert from 'node:assert/strict';
 let server,browser;
 try {
-  server=await createServer({plugins:[browserTestNoWatch],optimizeDeps:{entries:browserTestEntries},server:{host:'127.0.0.1',port:0,strictPort:false,hmr:false}});await server.listen();
+  server=await createServer({configLoader:'runner',plugins:[browserTestNoWatch],optimizeDeps:{entries:browserTestEntries},server:{host:'127.0.0.1',port:0,strictPort:false,hmr:false}});await server.listen();
   browser=await launchBrowser();
   const page=await browser.newPage({viewport:{width:1360,height:1000}});const errors=[];page.on('pageerror',e=>errors.push(e.message));
   // Simulated Tauri picker/authorization and media clock; native decode is checked separately.

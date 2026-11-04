@@ -27,12 +27,14 @@ export function SegmentEditor({segments,laps,duration,selectedSegmentId,onSelect
   };
   const numberField=(key:string,label:string)=><label>{label}<input type="number" step="any" value={draft[key]??''} onChange={event=>setDraft({...draft,[key]:event.target.value})}/></label>;
   return <section className="video-segment-editor" aria-label="Edited footage segments">
+    <div className="video-step-label"><b>02</b> Refine the mapping</div>
     <div className="video-section-title"><h3>Segments</h3><small>Each cut has its own alignment</small></div>
     <div className="video-segment-tabs" aria-label="Select segment">
       {segments.map((segment,index)=><button key={segment.id} aria-pressed={segment.id===selectedSegmentId} onClick={()=>onSelect(segment.id)}>Segment {index+1} <span className="mono">{segment.videoStart.toFixed(1)}–{segment.videoEnd.toFixed(1)}s</span></button>)}
       {!segments.length&&<p className="video-note">Pause on a start/finish crossing and use Sync Here to create the first segment.</p>}
     </div>
     {selected&&<>
+      <div className="video-offset-readout"><span>Telemetry − video offset</span><strong className="mono">{(selected.anchorTelemetryTime-selected.anchorVideoTime+selected.correctionSeconds)>=0?'+':''}{(selected.anchorTelemetryTime-selected.anchorVideoTime+selected.correctionSeconds).toFixed(3)}<small> s</small></strong><span>Includes {selected.correctionSeconds>=0?'+':''}{selected.correctionSeconds.toFixed(3)}s correction</span></div>
       <form onSubmit={event=>{event.preventDefault();if(Object.values(draft).some(value=>!value.trim())){setError('Enter a finite value for every segment field.');return;}
         const changes=Object.fromEntries(Object.entries(draft).map(([key,value])=>[key,Number(value)]));
         const anchorLapId=laps.find(lap=>lap.start===changes.anchorTelemetryTime)?.id;
