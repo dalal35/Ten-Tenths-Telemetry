@@ -1,0 +1,6 @@
+import type {CoachEvidence} from './types';
+import {displaySpeedUnit,speedFactor} from '../speedDisplay';
+
+export default function EvidenceTable({evidence,modeled=false,onInspect}:{evidence:CoachEvidence[];modeled?:boolean;onInspect?:(evidence:CoachEvidence)=>void}){
+ return <div className="coach-evidence-table"><table><thead><tr><th>Evidence</th><th>{modeled?'Calculated / baseline':'Fastest lap'}</th><th>{modeled?'Scenario / timing reference':'Supporting example'}</th></tr></thead><tbody>{evidence.map(e=>{const label=e.metric.replace(/([A-Z])/g,' $1');return <tr key={e.id}><td>{onInspect?<button className="coach-evidence-link" aria-label={`Inspect ${label} telemetry`} onClick={()=>onInspect(e)}>{label} ↗</button>:label}<small>{e.id}{e.channelIds.length?` · ${e.channelIds.join(', ')}`:''}</small></td><td className="mono">{Number.isFinite(e.lapValue)?`${(e.lapValue*speedFactor(e.unit)).toFixed(3)} ${displaySpeedUnit(e.unit)}`:'—'}</td><td className="mono">{e.referenceValue==null||!Number.isFinite(e.referenceValue)?'—':`${(e.referenceValue*speedFactor(e.unit)).toFixed(3)} ${displaySpeedUnit(e.unit)}`}</td></tr>;})}</tbody></table>{!evidence.length&&<p>No supporting measurements available for this section.</p>}</div>;
+}

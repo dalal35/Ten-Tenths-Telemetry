@@ -20,6 +20,7 @@
     "test:workflow": "node scripts/verify-workflow.mjs",
     "test:advanced": "node scripts/verify-advanced.mjs",
     "test:coach": "node scripts/verify-coach.mjs",
+    "test:coach:premium": "node scripts/verify-coach-premium.mjs",
     "test:canvas": "node scripts/verify-canvas.mjs",
     "test:video": "node scripts/verify-video.mjs && node scripts/verify-video-integration.mjs",
     "build:website": "tsc -p tsconfig.website.json && node scripts/build-website.mjs",

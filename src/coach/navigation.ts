@@ -1,6 +1,7 @@
 import type {Axis,Channel,Lap,LapView,Session} from '../types';
 import {sessionTimeToCursor} from '../video/model';
 export interface EvidenceInterval {lapId:string;startTime:number;endTime:number}
+export interface CoachInspection extends EvidenceInterval {referenceLapId:string;channelIds?:string[]}
 export function inspectionChannels(selected:string[],channels:Pick<Channel,'id'|'name'>[]):string[]{
  const speed=channels.find(c=>c.id==='gps-speed')??channels.find(c=>/speed/i.test(c.name)&&!/rpm|engine|revs/i.test(c.name));
  const rpm=channels.find(c=>/rpm|engine.*(speed|revs)/i.test(c.name));
