@@ -45,83 +45,32 @@ export function AxisTabs({value,onChange}:{value:'distance'|'time';onChange:(axi
   </div></LayoutGroup>;
 }
 
-export function WorkspaceTabs({value,onChange}:{value:WorkspaceView;onChange:(view:WorkspaceView)=>void}){
-  return <LayoutGroup id="workspaces"><div className="workspace-switch segmented" aria-label="Workspace">
+export function WorkspaceTabs({value,onChange,inert=false}:{value:WorkspaceView;onChange:(view:WorkspaceView)=>void;inert?:boolean}){
+  return <LayoutGroup id="workspaces"><nav className="workspace-switch segmented" aria-label="Workspace" inert={inert}>
     {workspaces.map(([view,label])=><motion.button key={view} className={view===value?'active':''} aria-pressed={view===value} whileTap={{scale:.98}} onClick={()=>onChange(view)}>
       {view===value&&<motion.span className="workspace-selection" layoutId="workspace-selection" transition={motionTokens.spring}/>}
       <WorkspaceIcon view={view}/><span className="workspace-tab-label">{label}</span>
     </motion.button>)}
-  </div></LayoutGroup>;
+  </nav></LayoutGroup>;
 }
 
-// Only the viewport is captured. The shell and live chart coordinate space never move.
+// Navigation changes application state immediately; only the selected tab moves.
 export function useWorkspaceMotion(viewport:RefObject<HTMLElement|null>,view:WorkspaceView,sessionId:string,available=true){
-  const reduced=useReducedMotion();
-  const preference=useRef(reduced);preference.current=reduced;
   const requested=useRef(view);
   const navigator=useRef<ReturnType<typeof createWorkspaceNavigator>|null>(null);
-  const fallback=useRef<Animation|null>(null);
   const positions=useRef(new Map<string,number>());
   useLayoutEffect(()=>{
-    if(!available)return;requested.current=view;
-    const host=viewport.current;
-    let capture=0;
-    let lastNavigation=-Infinity,rapid=false;
+    if(!available)return;
+    requested.current=view;
     const controller=createWorkspaceNavigator({
       commit:update=>flushSync(update),
-      start:()=>{
-        const now=performance.now();
-        rapid=now-lastNavigation<180;lastNavigation=now;
-        // Snapshot capture suspends rendering. A burst follows the latest intent
-        // immediately instead of repeatedly freezing video and the chart cursor.
-        if(rapid||typeof document.startViewTransition!=='function'||!host)return undefined;
-        return update=>{
-          const ticket=++capture;
-          host.style.viewTransitionName='workspace-content';
-          const transition=document.startViewTransition(()=>{
-            // Capture only the outgoing scene; a captured incoming tree loses hit-testing.
-            if(ticket===capture)host.style.removeProperty('view-transition-name');
-            update();
-          });
-          return transition;
-        };
-      },
-      reduced:()=>preference.current===true||window.matchMedia('(prefers-reduced-motion: reduce)').matches,
-      fallback:()=>{
-        fallback.current?.cancel();
-        if(rapid){fallback.current=null;return;}
-        // Legacy WebKit swaps immediately. Avoid cloning canvas/video/large Coach trees.
-        fallback.current=viewport.current?.animate([{opacity:.88},{opacity:1}],{duration:160,easing:'ease-out'})??null;
-      },
+      start:()=>undefined,
+      reduced:()=>true,
+      fallback:()=>{},
     });
     navigator.current=controller;
-    const interrupt=()=>{controller.skip();fallback.current?.cancel();fallback.current=null;};
-    const inputHost=host?.parentElement;
-    // Captured elements temporarily leave hit-testing. Listen on the stationary
-    // parent and include their rectangle, even when the event targets that parent.
-    const input=(event:Event)=>{
-      if(!host||!controller.animating()&&!fallback.current)return;
-      if(host.contains(event.target as Node)){interrupt();return;}
-      const point=event instanceof MouseEvent?event:'touches' in event?(event as TouchEvent).touches[0]:null;
-      if(!point)return;
-      const rect=host.getBoundingClientRect();
-      if(point.clientX>=rect.left&&point.clientX<=rect.right&&point.clientY>=rect.top&&point.clientY<=rect.bottom)interrupt();
-    };
-    inputHost?.addEventListener('pointerdown',input,true);
-    inputHost?.addEventListener('pointermove',input,true);
-    inputHost?.addEventListener('wheel',input,{passive:true,capture:true});
-    inputHost?.addEventListener('keydown',input,true);
-    inputHost?.addEventListener('touchstart',input,{passive:true,capture:true});
-    window.addEventListener('resize',interrupt);
-    const resize=new ResizeObserver(interrupt);if(host)resize.observe(host);
-    return()=>{
-      controller.dispose();++capture;host?.style.removeProperty('view-transition-name');fallback.current?.cancel();resize.disconnect();
-      inputHost?.removeEventListener('pointerdown',input,true);inputHost?.removeEventListener('pointermove',input,true);inputHost?.removeEventListener('wheel',input,true);
-      inputHost?.removeEventListener('keydown',input,true);inputHost?.removeEventListener('touchstart',input,true);
-      window.removeEventListener('resize',interrupt);navigator.current=null;
-    };
+    return()=>{controller.dispose();navigator.current=null;};
   },[viewport,sessionId,available]);
-  useLayoutEffect(()=>{if(reduced){navigator.current?.skip();fallback.current?.cancel();}},[reduced]);
   useLayoutEffect(()=>{
     if(!navigator.current?.pending())requested.current=view;
     const host=viewport.current;if(!host||!available)return;
@@ -150,7 +99,7 @@ export function useWorkspaceMotion(viewport:RefObject<HTMLElement|null>,view:Wor
   },[viewport,view,sessionId,available]);
   return useCallback((next:WorkspaceView,update:()=>void,semantic=false)=>{
     if(next===requested.current&&!semantic)return;
-    requested.current=next;fallback.current?.cancel();
+    requested.current=next;
     if(navigator.current)navigator.current.navigate(update);else update();
   },[]);
 }

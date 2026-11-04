@@ -47,7 +47,8 @@ try{
  assert.equal(await page.locator('.import-button kbd').innerText(),'Ctrl O','Windows import hint uses the working Control shortcut');
  await page.getByRole('button',{name:'Collapse sidebar',exact:true}).waitFor({timeout:2000});
  assert.equal(await page.locator('.library-entry.active .session-track').innerText(),'one','Explorer displays the actual session name');
- await page.locator('.segment-speeds').first().waitFor();assert.match(await page.locator('.segment-speeds').first().innerText(),/22\.4/,'Section speed converts 10 m/s to 22.4 mph');
+ await page.locator('.segment-card').first().click();
+ await page.locator('.segment-speeds').first().waitFor();assert.match(await page.locator('.segment-speeds').first().innerText(),/22\.4/,'Selected section evidence converts 10 m/s to 22.4 mph');
  await page.getByRole('button',{name:'Edit boundaries',exact:true}).click();
  const handle=page.getByRole('slider',{name:'Section boundary 1'});await handle.click();await page.waitForTimeout(150);assert.equal(await handle.evaluate(el=>document.activeElement===el),true,'Clicking a boundary enables keyboard adjustment');await page.keyboard.press('ArrowRight');await page.keyboard.press('ArrowRight');
  await page.waitForFunction(()=>JSON.parse(localStorage.getItem('test-corners')||'null')?.[0]===60);await page.waitForTimeout(150);

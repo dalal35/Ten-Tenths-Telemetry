@@ -1,0 +1,99 @@
+/* Measured circuit and section evidence, with instrument typography kept local. */
+/* The website's existing demo keeps its shell and needs only shared markup compatibility. */
+.app:not(.premium) .track-instruments,.app:not(.premium) .track-map-meta,.app:not(.premium) .track-position-control,.app:not(.premium) .map-section-labels{display:none}
+.app:not(.premium) .segment-overview{display:flex;align-items:center;gap:8px;width:100%}
+.app:not(.premium) .segment-index{display:none}
+.app:not(.premium) .segment-identity{display:flex;flex-direction:column;flex:1;min-width:0}
+.app:not(.premium) .segment-delta{white-space:nowrap;font-size:11px}
+.app:not(.premium) .section-finding{font-size:11px;color:var(--muted)}
+.app:not(.premium) .section-finding p{margin:8px 0}
+.app:not(.premium) .section-finding p>span{display:block}
+.app.premium .workspace-body{grid-template-columns:minmax(0,1fr) 300px;gap:20px}
+.app.premium .inspector{width:auto;padding:12px 0 0 20px;border-left:1px solid var(--border);background:transparent;min-width:0}
+.premium .track-section{min-width:0}
+.premium .track-instruments{display:grid;grid-template-columns:1.05fr 1fr;gap:12px;padding:10px 0;align-items:center}
+.premium .speed-instrument,.premium .delta-instrument{display:flex;flex-direction:column;min-width:0;gap:4px}
+.premium .track-instruments span{font-size:11px;color:var(--muted)}
+.premium .speed-instrument strong{font:500 44px/1 var(--font-display);letter-spacing:-1px;font-variant-numeric:tabular-nums;color:var(--ink);white-space:nowrap}
+.premium .speed-instrument strong small{font:400 11px var(--font-sans);letter-spacing:0;margin-left:5px;color:var(--muted)}
+.premium .delta-instrument{border-left:1px solid var(--border);padding-left:14px}
+.premium .delta-instrument strong{font:400 21px/1.4 var(--font-mono);letter-spacing:-.8px;color:var(--cyan);white-space:nowrap}
+.premium .delta-instrument strong small{font:400 11px var(--font-sans);margin-left:4px;color:var(--muted)}
+.premium .track-map-frame{background:var(--panel);border:1px solid var(--border);border-radius:4px 4px 0 0;overflow:hidden}
+.app.premium .track{display:block;height:155px;width:100%;margin:0;padding:6px;overflow:visible}
+.premium .track-underlay{stroke:var(--raised);stroke-width:9}
+.premium .primary-line{stroke:var(--cyan);stroke-width:1.8}
+.premium .comparison-line{stroke:var(--amber);stroke-width:1.5;stroke-dasharray:4 3;opacity:.9}
+.premium .track .track-segment{stroke-width:17}
+.premium .track .track-segment:hover{stroke-opacity:.2}
+.premium .track .track-segment.selected{stroke-width:10;stroke-opacity:.3}
+.premium .track .track-segment:focus-visible{stroke-opacity:.6;stroke:var(--cyan)}
+.premium .map-section-labels{pointer-events:none}
+.premium .map-section-labels circle{fill:var(--surface);stroke:var(--muted);stroke-width:.8}
+.premium .map-section-labels text{text-anchor:middle;font:14px var(--font-sans);fill:var(--ink)}
+.premium .map-section-labels .selected circle{fill:var(--raised);stroke:var(--cyan);stroke-width:1.8}
+.premium .track .position-ring{fill:var(--panel);stroke-width:1.4;opacity:.9}
+.premium .primary-marker circle{fill:var(--cyan);stroke:var(--panel)}
+.premium .primary-marker .position-ring{fill:var(--panel);stroke:var(--cyan)}
+.premium .comparison-marker circle{fill:var(--amber);stroke:var(--panel)}
+.premium .comparison-marker .position-ring{fill:var(--panel);stroke:var(--amber)}
+.premium .track-map-meta{display:flex;justify-content:space-between;gap:8px;padding:5px 10px;border:1px solid var(--border);border-top:0;border-radius:0 0 4px 4px;font-size:11px;color:var(--muted);background:var(--panel)}
+.premium .track-position-control{padding-top:9px}
+.premium .track-position-control>div{display:flex;justify-content:space-between;gap:10px;font-size:11px;color:var(--muted);margin-bottom:7px}
+.premium .track-position-control output{color:var(--ink);white-space:nowrap}
+.premium .track-position-control input{display:block;width:100%;margin:0;min-height:24px;cursor:pointer;accent-color:var(--cyan)}
+.app.premium .map-caption{font-size:11px;min-height:0;margin:5px 0 0;line-height:1.5;color:var(--muted);text-align:left}
+.premium .track-rpm{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-top:12px;font-size:11px;color:var(--muted)}
+.premium .track-rpm strong{font-size:13px;color:var(--ink);font-weight:400}
+.premium .track-rpm small{font-family:var(--font-sans);font-size:11px;color:var(--muted)}
+.app.premium .corner-controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;padding:0}
+.app.premium .corner-controls button{font-size:11px;padding:5px 8px;min-height:28px;border:1px solid var(--border);border-radius:4px;color:var(--muted)}
+.app.premium .corner-controls button:hover:not(:disabled){background:var(--raised);color:var(--ink)}
+.app.premium .segment-section{display:flex;flex-direction:column;margin-top:12px;padding-top:12px}
+.premium .section-finding{display:flex;order:3;gap:10px;padding-top:12px;color:var(--cyan)}
+.premium .section-finding>span{font-size:20px;line-height:1.3}
+.premium .section-finding p{display:flex;flex-direction:column;gap:5px;margin:0;font-size:11px;line-height:1.4}
+.premium .section-finding strong{font-size:12px;font-weight:500;color:var(--ink)}
+.premium .section-finding p>span{color:var(--muted)}
+.app.premium .segment-note{order:2;margin:10px 0 0}
+.app.premium .segment-list{display:block;max-height:200px;overflow:auto;scroll-padding:4px;margin-top:8px}
+.app.premium .segment-card{display:block;width:100%;border:0;border-bottom:1px solid var(--border);background:transparent;border-radius:0;padding:10px 4px;text-align:left;margin:0;color:var(--ink)}
+.app.premium .segment-card:hover{background:var(--surface)}
+.app.premium .segment-card.selected{background:var(--raised)}
+.app.premium .segment-card:focus-visible{outline-offset:-2px}
+.premium .segment-overview{display:flex;align-items:center;gap:10px;min-height:30px}
+.premium .segment-index{font:500 23px/1 var(--font-display);font-variant-numeric:tabular-nums;color:var(--muted);width:22px;flex-shrink:0}
+.premium .segment-identity{display:flex;flex-direction:column;flex:1;min-width:0;gap:2px}
+.premium .segment-identity b{font-size:12px;font-weight:500;overflow-wrap:anywhere}
+.app.premium .segment-identity small{font-size:11px;color:var(--muted)}
+.premium .segment-delta{font-size:12px;font-weight:400;white-space:nowrap;text-align:right}
+.premium .segment-delta small{font:11px var(--font-sans);color:var(--muted)}
+.premium .segment-chevron{font-size:17px;color:var(--muted)}
+.app.premium .segment-details{display:flex;flex-direction:column;gap:9px;border-top:1px solid var(--border);margin:12px 0 0;padding:12px 5px 2px;font-size:11px;line-height:1.5;color:var(--ink);overflow-wrap:anywhere}
+.premium .segment-evidence-heading{display:flex;justify-content:space-between;color:var(--muted)}
+.premium .segment-evidence-heading small{font-size:11px}
+.app.premium .segment-speeds{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0}
+.app.premium .segment-speeds>span{display:flex;flex-direction:column;gap:4px}
+.app.premium .segment-speeds small{font-size:11px;letter-spacing:0;color:var(--muted)}
+.app.premium .segment-speeds .mono{font-size:13px;color:var(--cyan)}
+.app.premium .segment-speeds em.mono{color:var(--amber);font-style:normal}
+@container analysis (max-width:850px){
+  .app.premium .workspace-body{grid-template-columns:minmax(0,1fr) 260px;gap:16px}
+  .app.premium .inspector{width:auto;padding-left:16px}
+  .premium .speed-instrument strong{font-size:43px}
+  .premium .delta-instrument strong{font-size:18px}
+}
+@container analysis (max-width:690px){
+  .app.premium .workspace-body{grid-template-columns:minmax(0,1fr)}
+  .app.premium .inspector{width:100%;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;border-left:0;border-top:1px solid var(--border);padding:16px 0 0}
+  .app.premium .inspector>.track-section{grid-column:1;grid-row:1 / span 2}
+  .app.premium .inspector>.corner-controls{grid-column:1;grid-row:3}
+  .app.premium .inspector>.segment-section{grid-column:2;grid-row:1 / span 3;margin:0;padding:0;border:0}
+  .app.premium .track{height:190px;max-height:none}
+  .app.premium .segment-list{max-height:420px}
+  .premium .speed-instrument strong{font-size:40px}
+  .premium .delta-instrument{padding-left:8px}
+  .premium .track-instruments{gap:8px}
+  .premium .delta-instrument strong{font-size:17px}
+  .app.premium .inspector>.reading-guide,.app.premium .inspector>.warnings{grid-column:1/-1}
+}

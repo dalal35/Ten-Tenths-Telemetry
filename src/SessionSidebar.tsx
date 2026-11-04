@@ -3,7 +3,7 @@ import {createPortal} from 'react-dom';
 import {SelectionRail,Surface} from './motion';
 import {AnimatePresence,motion,useIsPresent} from 'motion/react';
 import SessionDetails from './SessionDetails';
-import type {ReactNode} from 'react';
+import type {CSSProperties,ReactNode} from 'react';
 import type {LibraryEntry,Session} from './types';
 import type {ExplorerPreferences,SessionSort,SessionGrouping} from './sessionExplorer';
 import {organizeSessions,formatRecordingDate} from './sessionExplorer';
@@ -66,6 +66,12 @@ export default function SessionExplorer(p:Props){
   const [closedGroups,setClosedGroups]=useState<Set<string>>(()=>new Set());
   const [popover,setPopover]=useState<{key:string;anchor:HTMLButtonElement}|null>(null);
   const [details,setDetails]=useState<LibraryEntry|null>(null);
+  const [sidebarWidth,setSidebarWidth]=useState(()=>{
+    try{const saved=Number(localStorage.getItem('apex-telemetry:explorer-width'));return saved>=220&&saved<=360?saved:236;}catch{return 236;}
+  });
+  const resizeStart=useRef<{x:number;width:number}|null>(null);
+  const resizeWidth=(width:number)=>setSidebarWidth(Math.max(220,Math.min(360,Math.round(width))));
+  useEffect(()=>{try{localStorage.setItem('apex-telemetry:explorer-width',String(sidebarWidth));}catch{/* Width remains usable without storage. */}},[sidebarWidth]);
   const sidebar=useRef<HTMLElement>(null),opener=useRef<HTMLButtonElement>(null);
   const closePopover=useMemo(()=>()=>setPopover(null),[]);
   const visibleEntries=useMemo(()=>visibleSessionEntries(entries),[entries]);
@@ -98,7 +104,7 @@ export default function SessionExplorer(p:Props){
     const i=rows.indexOf(document.activeElement as HTMLButtonElement);if(i<0)return;
     e.preventDefault();rows[e.key==='Home'?0:e.key==='End'?rows.length-1:Math.max(0,Math.min(rows.length-1,i+(e.key==='ArrowDown'?1:-1)))]?.focus();
   };
-  return <div className="explorer-slot" data-visible={visible} data-drawer={narrow}>
+  return <div className="explorer-slot" data-visible={visible} data-drawer={narrow} style={{'--explorer-width':`${sidebarWidth}px`} as CSSProperties}>
     <div className="explorer-rail" hidden={visible&&!narrow} inert={narrow&&drawerOpen}>
       <button ref={opener} className="explorer-icon" aria-label={narrow?'Open session explorer':'Expand sidebar'} title={narrow?'Open sessions and laps':'Expand sidebar'} aria-expanded={visible} aria-controls="session-explorer" onClick={()=>{if(narrow)p.onDrawer(true);else changeState('analysis');}}><span aria-hidden="true">›</span></button>
     </div>
@@ -109,9 +115,10 @@ export default function SessionExplorer(p:Props){
     }}>
       <div className="explorer-heading">
         <button className="explorer-icon" aria-label={narrow?'Close session explorer':'Collapse sidebar'} title={narrow?'Close session explorer':'Collapse sidebar'} onClick={()=>{if(narrow)p.onDrawer(false);else changeState('collapsed');}}>‹</button>
-        <button className="explorer-section-toggle" aria-label={sessionsVisible?'Hide sessions':'Show sessions'} aria-expanded={sessionsVisible} disabled={p.mergeMode||!session} onClick={()=>changeState(sessionsVisible?'analysis':'expanded')}>SESSIONS <span>{visibleEntries.length}</span><span aria-hidden="true">{sessionsVisible?'⌃':'⌄'}</span></button>
+        <button className="explorer-section-toggle" aria-label={sessionsVisible?'Hide sessions':'Show sessions'} aria-expanded={sessionsVisible} disabled={p.mergeMode||!session} onClick={()=>changeState(sessionsVisible?'analysis':'expanded')}>Session library <span>{visibleEntries.length}</span><span aria-hidden="true">{sessionsVisible?'⌃':'⌄'}</span></button>
         <button className="explorer-icon" aria-label="Session explorer actions" aria-haspopup="menu" aria-expanded={popover?.key==='header'} onClick={e=>togglePopover('header',e.currentTarget)}>⋯</button>
       </div>
+      {session&&!sessionsVisible&&<div className="explorer-current"><span>Current session</span><strong title={session.name||session.track}>{session.name||session.track||'Untitled session'}</strong><small>{session.track||'Circuit not recorded'}</small></div>}
       {sessionsVisible&&<section className="session-region" aria-label="Sessions">
         <div className="explorer-tools"><button aria-label="Sort and group sessions" aria-haspopup="dialog" aria-expanded={popover?.key==='organize'} onClick={e=>togglePopover('organize',e.currentTarget)}>Sort & group <span aria-hidden="true">⌄</span></button><button className="explorer-icon" aria-label="Import session" title="Import session" disabled={p.busy||p.restoring} onClick={p.onImport}>＋</button></div>
         {p.mergeMode&&<div className="merge-selection"><span>{p.selectedIds.length} selected</span><button disabled={p.busy||p.restoring||p.selectedIds.length<2} onClick={p.onMerge}>Merge Sessions</button><button disabled={p.busy} onClick={cancel}>Cancel</button></div>}
@@ -130,10 +137,11 @@ export default function SessionExplorer(p:Props){
           })}</div>
         </div>)}{!visibleEntries.length&&<p className="sidebar-hint">Your sessions stay on this computer.<br/>Import an XRK file to begin.</p>}</div>
       </section>}
-      {session&&<section className="lap-region" aria-label="Laps"><div className="sidebar-label laps-heading">LAPS <span>{session.laps.length}</span></div><div className="lap-table-head"><span>LAP</span><span>TIME</span><span>COMPARE</span></div><motion.div layoutScroll className="lap-list" inert={p.lifecycle}>{session.laps.map(l=><div key={l.id} className={`lap-row ${l.id===p.primary?'selected':''} ${l.id===p.comparison?'compared':''}`}>{l.id===p.primary&&<SelectionRail group="lap-selection" value={l.id}/>}<button className="lap-select" onClick={()=>p.onLap(l.id)} title="Use as primary lap" aria-pressed={l.id===p.primary}><span className="lap-number">{lapDisplayNumber(session,l.id).toString().padStart(2,'0')}</span><span className="lap-time mono">{formatTime(l.duration)}{(!l.complete||l.id===best?.id)&&<small>{!l.complete?lapBoundaryLabel(session,l.id):'FASTEST'}</small>}</span></button><button className={`compare-toggle ${l.id===p.comparison?'on':''}`} disabled={l.id===p.primary} aria-label={`Compare lap ${lapDisplayNumber(session,l.id)}`} aria-pressed={l.id===p.comparison} onClick={()=>p.onCompare(p.comparison===l.id?null:l.id)}>{l.id===p.comparison?'●':'＋'}</button></div>)}</motion.div></section>}
+      {session&&<section className="lap-region" aria-label="Laps"><div className="sidebar-label laps-heading">Laps <span>{session.laps.length} total</span></div><div className="lap-table-head"><span>Lap</span><span>Time</span><span>Ref.</span></div><motion.div layoutScroll className="lap-list" inert={p.lifecycle}>{session.laps.map(l=><div key={l.id} className={`lap-row ${l.id===p.primary?'selected':''} ${l.id===p.comparison?'compared':''}`}>{l.id===p.primary&&<SelectionRail group="lap-selection" value={l.id}/>}<button className="lap-select" onClick={()=>p.onLap(l.id)} title="Use as primary lap" aria-pressed={l.id===p.primary}><span className="lap-number">{lapDisplayNumber(session,l.id).toString().padStart(2,'0')}</span><span className="lap-time mono">{formatTime(l.duration)}{(!l.complete||l.id===best?.id)&&<small>{!l.complete?lapBoundaryLabel(session,l.id):'FASTEST'}</small>}</span></button><button className={`compare-toggle ${l.id===p.comparison?'on':''}`} disabled={l.id===p.primary} aria-label={`Compare lap ${lapDisplayNumber(session,l.id)}`} aria-pressed={l.id===p.comparison} onClick={()=>p.onCompare(p.comparison===l.id?null:l.id)}>{l.id===p.comparison?'R':'＋'}</button></div>)}</motion.div></section>}
       {session&&<div className="sidebar-footer" title={session.source}><span className="dot"/><span>{session.source.split(/[\\/]/).pop()}</span></div>}
       <AnimatePresence>{details&&<SessionDetails key={details.id} entry={details} onClose={()=>setDetails(null)} onSave={(name,driver,date)=>p.onEditDetails(details,name,driver,date)}/>}</AnimatePresence>
     </aside>
+    {!narrow&&!collapsed&&<div className="explorer-resizer" role="separator" aria-label="Resize session explorer" aria-orientation="vertical" aria-controls="session-explorer" aria-valuemin={220} aria-valuemax={360} aria-valuenow={sidebarWidth} tabIndex={0} title="Drag to resize · arrow keys adjust width" onPointerDown={e=>{if(e.button!==0)return;e.preventDefault();resizeStart.current={x:e.clientX,width:sidebarWidth};e.currentTarget.setPointerCapture(e.pointerId);}} onPointerMove={e=>{if(resizeStart.current)resizeWidth(resizeStart.current.width+e.clientX-resizeStart.current.x);}} onPointerUp={()=>{resizeStart.current=null;}} onPointerCancel={()=>{resizeStart.current=null;}} onKeyDown={e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();resizeWidth(sidebarWidth+(e.key==='ArrowLeft'?-1:1)*(e.shiftKey?32:8));}else if(e.key==='Home'||e.key==='End'){e.preventDefault();resizeWidth(e.key==='Home'?220:360);}}}/>}
     <AnimatePresence>{popover&&visible&&<ExplorerPopover key={popover.key} anchor={popover.anchor} container={sidebar.current} onClose={closePopover} label={popover.key==='organize'?'Organize sessions':'Session actions'} menu={popover.key!=='organize'}>
       {popover.key==='organize'?<><label>Sort sessions<select aria-label="Sort sessions" value={preferences.sort} onChange={e=>p.onPreferences({...preferences,sort:e.target.value as SessionSort})}><option value="date-desc">Date · Newest first</option><option value="date-asc">Date · Oldest first</option><option value="driver-asc">Driver · A–Z</option><option value="driver-desc">Driver · Z–A</option><option value="circuit-asc">Circuit · A–Z</option><option value="circuit-desc">Circuit · Z–A</option></select></label><label>Group sessions<select aria-label="Group sessions" value={preferences.grouping} onChange={e=>{setClosedGroups(new Set());p.onPreferences({...preferences,grouping:e.target.value as SessionGrouping});}}><option value="date">By date</option><option value="driver">By driver</option><option value="circuit">By circuit</option><option value="none">No grouping</option></select></label></>:popover.key==='header'?<button role="menuitem" disabled={p.busy||p.restoring} onClick={()=>{closePopover();p.onMergeMode();changeState('expanded');}}>Merge sessions</button>:<>{(()=>{const entry=entries.find(e=>e.id===popover.key);if(!entry)return null;const action=(kind:Action)=>{const anchor=popover.anchor;closePopover();anchor.focus();p.onManage(entry,kind);};return <><button role="menuitem" onClick={()=>{closePopover();popover.anchor.focus();setDetails(entry);}}>Edit details</button>{entry.mergeSources?<button role="menuitem" onClick={()=>action('unmerge')}>Unmerge</button>:<><button role="menuitem" onClick={()=>action(entry.status==='missing'?'locate':'refresh')}>{entry.status==='missing'?'Locate…':'Refresh'}</button><button role="menuitem" onClick={()=>action('remove')}>Remove</button></>}</>;})()}</>}
     </ExplorerPopover>}</AnimatePresence>
