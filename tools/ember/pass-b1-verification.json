@@ -1,0 +1,2708 @@
+{
+  "simulatedIPC": true,
+  "themes": [
+    {
+      "theme": "dark",
+      "axe": [],
+      "contrast": [
+        {
+          "foreground": "--ink",
+          "background": "--surface-0",
+          "fg": "#DDE7ED",
+          "bg": "#101113",
+          "minimum": 4.5,
+          "ratio": 15.048091362932428,
+          "pass": true
+        },
+        {
+          "foreground": "--muted",
+          "background": "--surface-0",
+          "fg": "#B4C0CA",
+          "bg": "#101113",
+          "minimum": 4.5,
+          "ratio": 10.195409540933353,
+          "pass": true
+        },
+        {
+          "foreground": "--subtle",
+          "background": "--surface-0",
+          "fg": "#AAB6C1",
+          "bg": "#101113",
+          "minimum": 4.5,
+          "ratio": 9.149248605804896,
+          "pass": true
+        },
+        {
+          "foreground": "--ink",
+          "background": "--surface-1",
+          "fg": "#DDE7ED",
+          "bg": "#171A1E",
+          "minimum": 4.5,
+          "ratio": 13.905700390609773,
+          "pass": true
+        },
+        {
+          "foreground": "--muted",
+          "background": "--surface-1",
+          "fg": "#B4C0CA",
+          "bg": "#171A1E",
+          "minimum": 4.5,
+          "ratio": 9.421414783871695,
+          "pass": true
+        },
+        {
+          "foreground": "--subtle",
+          "background": "--surface-1",
+          "fg": "#AAB6C1",
+          "bg": "#171A1E",
+          "minimum": 4.5,
+          "ratio": 8.45467420705069,
+          "pass": true
+        },
+        {
+          "foreground": "--ink",
+          "background": "--surface-2",
+          "fg": "#DDE7ED",
+          "bg": "#202328",
+          "minimum": 4.5,
+          "ratio": 12.553906510679878,
+          "pass": true
+        },
+        {
+          "foreground": "--muted",
+          "background": "--surface-2",
+          "fg": "#B4C0CA",
+          "bg": "#202328",
+          "minimum": 4.5,
+          "ratio": 8.505544997570315,
+          "pass": true
+        },
+        {
+          "foreground": "--subtle",
+          "background": "--surface-2",
+          "fg": "#AAB6C1",
+          "bg": "#202328",
+          "minimum": 4.5,
+          "ratio": 7.632782714435905,
+          "pass": true
+        },
+        {
+          "foreground": "--ink",
+          "background": "--surface-3",
+          "fg": "#DDE7ED",
+          "bg": "#26292D",
+          "minimum": 4.5,
+          "ratio": 11.6367983983173,
+          "pass": true
+        },
+        {
+          "foreground": "--muted",
+          "background": "--surface-3",
+          "fg": "#B4C0CA",
+          "bg": "#26292D",
+          "minimum": 4.5,
+          "ratio": 7.884184283222105,
+          "pass": true
+        },
+        {
+          "foreground": "--subtle",
+          "background": "--surface-3",
+          "fg": "#AAB6C1",
+          "bg": "#26292D",
+          "minimum": 4.5,
+          "ratio": 7.075180430130624,
+          "pass": true
+        },
+        {
+          "foreground": "--ink",
+          "background": "--surface-4",
+          "fg": "#DDE7ED",
+          "bg": "#30343A",
+          "minimum": 4.5,
+          "ratio": 9.96899919629121,
+          "pass": true
+        },
+        {
+          "foreground": "--muted",
+          "background": "--surface-4",
+          "fg": "#B4C0CA",
+          "bg": "#30343A",
+          "minimum": 4.5,
+          "ratio": 6.754214010807153,
+          "pass": true
+        },
+        {
+          "foreground": "--subtle",
+          "background": "--surface-4",
+          "fg": "#AAB6C1",
+          "bg": "#30343A",
+          "minimum": 4.5,
+          "ratio": 6.061157511484137,
+          "pass": true
+        },
+        {
+          "foreground": "--trace-primary",
+          "background": "actual plot background",
+          "fg": "#79C9F2",
+          "bg": "rgb(23, 26, 30)",
+          "minimum": 3,
+          "ratio": 9.518211370827746,
+          "pass": true
+        },
+        {
+          "foreground": "--trace-comparison",
+          "background": "actual plot background",
+          "fg": "#FFC27B",
+          "bg": "rgb(23, 26, 30)",
+          "minimum": 3,
+          "ratio": 11.018637864794108,
+          "pass": true
+        },
+        {
+          "foreground": "--delta-trace",
+          "background": "actual plot background",
+          "fg": "#D8B6FF",
+          "bg": "rgb(23, 26, 30)",
+          "minimum": 3,
+          "ratio": 10.021277751461305,
+          "pass": true
+        },
+        {
+          "foreground": "--delta-ahead",
+          "background": "actual plot background",
+          "fg": "#65DCC3",
+          "bg": "rgb(23, 26, 30)",
+          "minimum": 3,
+          "ratio": 10.456613020733675,
+          "pass": true
+        },
+        {
+          "foreground": "--delta-behind",
+          "background": "actual plot background",
+          "fg": "#F59BDB",
+          "bg": "rgb(23, 26, 30)",
+          "minimum": 3,
+          "ratio": 8.80671920720029,
+          "pass": true
+        },
+        {
+          "foreground": "--accent-focus",
+          "background": "--bg",
+          "fg": "#FF9B89",
+          "bg": "#101113",
+          "minimum": 3,
+          "ratio": 9.26738882138698,
+          "pass": true
+        },
+        {
+          "foreground": "--control",
+          "background": "--bg",
+          "fg": "#84909C",
+          "bg": "#101113",
+          "minimum": 3,
+          "ratio": 5.802792755278442,
+          "pass": true
+        },
+        {
+          "foreground": "--accent-focus",
+          "background": "--panel",
+          "fg": "#FF9B89",
+          "bg": "#171A1E",
+          "minimum": 3,
+          "ratio": 8.563845689489535,
+          "pass": true
+        },
+        {
+          "foreground": "--control",
+          "background": "--panel",
+          "fg": "#84909C",
+          "bg": "#171A1E",
+          "minimum": 3,
+          "ratio": 5.362267914087047,
+          "pass": true
+        },
+        {
+          "foreground": "--accent-focus",
+          "background": "--raised",
+          "fg": "#FF9B89",
+          "bg": "#26292D",
+          "minimum": 3,
+          "ratio": 7.166539117309312,
+          "pass": true
+        },
+        {
+          "foreground": "--control",
+          "background": "--raised",
+          "fg": "#84909C",
+          "bg": "#26292D",
+          "minimum": 3,
+          "ratio": 4.487341803806844,
+          "pass": true
+        }
+      ],
+      "tooltip": {
+        "triggerCount": 1,
+        "focused": true,
+        "visible": true,
+        "accessibleName": "Chart controls and alignment",
+        "hoverReachable": true,
+        "escapeDismissed": true,
+        "focusRetained": true
+      },
+      "sourceTooltip": {
+        "visible": true,
+        "hoverReachable": true,
+        "escapeDismissed": true,
+        "focusRetained": true
+      },
+      "fontFloors": {
+        "body": 13,
+        "legends": [
+          {
+            "size": 12,
+            "text": "GPS Speed mphPrimary lap Primary28.0Comp"
+          },
+          {
+            "size": 12,
+            "text": "Primary lap Primary28.0Comparison lap Re"
+          },
+          {
+            "size": 12,
+            "text": "RPM rpmPrimary lap Primary9842Comparison"
+          },
+          {
+            "size": 12,
+            "text": "Primary lap Primary9842Comparison lap Re"
+          },
+          {
+            "size": 12,
+            "text": "Spatial time delta sDelta Δ-0.011Ahead"
+          },
+          {
+            "size": 12,
+            "text": "Delta Δ-0.011Ahead"
+          }
+        ],
+        "canvas": [
+          {
+            "font": "11px Geist, \"IBM Plex Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "size": 11
+          }
+        ],
+        "loaded": [
+          "IBM Plex Sans",
+          "IBM Plex Sans",
+          "IBM Plex Mono",
+          "Geist",
+          "IBM Plex Sans",
+          "IBM Plex Sans",
+          "IBM Plex Mono"
+        ],
+        "bodyPass": true,
+        "legendsPass": true,
+        "canvasPass": true,
+        "geistLoaded": true,
+        "canvasFamilyPass": true
+      },
+      "smallText": [],
+      "cursor": {
+        "sameCanvas": true,
+        "commits": 2,
+        "plotUpdates": 2,
+        "focusOutline": "solid"
+      },
+      "themeSwitch": {
+        "sameCanvas": true,
+        "theme": "light",
+        "primaryPainted": true,
+        "comparisonDashed": true,
+        "deltaPainted": true,
+        "axisPainted": true,
+        "dotColors": [
+          "#006396",
+          "#805000",
+          "#006396",
+          "#805000",
+          "#74419c"
+        ],
+        "cursorDotsCurrent": true
+      },
+      "zoomPan": {
+        "narrowed": {
+          "min": 93.81766381766383,
+          "max": 253.81766381766383,
+          "primary": "lap-8",
+          "comparison": "lap-9",
+          "axis": "distance"
+        },
+        "panned": {
+          "min": 109.81766659989317,
+          "max": 269.8176665998932,
+          "primary": "lap-8",
+          "comparison": "lap-9",
+          "axis": "distance"
+        },
+        "reset": {
+          "min": 0,
+          "max": 413.9772293183862,
+          "primary": "lap-8",
+          "comparison": "lap-9",
+          "axis": "distance"
+        },
+        "narrowedRange": true,
+        "panPreservesRange": true,
+        "resetCleared": true
+      },
+      "interactionIdentity": true,
+      "narrow": {
+        "controls": [
+          {
+            "selector": ".channel-control>button",
+            "index": 0,
+            "reachable": true
+          },
+          {
+            "selector": "[data-plot]",
+            "index": 0,
+            "reachable": true
+          },
+          {
+            "selector": "[data-plot]",
+            "index": 1,
+            "reachable": true
+          },
+          {
+            "selector": "[data-plot]",
+            "index": 2,
+            "reachable": true
+          },
+          {
+            "selector": ".corner-controls button:not(:disabled)",
+            "index": 0,
+            "reachable": true
+          },
+          {
+            "selector": ".track-position-control input",
+            "index": 0,
+            "reachable": true
+          },
+          {
+            "selector": ".segment-card",
+            "index": 0,
+            "reachable": true
+          },
+          {
+            "selector": ".segment-card",
+            "index": 1,
+            "reachable": true
+          },
+          {
+            "selector": ".segment-card",
+            "index": 2,
+            "reachable": true
+          },
+          {
+            "selector": ".segment-card",
+            "index": 3,
+            "reachable": true
+          },
+          {
+            "selector": ".segment-card",
+            "index": 4,
+            "reachable": true
+          },
+          {
+            "selector": ".segment-card",
+            "index": 5,
+            "reachable": true
+          },
+          {
+            "selector": ".segment-card",
+            "index": 6,
+            "reachable": true
+          },
+          {
+            "selector": ".segment-card",
+            "index": 7,
+            "reachable": true
+          },
+          {
+            "selector": ".segment-card",
+            "index": 8,
+            "reachable": true
+          },
+          {
+            "selector": ".segment-card",
+            "index": 9,
+            "reachable": true
+          },
+          {
+            "selector": ".segment-card",
+            "index": 10,
+            "reachable": true
+          }
+        ],
+        "channelMenu": {
+          "x": 210,
+          "right": 540,
+          "top": 288.078125,
+          "bottom": 459,
+          "height": 170.921875
+        },
+        "lastChannelReachable": true,
+        "overflow": false,
+        "plotHeights": [
+          120,
+          120,
+          120
+        ],
+        "axe": []
+      }
+    },
+    {
+      "theme": "light",
+      "axe": [],
+      "contrast": [
+        {
+          "foreground": "--ink",
+          "background": "--surface-0",
+          "fg": "#19232C",
+          "bg": "#EDF0F3",
+          "minimum": 4.5,
+          "ratio": 13.928316827995262,
+          "pass": true
+        },
+        {
+          "foreground": "--muted",
+          "background": "--surface-0",
+          "fg": "#424F5B",
+          "bg": "#EDF0F3",
+          "minimum": 4.5,
+          "ratio": 7.340404430618744,
+          "pass": true
+        },
+        {
+          "foreground": "--subtle",
+          "background": "--surface-0",
+          "fg": "#4D5A66",
+          "bg": "#EDF0F3",
+          "minimum": 4.5,
+          "ratio": 6.181775133084595,
+          "pass": true
+        },
+        {
+          "foreground": "--ink",
+          "background": "--surface-1",
+          "fg": "#19232C",
+          "bg": "#FFFFFF",
+          "minimum": 4.5,
+          "ratio": 15.93181614678867,
+          "pass": true
+        },
+        {
+          "foreground": "--muted",
+          "background": "--surface-1",
+          "fg": "#424F5B",
+          "bg": "#FFFFFF",
+          "minimum": 4.5,
+          "ratio": 8.396274673809465,
+          "pass": true
+        },
+        {
+          "foreground": "--subtle",
+          "background": "--surface-1",
+          "fg": "#4D5A66",
+          "bg": "#FFFFFF",
+          "minimum": 4.5,
+          "ratio": 7.07098396003886,
+          "pass": true
+        },
+        {
+          "foreground": "--ink",
+          "background": "--surface-2",
+          "fg": "#19232C",
+          "bg": "#F6F8FA",
+          "minimum": 4.5,
+          "ratio": 14.965249729803816,
+          "pass": true
+        },
+        {
+          "foreground": "--muted",
+          "background": "--surface-2",
+          "fg": "#424F5B",
+          "bg": "#F6F8FA",
+          "minimum": 4.5,
+          "ratio": 7.886881579342924,
+          "pass": true
+        },
+        {
+          "foreground": "--subtle",
+          "background": "--surface-2",
+          "fg": "#4D5A66",
+          "bg": "#F6F8FA",
+          "minimum": 4.5,
+          "ratio": 6.641994849956156,
+          "pass": true
+        },
+        {
+          "foreground": "--ink",
+          "background": "--surface-3",
+          "fg": "#19232C",
+          "bg": "#E4E9EE",
+          "minimum": 4.5,
+          "ratio": 13.04054866755624,
+          "pass": true
+        },
+        {
+          "foreground": "--muted",
+          "background": "--surface-3",
+          "fg": "#424F5B",
+          "bg": "#E4E9EE",
+          "minimum": 4.5,
+          "ratio": 6.872539043959041,
+          "pass": true
+        },
+        {
+          "foreground": "--subtle",
+          "background": "--surface-3",
+          "fg": "#4D5A66",
+          "bg": "#E4E9EE",
+          "minimum": 4.5,
+          "ratio": 5.787758885039777,
+          "pass": true
+        },
+        {
+          "foreground": "--ink",
+          "background": "--surface-4",
+          "fg": "#19232C",
+          "bg": "#D8E0E7",
+          "minimum": 4.5,
+          "ratio": 11.938204571321721,
+          "pass": true
+        },
+        {
+          "foreground": "--muted",
+          "background": "--surface-4",
+          "fg": "#424F5B",
+          "bg": "#D8E0E7",
+          "minimum": 4.5,
+          "ratio": 6.291589343575831,
+          "pass": true
+        },
+        {
+          "foreground": "--subtle",
+          "background": "--surface-4",
+          "fg": "#4D5A66",
+          "bg": "#D8E0E7",
+          "minimum": 4.5,
+          "ratio": 5.298507857341408,
+          "pass": true
+        },
+        {
+          "foreground": "--trace-primary",
+          "background": "actual plot background",
+          "fg": "#006396",
+          "bg": "rgb(255, 255, 255)",
+          "minimum": 3,
+          "ratio": 6.511349766527229,
+          "pass": true
+        },
+        {
+          "foreground": "--trace-comparison",
+          "background": "actual plot background",
+          "fg": "#805000",
+          "bg": "rgb(255, 255, 255)",
+          "minimum": 3,
+          "ratio": 6.850872141992458,
+          "pass": true
+        },
+        {
+          "foreground": "--delta-trace",
+          "background": "actual plot background",
+          "fg": "#74419C",
+          "bg": "rgb(255, 255, 255)",
+          "minimum": 3,
+          "ratio": 7.049867297789304,
+          "pass": true
+        },
+        {
+          "foreground": "--delta-ahead",
+          "background": "actual plot background",
+          "fg": "#00695C",
+          "bg": "rgb(255, 255, 255)",
+          "minimum": 3,
+          "ratio": 6.6138160256812535,
+          "pass": true
+        },
+        {
+          "foreground": "--delta-behind",
+          "background": "actual plot background",
+          "fg": "#9F2577",
+          "bg": "rgb(255, 255, 255)",
+          "minimum": 3,
+          "ratio": 6.987900012296586,
+          "pass": true
+        },
+        {
+          "foreground": "--accent-focus",
+          "background": "--bg",
+          "fg": "#B72E1D",
+          "bg": "#EDF0F3",
+          "minimum": 3,
+          "ratio": 5.365042830342228,
+          "pass": true
+        },
+        {
+          "foreground": "--control",
+          "background": "--bg",
+          "fg": "#65717C",
+          "bg": "#EDF0F3",
+          "minimum": 3,
+          "ratio": 4.364536284946547,
+          "pass": true
+        },
+        {
+          "foreground": "--accent-focus",
+          "background": "--panel",
+          "fg": "#B72E1D",
+          "bg": "#FFFFFF",
+          "minimum": 3,
+          "ratio": 6.136769937689715,
+          "pass": true
+        },
+        {
+          "foreground": "--control",
+          "background": "--panel",
+          "fg": "#65717C",
+          "bg": "#FFFFFF",
+          "minimum": 3,
+          "ratio": 4.992346922924267,
+          "pass": true
+        },
+        {
+          "foreground": "--accent-focus",
+          "background": "--raised",
+          "fg": "#B72E1D",
+          "bg": "#E4E9EE",
+          "minimum": 3,
+          "ratio": 5.023083765008774,
+          "pass": true
+        },
+        {
+          "foreground": "--control",
+          "background": "--raised",
+          "fg": "#65717C",
+          "bg": "#E4E9EE",
+          "minimum": 3,
+          "ratio": 4.0863478723259785,
+          "pass": true
+        }
+      ],
+      "tooltip": {
+        "triggerCount": 1,
+        "focused": true,
+        "visible": true,
+        "accessibleName": "Chart controls and alignment",
+        "hoverReachable": true,
+        "escapeDismissed": true,
+        "focusRetained": true
+      },
+      "sourceTooltip": {
+        "visible": true,
+        "hoverReachable": true,
+        "escapeDismissed": true,
+        "focusRetained": true
+      },
+      "fontFloors": {
+        "body": 13,
+        "legends": [
+          {
+            "size": 12,
+            "text": "GPS Speed mphPrimary lap Primary28.0Comp"
+          },
+          {
+            "size": 12,
+            "text": "Primary lap Primary28.0Comparison lap Re"
+          },
+          {
+            "size": 12,
+            "text": "RPM rpmPrimary lap Primary9842Comparison"
+          },
+          {
+            "size": 12,
+            "text": "Primary lap Primary9842Comparison lap Re"
+          },
+          {
+            "size": 12,
+            "text": "Spatial time delta sDelta Δ-0.011Ahead"
+          },
+          {
+            "size": 12,
+            "text": "Delta Δ-0.011Ahead"
+          }
+        ],
+        "canvas": [
+          {
+            "font": "11px Geist, \"IBM Plex Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "size": 11
+          }
+        ],
+        "loaded": [
+          "IBM Plex Sans",
+          "IBM Plex Sans",
+          "IBM Plex Mono",
+          "Geist",
+          "IBM Plex Sans",
+          "IBM Plex Sans",
+          "IBM Plex Mono"
+        ],
+        "bodyPass": true,
+        "legendsPass": true,
+        "canvasPass": true,
+        "geistLoaded": true,
+        "canvasFamilyPass": true
+      },
+      "smallText": [],
+      "cursor": {
+        "sameCanvas": true,
+        "commits": 2,
+        "plotUpdates": 2,
+        "focusOutline": "solid"
+      },
+      "themeSwitch": {
+        "sameCanvas": true,
+        "theme": "dark",
+        "primaryPainted": true,
+        "comparisonDashed": true,
+        "deltaPainted": true,
+        "axisPainted": true,
+        "dotColors": [
+          "#79c9f2",
+          "#ffc27b",
+          "#79c9f2",
+          "#ffc27b",
+          "#d8b6ff"
+        ],
+        "cursorDotsCurrent": true
+      },
+      "zoomPan": {
+        "narrowed": {
+          "min": 93.81766381766383,
+          "max": 253.81766381766383,
+          "primary": "lap-8",
+          "comparison": "lap-9",
+          "axis": "distance"
+        },
+        "panned": {
+          "min": 109.81766659989317,
+          "max": 269.8176665998932,
+          "primary": "lap-8",
+          "comparison": "lap-9",
+          "axis": "distance"
+        },
+        "reset": {
+          "min": 0,
+          "max": 413.9772293183862,
+          "primary": "lap-8",
+          "comparison": "lap-9",
+          "axis": "distance"
+        },
+        "narrowedRange": true,
+        "panPreservesRange": true,
+        "resetCleared": true
+      },
+      "interactionIdentity": true,
+      "narrow": {
+        "controls": [
+          {
+            "selector": ".channel-control>button",
+            "index": 0,
+            "reachable": true
+          },
+          {
+            "selector": "[data-plot]",
+            "index": 0,
+            "reachable": true
+          },
+          {
+            "selector": "[data-plot]",
+            "index": 1,
+            "reachable": true
+          },
+          {
+            "selector": "[data-plot]",
+            "index": 2,
+            "reachable": true
+          },
+          {
+            "selector": ".corner-controls button:not(:disabled)",
+            "index": 0,
+            "reachable": true
+          },
+          {
+            "selector": ".track-position-control input",
+            "index": 0,
+            "reachable": true
+          },
+          {
+            "selector": ".segment-card",
+            "index": 0,
+            "reachable": true
+          },
+          {
+            "selector": ".segment-card",
+            "index": 1,
+            "reachable": true
+          },
+          {
+            "selector": ".segment-card",
+            "index": 2,
+            "reachable": true
+          },
+          {
+            "selector": ".segment-card",
+            "index": 3,
+            "reachable": true
+          },
+          {
+            "selector": ".segment-card",
+            "index": 4,
+            "reachable": true
+          },
+          {
+            "selector": ".segment-card",
+            "index": 5,
+            "reachable": true
+          },
+          {
+            "selector": ".segment-card",
+            "index": 6,
+            "reachable": true
+          },
+          {
+            "selector": ".segment-card",
+            "index": 7,
+            "reachable": true
+          },
+          {
+            "selector": ".segment-card",
+            "index": 8,
+            "reachable": true
+          },
+          {
+            "selector": ".segment-card",
+            "index": 9,
+            "reachable": true
+          },
+          {
+            "selector": ".segment-card",
+            "index": 10,
+            "reachable": true
+          }
+        ],
+        "channelMenu": {
+          "x": 210,
+          "right": 540,
+          "top": 288.078125,
+          "bottom": 459,
+          "height": 170.921875
+        },
+        "lastChannelReachable": true,
+        "overflow": false,
+        "plotHeights": [
+          120,
+          120,
+          120
+        ],
+        "axe": []
+      }
+    }
+  ],
+  "differences": [
+    {
+      "before": "docs/ember/screenshots/after/telemetry-1440x900-dark.png",
+      "after": "docs/ember/screenshots/after/pass-b1/telemetry-1440x900-dark.png",
+      "path": "docs/ember/screenshots/after/pass-b1/telemetry-1440x900-dark-diff.png",
+      "pixels": 66147,
+      "fraction": 0.05103935185185185
+    },
+    {
+      "before": "docs/ember/screenshots/after/telemetry-1440x900-light.png",
+      "after": "docs/ember/screenshots/after/pass-b1/telemetry-1440x900-light.png",
+      "path": "docs/ember/screenshots/after/pass-b1/telemetry-1440x900-light-diff.png",
+      "pixels": 59361,
+      "fraction": 0.04580324074074074
+    },
+    {
+      "before": "docs/ember/screenshots/after/telemetry-1920x1080-dark.png",
+      "after": "docs/ember/screenshots/after/pass-b1/telemetry-1920x1080-dark.png",
+      "path": "docs/ember/screenshots/after/pass-b1/telemetry-1920x1080-dark-diff.png",
+      "pixels": 84235,
+      "fraction": 0.0406225887345679
+    },
+    {
+      "before": "docs/ember/screenshots/after/telemetry-1920x1080-light.png",
+      "after": "docs/ember/screenshots/after/pass-b1/telemetry-1920x1080-light.png",
+      "path": "docs/ember/screenshots/after/pass-b1/telemetry-1920x1080-light-diff.png",
+      "pixels": 75885,
+      "fraction": 0.036595775462962964
+    },
+    {
+      "before": "docs/ember/screenshots/after/telemetry-600x500-dark.png",
+      "after": "docs/ember/screenshots/after/pass-b1/telemetry-600x500-dark.png",
+      "path": "docs/ember/screenshots/after/pass-b1/telemetry-600x500-dark-diff.png",
+      "pixels": 17167,
+      "fraction": 0.057223333333333334
+    },
+    {
+      "before": "docs/ember/screenshots/after/telemetry-600x500-light.png",
+      "after": "docs/ember/screenshots/after/pass-b1/telemetry-600x500-light.png",
+      "path": "docs/ember/screenshots/after/pass-b1/telemetry-600x500-light-diff.png",
+      "pixels": 15751,
+      "fraction": 0.05250333333333333
+    }
+  ],
+  "failures": [],
+  "geometry": [
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "theme": "dark",
+      "utilizationBefore": 0.7378051968421603,
+      "utilizationAfter": 0.7490843463028823,
+      "plotChanges": [
+        {
+          "before": {
+            "x": 265,
+            "y": 331.28125,
+            "width": 816,
+            "height": 147
+          },
+          "after": {
+            "x": 265,
+            "y": 340.28125,
+            "width": 816,
+            "height": 147
+          },
+          "heightChange": 0
+        },
+        {
+          "before": {
+            "x": 265,
+            "y": 478.28125,
+            "width": 816,
+            "height": 147
+          },
+          "after": {
+            "x": 265,
+            "y": 487.28125,
+            "width": 816,
+            "height": 147
+          },
+          "heightChange": 0
+        },
+        {
+          "before": {
+            "x": 265,
+            "y": 625.28125,
+            "width": 816,
+            "height": 147
+          },
+          "after": {
+            "x": 265,
+            "y": 634.28125,
+            "width": 816,
+            "height": 147
+          },
+          "heightChange": 0
+        }
+      ],
+      "regionsBefore": {
+        "sidebar": {
+          "selector": ".sidebar",
+          "box": {
+            "x": 0,
+            "y": 64,
+            "width": 235,
+            "height": 808
+          }
+        },
+        "inspector": {
+          "selector": ".inspector",
+          "box": {
+            "x": 1102,
+            "y": 274.28125,
+            "width": 300,
+            "height": 952.015625
+          }
+        },
+        "plots": {
+          "selector": ".plots",
+          "box": {
+            "x": 264,
+            "y": 330.28125,
+            "width": 818,
+            "height": 474.9375
+          }
+        }
+      },
+      "regionsAfter": {
+        "sidebar": {
+          "selector": ".sidebar",
+          "box": {
+            "x": 0,
+            "y": 64,
+            "width": 235,
+            "height": 808
+          }
+        },
+        "inspector": {
+          "selector": ".inspector",
+          "box": {
+            "x": 1102,
+            "y": 283.28125,
+            "width": 300,
+            "height": 744.53125
+          }
+        },
+        "plots": {
+          "selector": ".plots",
+          "box": {
+            "x": 264,
+            "y": 339.28125,
+            "width": 818,
+            "height": 476.390625
+          }
+        }
+      },
+      "regionChanges": {
+        "sidebar": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "inspector": {
+          "x": 0,
+          "y": 9,
+          "width": 0,
+          "height": -207.484375
+        },
+        "plots": {
+          "x": 0,
+          "y": 9,
+          "width": 0,
+          "height": 1.453125
+        }
+      },
+      "overflow": false,
+      "textAudit": {
+        "method": "Visible direct-text owners intersecting viewport and overflow-clipping ancestors; visually hidden content, closed menus and canvas text excluded",
+        "count": 135,
+        "supportingCount": 3,
+        "supportingDefinition": "Visible direct-text owners in session metadata, lap-table headings, repeated plot reading keys, chart help, map hint, section index, track source, fastest-lap summary, local badge, or status bar",
+        "examples": [
+          {
+            "text": "Telemetry",
+            "tag": "small",
+            "class": "",
+            "size": "11px",
+            "supporting": false
+          },
+          {
+            "text": "Telemetry",
+            "tag": "span",
+            "class": "workspace-tab-label",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Advanced",
+            "tag": "span",
+            "class": "workspace-tab-label",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Video",
+            "tag": "span",
+            "class": "workspace-tab-label",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "AI Driving Coach",
+            "tag": "span",
+            "class": "workspace-tab-label",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Session library",
+            "tag": "button",
+            "class": "explorer-section-toggle",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Laps",
+            "tag": "div",
+            "class": "sidebar-label laps-heading",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Primary ahead",
+            "tag": "small",
+            "class": "",
+            "size": "11px",
+            "supporting": false
+          },
+          {
+            "text": "Distance",
+            "tag": "button",
+            "class": "active",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Time",
+            "tag": "button",
+            "class": "",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Compact",
+            "tag": "button",
+            "class": "",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "GPS Speed",
+            "tag": "span",
+            "class": "plot-title",
+            "size": "13px",
+            "supporting": false
+          },
+          {
+            "text": "RPM",
+            "tag": "span",
+            "class": "plot-title",
+            "size": "13px",
+            "supporting": false
+          },
+          {
+            "text": "rpm",
+            "tag": "small",
+            "class": "plot-unit",
+            "size": "11px",
+            "supporting": false
+          },
+          {
+            "text": "Spatial time delta",
+            "tag": "span",
+            "class": "plot-title",
+            "size": "13px",
+            "supporting": false
+          },
+          {
+            "text": "Ahead",
+            "tag": "span",
+            "class": "",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Primary",
+            "tag": "span",
+            "class": "",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Reference",
+            "tag": "span",
+            "class": "",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Track position",
+            "tag": "span",
+            "class": "",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Speed",
+            "tag": "span",
+            "class": "",
+            "size": "11px",
+            "supporting": false
+          },
+          {
+            "text": "Delta to reference",
+            "tag": "span",
+            "class": "",
+            "size": "11px",
+            "supporting": false
+          },
+          {
+            "text": "Primary ahead",
+            "tag": "span",
+            "class": "",
+            "size": "11px",
+            "supporting": false
+          },
+          {
+            "text": "Lap position",
+            "tag": "label",
+            "class": "",
+            "size": "11px",
+            "supporting": false
+          },
+          {
+            "text": "Section comparison",
+            "tag": "div",
+            "class": "section-heading",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Saved on this computer",
+            "tag": "span",
+            "class": "",
+            "size": "11px",
+            "supporting": true
+          }
+        ]
+      }
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "theme": "light",
+      "utilizationBefore": 0.7378051968421603,
+      "utilizationAfter": 0.7490843463028823,
+      "plotChanges": [
+        {
+          "before": {
+            "x": 265,
+            "y": 331.28125,
+            "width": 816,
+            "height": 147
+          },
+          "after": {
+            "x": 265,
+            "y": 340.28125,
+            "width": 816,
+            "height": 147
+          },
+          "heightChange": 0
+        },
+        {
+          "before": {
+            "x": 265,
+            "y": 478.28125,
+            "width": 816,
+            "height": 147
+          },
+          "after": {
+            "x": 265,
+            "y": 487.28125,
+            "width": 816,
+            "height": 147
+          },
+          "heightChange": 0
+        },
+        {
+          "before": {
+            "x": 265,
+            "y": 625.28125,
+            "width": 816,
+            "height": 147
+          },
+          "after": {
+            "x": 265,
+            "y": 634.28125,
+            "width": 816,
+            "height": 147
+          },
+          "heightChange": 0
+        }
+      ],
+      "regionsBefore": {
+        "sidebar": {
+          "selector": ".sidebar",
+          "box": {
+            "x": 0,
+            "y": 64,
+            "width": 235,
+            "height": 808
+          }
+        },
+        "inspector": {
+          "selector": ".inspector",
+          "box": {
+            "x": 1102,
+            "y": 274.28125,
+            "width": 300,
+            "height": 952.015625
+          }
+        },
+        "plots": {
+          "selector": ".plots",
+          "box": {
+            "x": 264,
+            "y": 330.28125,
+            "width": 818,
+            "height": 474.9375
+          }
+        }
+      },
+      "regionsAfter": {
+        "sidebar": {
+          "selector": ".sidebar",
+          "box": {
+            "x": 0,
+            "y": 64,
+            "width": 235,
+            "height": 808
+          }
+        },
+        "inspector": {
+          "selector": ".inspector",
+          "box": {
+            "x": 1102,
+            "y": 283.28125,
+            "width": 300,
+            "height": 744.53125
+          }
+        },
+        "plots": {
+          "selector": ".plots",
+          "box": {
+            "x": 264,
+            "y": 339.28125,
+            "width": 818,
+            "height": 476.390625
+          }
+        }
+      },
+      "regionChanges": {
+        "sidebar": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "inspector": {
+          "x": 0,
+          "y": 9,
+          "width": 0,
+          "height": -207.484375
+        },
+        "plots": {
+          "x": 0,
+          "y": 9,
+          "width": 0,
+          "height": 1.453125
+        }
+      },
+      "overflow": false,
+      "textAudit": {
+        "method": "Visible direct-text owners intersecting viewport and overflow-clipping ancestors; visually hidden content, closed menus and canvas text excluded",
+        "count": 135,
+        "supportingCount": 3,
+        "supportingDefinition": "Visible direct-text owners in session metadata, lap-table headings, repeated plot reading keys, chart help, map hint, section index, track source, fastest-lap summary, local badge, or status bar",
+        "examples": [
+          {
+            "text": "Telemetry",
+            "tag": "small",
+            "class": "",
+            "size": "11px",
+            "supporting": false
+          },
+          {
+            "text": "Telemetry",
+            "tag": "span",
+            "class": "workspace-tab-label",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Advanced",
+            "tag": "span",
+            "class": "workspace-tab-label",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Video",
+            "tag": "span",
+            "class": "workspace-tab-label",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "AI Driving Coach",
+            "tag": "span",
+            "class": "workspace-tab-label",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Session library",
+            "tag": "button",
+            "class": "explorer-section-toggle",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Laps",
+            "tag": "div",
+            "class": "sidebar-label laps-heading",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Primary ahead",
+            "tag": "small",
+            "class": "",
+            "size": "11px",
+            "supporting": false
+          },
+          {
+            "text": "Distance",
+            "tag": "button",
+            "class": "active",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Time",
+            "tag": "button",
+            "class": "",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Compact",
+            "tag": "button",
+            "class": "",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "GPS Speed",
+            "tag": "span",
+            "class": "plot-title",
+            "size": "13px",
+            "supporting": false
+          },
+          {
+            "text": "RPM",
+            "tag": "span",
+            "class": "plot-title",
+            "size": "13px",
+            "supporting": false
+          },
+          {
+            "text": "rpm",
+            "tag": "small",
+            "class": "plot-unit",
+            "size": "11px",
+            "supporting": false
+          },
+          {
+            "text": "Spatial time delta",
+            "tag": "span",
+            "class": "plot-title",
+            "size": "13px",
+            "supporting": false
+          },
+          {
+            "text": "Ahead",
+            "tag": "span",
+            "class": "",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Primary",
+            "tag": "span",
+            "class": "",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Reference",
+            "tag": "span",
+            "class": "",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Track position",
+            "tag": "span",
+            "class": "",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Speed",
+            "tag": "span",
+            "class": "",
+            "size": "11px",
+            "supporting": false
+          },
+          {
+            "text": "Delta to reference",
+            "tag": "span",
+            "class": "",
+            "size": "11px",
+            "supporting": false
+          },
+          {
+            "text": "Primary ahead",
+            "tag": "span",
+            "class": "",
+            "size": "11px",
+            "supporting": false
+          },
+          {
+            "text": "Lap position",
+            "tag": "label",
+            "class": "",
+            "size": "11px",
+            "supporting": false
+          },
+          {
+            "text": "Section comparison",
+            "tag": "div",
+            "class": "section-heading",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Saved on this computer",
+            "tag": "span",
+            "class": "",
+            "size": "11px",
+            "supporting": true
+          }
+        ]
+      }
+    },
+    {
+      "viewport": [
+        1920,
+        1080
+      ],
+      "theme": "dark",
+      "utilizationBefore": 0.7199541929521437,
+      "utilizationAfter": 0.7199682913939591,
+      "plotChanges": [
+        {
+          "before": {
+            "x": 265,
+            "y": 331.28125,
+            "width": 1296,
+            "height": 186.640625
+          },
+          "after": {
+            "x": 265,
+            "y": 340.28125,
+            "width": 1296,
+            "height": 184.484375
+          },
+          "heightChange": -0.011552951025533664
+        },
+        {
+          "before": {
+            "x": 265,
+            "y": 517.921875,
+            "width": 1296,
+            "height": 186.640625
+          },
+          "after": {
+            "x": 265,
+            "y": 524.765625,
+            "width": 1296,
+            "height": 184.484375
+          },
+          "heightChange": -0.011552951025533664
+        },
+        {
+          "before": {
+            "x": 265,
+            "y": 704.5625,
+            "width": 1296,
+            "height": 186.640625
+          },
+          "after": {
+            "x": 265,
+            "y": 709.25,
+            "width": 1296,
+            "height": 184.484375
+          },
+          "heightChange": -0.011552951025533664
+        }
+      ],
+      "regionsBefore": {
+        "sidebar": {
+          "selector": ".sidebar",
+          "box": {
+            "x": 0,
+            "y": 64,
+            "width": 235,
+            "height": 988
+          }
+        },
+        "inspector": {
+          "selector": ".inspector",
+          "box": {
+            "x": 1582,
+            "y": 274.28125,
+            "width": 300,
+            "height": 952.015625
+          }
+        },
+        "plots": {
+          "selector": ".plots",
+          "box": {
+            "x": 264,
+            "y": 330.28125,
+            "width": 1298,
+            "height": 593.859375
+          }
+        }
+      },
+      "regionsAfter": {
+        "sidebar": {
+          "selector": ".sidebar",
+          "box": {
+            "x": 0,
+            "y": 64,
+            "width": 235,
+            "height": 988
+          }
+        },
+        "inspector": {
+          "selector": ".inspector",
+          "box": {
+            "x": 1582,
+            "y": 283.28125,
+            "width": 300,
+            "height": 744.53125
+          }
+        },
+        "plots": {
+          "selector": ".plots",
+          "box": {
+            "x": 264,
+            "y": 339.28125,
+            "width": 1298,
+            "height": 588.84375
+          }
+        }
+      },
+      "regionChanges": {
+        "sidebar": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "inspector": {
+          "x": 0,
+          "y": 9,
+          "width": 0,
+          "height": -207.484375
+        },
+        "plots": {
+          "x": 0,
+          "y": 9,
+          "width": 0,
+          "height": -5.015625
+        }
+      },
+      "overflow": false,
+      "textAudit": {
+        "method": "Visible direct-text owners intersecting viewport and overflow-clipping ancestors; visually hidden content, closed menus and canvas text excluded",
+        "count": 148,
+        "supportingCount": 3,
+        "supportingDefinition": "Visible direct-text owners in session metadata, lap-table headings, repeated plot reading keys, chart help, map hint, section index, track source, fastest-lap summary, local badge, or status bar",
+        "examples": [
+          {
+            "text": "Telemetry",
+            "tag": "small",
+            "class": "",
+            "size": "11px",
+            "supporting": false
+          },
+          {
+            "text": "Telemetry",
+            "tag": "span",
+            "class": "workspace-tab-label",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Advanced",
+            "tag": "span",
+            "class": "workspace-tab-label",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Video",
+            "tag": "span",
+            "class": "workspace-tab-label",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "AI Driving Coach",
+            "tag": "span",
+            "class": "workspace-tab-label",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Session library",
+            "tag": "button",
+            "class": "explorer-section-toggle",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Laps",
+            "tag": "div",
+            "class": "sidebar-label laps-heading",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Primary ahead",
+            "tag": "small",
+            "class": "",
+            "size": "11px",
+            "supporting": false
+          },
+          {
+            "text": "Distance",
+            "tag": "button",
+            "class": "active",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Time",
+            "tag": "button",
+            "class": "",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Compact",
+            "tag": "button",
+            "class": "",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "GPS Speed",
+            "tag": "span",
+            "class": "plot-title",
+            "size": "13px",
+            "supporting": false
+          },
+          {
+            "text": "RPM",
+            "tag": "span",
+            "class": "plot-title",
+            "size": "13px",
+            "supporting": false
+          },
+          {
+            "text": "rpm",
+            "tag": "small",
+            "class": "plot-unit",
+            "size": "11px",
+            "supporting": false
+          },
+          {
+            "text": "Spatial time delta",
+            "tag": "span",
+            "class": "plot-title",
+            "size": "13px",
+            "supporting": false
+          },
+          {
+            "text": "Ahead",
+            "tag": "span",
+            "class": "",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Primary",
+            "tag": "span",
+            "class": "",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Reference",
+            "tag": "span",
+            "class": "",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Track position",
+            "tag": "span",
+            "class": "",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Speed",
+            "tag": "span",
+            "class": "",
+            "size": "11px",
+            "supporting": false
+          },
+          {
+            "text": "Delta to reference",
+            "tag": "span",
+            "class": "",
+            "size": "11px",
+            "supporting": false
+          },
+          {
+            "text": "Primary ahead",
+            "tag": "span",
+            "class": "",
+            "size": "11px",
+            "supporting": false
+          },
+          {
+            "text": "Lap position",
+            "tag": "label",
+            "class": "",
+            "size": "11px",
+            "supporting": false
+          },
+          {
+            "text": "Section comparison",
+            "tag": "div",
+            "class": "section-heading",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Saved on this computer",
+            "tag": "span",
+            "class": "",
+            "size": "11px",
+            "supporting": true
+          }
+        ]
+      }
+    },
+    {
+      "viewport": [
+        1920,
+        1080
+      ],
+      "theme": "light",
+      "utilizationBefore": 0.7199541929521437,
+      "utilizationAfter": 0.7199682913939591,
+      "plotChanges": [
+        {
+          "before": {
+            "x": 265,
+            "y": 331.28125,
+            "width": 1296,
+            "height": 186.640625
+          },
+          "after": {
+            "x": 265,
+            "y": 340.28125,
+            "width": 1296,
+            "height": 184.484375
+          },
+          "heightChange": -0.011552951025533664
+        },
+        {
+          "before": {
+            "x": 265,
+            "y": 517.921875,
+            "width": 1296,
+            "height": 186.640625
+          },
+          "after": {
+            "x": 265,
+            "y": 524.765625,
+            "width": 1296,
+            "height": 184.484375
+          },
+          "heightChange": -0.011552951025533664
+        },
+        {
+          "before": {
+            "x": 265,
+            "y": 704.5625,
+            "width": 1296,
+            "height": 186.640625
+          },
+          "after": {
+            "x": 265,
+            "y": 709.25,
+            "width": 1296,
+            "height": 184.484375
+          },
+          "heightChange": -0.011552951025533664
+        }
+      ],
+      "regionsBefore": {
+        "sidebar": {
+          "selector": ".sidebar",
+          "box": {
+            "x": 0,
+            "y": 64,
+            "width": 235,
+            "height": 988
+          }
+        },
+        "inspector": {
+          "selector": ".inspector",
+          "box": {
+            "x": 1582,
+            "y": 274.28125,
+            "width": 300,
+            "height": 952.015625
+          }
+        },
+        "plots": {
+          "selector": ".plots",
+          "box": {
+            "x": 264,
+            "y": 330.28125,
+            "width": 1298,
+            "height": 593.859375
+          }
+        }
+      },
+      "regionsAfter": {
+        "sidebar": {
+          "selector": ".sidebar",
+          "box": {
+            "x": 0,
+            "y": 64,
+            "width": 235,
+            "height": 988
+          }
+        },
+        "inspector": {
+          "selector": ".inspector",
+          "box": {
+            "x": 1582,
+            "y": 283.28125,
+            "width": 300,
+            "height": 744.53125
+          }
+        },
+        "plots": {
+          "selector": ".plots",
+          "box": {
+            "x": 264,
+            "y": 339.28125,
+            "width": 1298,
+            "height": 588.84375
+          }
+        }
+      },
+      "regionChanges": {
+        "sidebar": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "inspector": {
+          "x": 0,
+          "y": 9,
+          "width": 0,
+          "height": -207.484375
+        },
+        "plots": {
+          "x": 0,
+          "y": 9,
+          "width": 0,
+          "height": -5.015625
+        }
+      },
+      "overflow": false,
+      "textAudit": {
+        "method": "Visible direct-text owners intersecting viewport and overflow-clipping ancestors; visually hidden content, closed menus and canvas text excluded",
+        "count": 148,
+        "supportingCount": 3,
+        "supportingDefinition": "Visible direct-text owners in session metadata, lap-table headings, repeated plot reading keys, chart help, map hint, section index, track source, fastest-lap summary, local badge, or status bar",
+        "examples": [
+          {
+            "text": "Telemetry",
+            "tag": "small",
+            "class": "",
+            "size": "11px",
+            "supporting": false
+          },
+          {
+            "text": "Telemetry",
+            "tag": "span",
+            "class": "workspace-tab-label",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Advanced",
+            "tag": "span",
+            "class": "workspace-tab-label",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Video",
+            "tag": "span",
+            "class": "workspace-tab-label",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "AI Driving Coach",
+            "tag": "span",
+            "class": "workspace-tab-label",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Session library",
+            "tag": "button",
+            "class": "explorer-section-toggle",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Laps",
+            "tag": "div",
+            "class": "sidebar-label laps-heading",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Primary ahead",
+            "tag": "small",
+            "class": "",
+            "size": "11px",
+            "supporting": false
+          },
+          {
+            "text": "Distance",
+            "tag": "button",
+            "class": "active",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Time",
+            "tag": "button",
+            "class": "",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Compact",
+            "tag": "button",
+            "class": "",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "GPS Speed",
+            "tag": "span",
+            "class": "plot-title",
+            "size": "13px",
+            "supporting": false
+          },
+          {
+            "text": "RPM",
+            "tag": "span",
+            "class": "plot-title",
+            "size": "13px",
+            "supporting": false
+          },
+          {
+            "text": "rpm",
+            "tag": "small",
+            "class": "plot-unit",
+            "size": "11px",
+            "supporting": false
+          },
+          {
+            "text": "Spatial time delta",
+            "tag": "span",
+            "class": "plot-title",
+            "size": "13px",
+            "supporting": false
+          },
+          {
+            "text": "Ahead",
+            "tag": "span",
+            "class": "",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Primary",
+            "tag": "span",
+            "class": "",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Reference",
+            "tag": "span",
+            "class": "",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Track position",
+            "tag": "span",
+            "class": "",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Speed",
+            "tag": "span",
+            "class": "",
+            "size": "11px",
+            "supporting": false
+          },
+          {
+            "text": "Delta to reference",
+            "tag": "span",
+            "class": "",
+            "size": "11px",
+            "supporting": false
+          },
+          {
+            "text": "Primary ahead",
+            "tag": "span",
+            "class": "",
+            "size": "11px",
+            "supporting": false
+          },
+          {
+            "text": "Lap position",
+            "tag": "label",
+            "class": "",
+            "size": "11px",
+            "supporting": false
+          },
+          {
+            "text": "Section comparison",
+            "tag": "div",
+            "class": "section-heading",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Saved on this computer",
+            "tag": "span",
+            "class": "",
+            "size": "11px",
+            "supporting": true
+          }
+        ]
+      }
+    },
+    {
+      "viewport": [
+        600,
+        500
+      ],
+      "theme": "dark",
+      "utilizationBefore": 0.7540784683834434,
+      "utilizationAfter": 0.7573661456601264,
+      "plotChanges": [
+        {
+          "before": {
+            "x": 55,
+            "y": 297.21875,
+            "width": 520,
+            "height": 147
+          },
+          "after": {
+            "x": 55,
+            "y": 294.078125,
+            "width": 520,
+            "height": 147
+          },
+          "heightChange": 0
+        },
+        {
+          "before": {
+            "x": 55,
+            "y": 444.21875,
+            "width": 520,
+            "height": 147
+          },
+          "after": {
+            "x": 55,
+            "y": 441.078125,
+            "width": 520,
+            "height": 147
+          },
+          "heightChange": 0
+        },
+        {
+          "before": {
+            "x": 55,
+            "y": 591.21875,
+            "width": 520,
+            "height": 147
+          },
+          "after": {
+            "x": 55,
+            "y": 588.078125,
+            "width": 520,
+            "height": 147
+          },
+          "heightChange": 0
+        }
+      ],
+      "regionsBefore": {
+        "sidebar": {
+          "selector": ".sidebar",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          }
+        },
+        "inspector": {
+          "selector": ".inspector",
+          "box": {
+            "x": 54,
+            "y": 857.34375,
+            "width": 522,
+            "height": 756.328125
+          }
+        },
+        "plots": {
+          "selector": ".plots",
+          "box": {
+            "x": 54,
+            "y": 296.21875,
+            "width": 522,
+            "height": 474.9375
+          }
+        }
+      },
+      "regionsAfter": {
+        "sidebar": {
+          "selector": ".sidebar",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          }
+        },
+        "inspector": {
+          "selector": ".inspector",
+          "box": {
+            "x": 54,
+            "y": 824.0625,
+            "width": 522,
+            "height": 571.578125
+          }
+        },
+        "plots": {
+          "selector": ".plots",
+          "box": {
+            "x": 54,
+            "y": 293.078125,
+            "width": 522,
+            "height": 476.390625
+          }
+        }
+      },
+      "regionChanges": {
+        "sidebar": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "inspector": {
+          "x": 0,
+          "y": -33.28125,
+          "width": 0,
+          "height": -184.75
+        },
+        "plots": {
+          "x": 0,
+          "y": -3.140625,
+          "width": 0,
+          "height": 1.453125
+        }
+      },
+      "overflow": false,
+      "textAudit": {
+        "method": "Visible direct-text owners intersecting viewport and overflow-clipping ancestors; visually hidden content, closed menus and canvas text excluded",
+        "count": 33,
+        "supportingCount": 2,
+        "supportingDefinition": "Visible direct-text owners in session metadata, lap-table headings, repeated plot reading keys, chart help, map hint, section index, track source, fastest-lap summary, local badge, or status bar",
+        "examples": [
+          {
+            "text": "Telemetry",
+            "tag": "span",
+            "class": "workspace-tab-label",
+            "size": "11px",
+            "supporting": false
+          },
+          {
+            "text": "Advanced",
+            "tag": "span",
+            "class": "workspace-tab-label",
+            "size": "11px",
+            "supporting": false
+          },
+          {
+            "text": "Video",
+            "tag": "span",
+            "class": "workspace-tab-label",
+            "size": "11px",
+            "supporting": false
+          },
+          {
+            "text": "AI Driving Coach",
+            "tag": "span",
+            "class": "workspace-tab-label",
+            "size": "11px",
+            "supporting": false
+          },
+          {
+            "text": "Lap",
+            "tag": "label",
+            "class": "",
+            "size": "10px",
+            "supporting": false
+          },
+          {
+            "text": "Primary ahead",
+            "tag": "small",
+            "class": "",
+            "size": "11px",
+            "supporting": false
+          },
+          {
+            "text": "Distance",
+            "tag": "button",
+            "class": "active",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Time",
+            "tag": "button",
+            "class": "",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Compact",
+            "tag": "button",
+            "class": "",
+            "size": "11px",
+            "supporting": false
+          },
+          {
+            "text": "GPS Speed",
+            "tag": "span",
+            "class": "plot-title",
+            "size": "13px",
+            "supporting": false
+          },
+          {
+            "text": "RPM",
+            "tag": "span",
+            "class": "plot-title",
+            "size": "13px",
+            "supporting": false
+          },
+          {
+            "text": "rpm",
+            "tag": "small",
+            "class": "plot-unit",
+            "size": "11px",
+            "supporting": false
+          },
+          {
+            "text": "Saved on this computer",
+            "tag": "span",
+            "class": "",
+            "size": "11px",
+            "supporting": true
+          }
+        ]
+      }
+    },
+    {
+      "viewport": [
+        600,
+        500
+      ],
+      "theme": "light",
+      "utilizationBefore": 0.7540784683834434,
+      "utilizationAfter": 0.7573661456601264,
+      "plotChanges": [
+        {
+          "before": {
+            "x": 55,
+            "y": 297.21875,
+            "width": 520,
+            "height": 147
+          },
+          "after": {
+            "x": 55,
+            "y": 294.078125,
+            "width": 520,
+            "height": 147
+          },
+          "heightChange": 0
+        },
+        {
+          "before": {
+            "x": 55,
+            "y": 444.21875,
+            "width": 520,
+            "height": 147
+          },
+          "after": {
+            "x": 55,
+            "y": 441.078125,
+            "width": 520,
+            "height": 147
+          },
+          "heightChange": 0
+        },
+        {
+          "before": {
+            "x": 55,
+            "y": 591.21875,
+            "width": 520,
+            "height": 147
+          },
+          "after": {
+            "x": 55,
+            "y": 588.078125,
+            "width": 520,
+            "height": 147
+          },
+          "heightChange": 0
+        }
+      ],
+      "regionsBefore": {
+        "sidebar": {
+          "selector": ".sidebar",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          }
+        },
+        "inspector": {
+          "selector": ".inspector",
+          "box": {
+            "x": 54,
+            "y": 857.34375,
+            "width": 522,
+            "height": 756.328125
+          }
+        },
+        "plots": {
+          "selector": ".plots",
+          "box": {
+            "x": 54,
+            "y": 296.21875,
+            "width": 522,
+            "height": 474.9375
+          }
+        }
+      },
+      "regionsAfter": {
+        "sidebar": {
+          "selector": ".sidebar",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          }
+        },
+        "inspector": {
+          "selector": ".inspector",
+          "box": {
+            "x": 54,
+            "y": 824.0625,
+            "width": 522,
+            "height": 571.578125
+          }
+        },
+        "plots": {
+          "selector": ".plots",
+          "box": {
+            "x": 54,
+            "y": 293.078125,
+            "width": 522,
+            "height": 476.390625
+          }
+        }
+      },
+      "regionChanges": {
+        "sidebar": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "inspector": {
+          "x": 0,
+          "y": -33.28125,
+          "width": 0,
+          "height": -184.75
+        },
+        "plots": {
+          "x": 0,
+          "y": -3.140625,
+          "width": 0,
+          "height": 1.453125
+        }
+      },
+      "overflow": false,
+      "textAudit": {
+        "method": "Visible direct-text owners intersecting viewport and overflow-clipping ancestors; visually hidden content, closed menus and canvas text excluded",
+        "count": 33,
+        "supportingCount": 2,
+        "supportingDefinition": "Visible direct-text owners in session metadata, lap-table headings, repeated plot reading keys, chart help, map hint, section index, track source, fastest-lap summary, local badge, or status bar",
+        "examples": [
+          {
+            "text": "Telemetry",
+            "tag": "span",
+            "class": "workspace-tab-label",
+            "size": "11px",
+            "supporting": false
+          },
+          {
+            "text": "Advanced",
+            "tag": "span",
+            "class": "workspace-tab-label",
+            "size": "11px",
+            "supporting": false
+          },
+          {
+            "text": "Video",
+            "tag": "span",
+            "class": "workspace-tab-label",
+            "size": "11px",
+            "supporting": false
+          },
+          {
+            "text": "AI Driving Coach",
+            "tag": "span",
+            "class": "workspace-tab-label",
+            "size": "11px",
+            "supporting": false
+          },
+          {
+            "text": "Lap",
+            "tag": "label",
+            "class": "",
+            "size": "10px",
+            "supporting": false
+          },
+          {
+            "text": "Primary ahead",
+            "tag": "small",
+            "class": "",
+            "size": "11px",
+            "supporting": false
+          },
+          {
+            "text": "Distance",
+            "tag": "button",
+            "class": "active",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Time",
+            "tag": "button",
+            "class": "",
+            "size": "12px",
+            "supporting": false
+          },
+          {
+            "text": "Compact",
+            "tag": "button",
+            "class": "",
+            "size": "11px",
+            "supporting": false
+          },
+          {
+            "text": "GPS Speed",
+            "tag": "span",
+            "class": "plot-title",
+            "size": "13px",
+            "supporting": false
+          },
+          {
+            "text": "RPM",
+            "tag": "span",
+            "class": "plot-title",
+            "size": "13px",
+            "supporting": false
+          },
+          {
+            "text": "rpm",
+            "tag": "small",
+            "class": "plot-unit",
+            "size": "11px",
+            "supporting": false
+          },
+          {
+            "text": "Saved on this computer",
+            "tag": "span",
+            "class": "",
+            "size": "11px",
+            "supporting": true
+          }
+        ]
+      }
+    }
+  ]
+}

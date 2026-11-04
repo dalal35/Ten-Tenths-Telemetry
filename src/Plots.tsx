@@ -62,10 +62,10 @@ export default function Plots({analysis,axis,onCursor,resetVersion,cursor=null,e
     const readPalette=()=>{
       const style=getComputedStyle(host.current!);
       const color=(name:string,fallback:string)=>style.getPropertyValue(name).trim()||style.getPropertyValue(fallback).trim();
-      return {ink:color('--muted','--ink'),grid:color('--grid','--border'),primary:color('--trace-primary','--cyan'),comparison:color('--trace-comparison','--amber'),delta:color('--delta-trace','--cyan')};
+      return {ink:color('--muted','--ink'),grid:color('--grid','--border'),primary:color('--trace-primary','--cyan'),comparison:color('--trace-comparison','--amber'),delta:color('--delta-trace','--cyan'),font:style.getPropertyValue('--font-chart').trim()||"'IBM Plex Mono', ui-monospace, monospace"};
     };
     let palette=readPalette();
-    const axisFont="11px 'IBM Plex Mono', ui-monospace, monospace";
+    const axisFont=`11px ${palette.font}`;
     let initialized=false;
     const fallbackHeight=layout==='compact'?120:152;
     const plotHeight=(node:HTMLElement)=>{
@@ -121,6 +121,10 @@ export default function Plots({analysis,axis,onCursor,resetVersion,cursor=null,e
         finally{applyingCursor.current=false;}
       });
     });
+    // Font loading changes canvas glyph metrics, not chart ownership or data.
+    if(host.current?.closest('.premium'))void document.fonts.ready.then(()=>{
+      if(initialized)plots.current.forEach(plot=>plot.redraw(false,true));
+    });
     themeObserver.observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
     return()=>{
       themeObserver.disconnect();
@@ -154,5 +158,5 @@ export default function Plots({analysis,axis,onCursor,resetVersion,cursor=null,e
     if(!active)return;const frame=requestAnimationFrame(()=>{applyingCursor.current=true;try{plots.current.forEach(plot=>{plot.redraw(false,false);const position=sharedCursor.current;plot.setCursor({left:position==null?-10:plot.valToPos(position,'x'),top:30});});}finally{applyingCursor.current=false;}});
     return()=>cancelAnimationFrame(frame);
   },[events,active]);
-  return <div ref={host} className="plots" style={{'--plot-count':visiblePlotCount} as CSSProperties}>{rows.map(row=><section className={`plot-row${row.id==='__delta'?' plot-delta':''}`} key={row.id} hidden={!!visibleChannels&&!visibleChannels.includes(row.id)&&row.id!=='__delta'}><div className="plot-label"><span className="plot-title">{row.name} <small className="plot-unit">{row.unit}</small>{row.primaryUnavailable&&<small> · Primary unavailable</small>}{analysis.comparison&&!row.comparison&&row.id!=='__delta'&&<small> · Comparison unavailable</small>}</span><span className="mono readout" ref={el=>{if(el)readouts.current.set(row.id,el);}}><span className="plot-reading primary-reading"><span className="plot-sr-only">{row.id==='__delta'?'Delta':'Primary lap'} </span><span className="reading-key" aria-hidden="true">{row.id==='__delta'?'Δ':'Primary'}</span><span data-primary-value>—</span>{row.id==='__delta'&&<span data-delta-direction/>}</span>{row.id!=='__delta'&&analysis.comparison&&<span className="plot-reading comparison-reading"><span className="plot-sr-only">Comparison lap </span><span className="reading-key" aria-hidden="true">Reference</span><span data-comparison-value>—</span></span>}</span></div><div data-plot role="group" title="Move over a graph or use arrow keys to inspect. Drag to zoom; Shift and drag to pan." /></section>)}<div className="axis-label">{axis==='distance'?analysis.alignment?.method==='spatial'?'Reference track position · meters':'Distance into lap · meters':analysis.alignment?.method==='spatial'?'Primary lap time at aligned position · seconds':'Time into lap · seconds'}</div></div>;
+  return <div ref={host} className="plots" style={{'--plot-count':visiblePlotCount} as CSSProperties}>{rows.map(row=><section className={`plot-row${row.id==='__delta'?' plot-delta':''}`} key={row.id} hidden={!!visibleChannels&&!visibleChannels.includes(row.id)&&row.id!=='__delta'}><div className="plot-label"><span className="plot-title">{row.name} <small className="plot-unit">{row.unit}</small>{row.primaryUnavailable&&<small> · Primary unavailable</small>}{analysis.comparison&&!row.comparison&&row.id!=='__delta'&&<small> · Comparison unavailable</small>}</span><span className="mono readout" ref={el=>{if(el)readouts.current.set(row.id,el);}}><span className="plot-reading primary-reading"><span className="plot-sr-only">{row.id==='__delta'?'Delta':'Primary lap'} </span><span className="reading-key" aria-hidden="true">{row.id==='__delta'?'Δ':'Primary'}</span><span data-primary-value>—</span>{row.id==='__delta'&&<span data-delta-direction/>}</span>{row.id!=='__delta'&&analysis.comparison&&<span className="plot-reading comparison-reading"><span className="plot-sr-only">Comparison lap </span><span className="reading-key" aria-hidden="true">Reference</span><span data-comparison-value>—</span></span>}</span></div><div data-plot role="group" title="Move over a graph or use arrow keys to inspect. Drag to zoom; Shift and drag to pan." /></section>)}<div className="axis-label"><span className="plot-legend"><span>Primary</span>{analysis.comparison&&<span>Reference</span>}</span><span>{axis==='distance'?analysis.alignment?.method==='spatial'?'Reference track position · meters':'Distance into lap · meters':analysis.alignment?.method==='spatial'?'Primary lap time at aligned position · seconds':'Time into lap · seconds'}</span></div></div>;
 }

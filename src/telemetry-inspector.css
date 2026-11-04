@@ -121,3 +121,14 @@
 .premium [data-workspace=telemetry] .corner-controls button:not(:disabled){border-color:var(--control);color:var(--ink)}
 .premium [data-workspace=telemetry] .segment-note,.premium [data-workspace=telemetry] .map-caption{line-height:1.55}
 .app.premium [data-workspace=telemetry] .segment-details,.app.premium [data-workspace=telemetry] .segment-note,.app.premium [data-workspace=telemetry] .section-finding p,.app.premium [data-workspace=telemetry] .alignment-note{font-size:12px}
+/* B.1: a single map surface, and depth only on focused evidence. */
+.premium [data-workspace=telemetry] .track-map-frame{border-radius:var(--radius-surface) var(--radius-surface) 0 0;border-color:var(--grid);box-shadow:inset 0 1px var(--edge-raised)}
+.premium [data-workspace=telemetry] .track-map-meta{border-radius:0 0 var(--radius-surface) var(--radius-surface);border-color:var(--grid)}
+.premium [data-workspace=telemetry] .map-caption-hint,
+.premium [data-workspace=telemetry] .segment-index{display:none}
+.premium [data-workspace=telemetry] .track-source{display:none}
+.premium [data-workspace=telemetry] .corner-controls button{border-radius:var(--radius-control);min-height:32px;font-size:12px}
+.premium [data-workspace=telemetry] .segment-card{border-radius:var(--radius-control);border-bottom-color:var(--grid)}
+.premium [data-workspace=telemetry] .segment-card.selected{background:var(--layer-focused);box-shadow:inset 2px 0 var(--accent),var(--depth-focused)}
+.premium [data-workspace=telemetry] .speed-instrument strong{letter-spacing:-1.5px}
+.premium [data-workspace=telemetry] .delta-instrument strong{letter-spacing:-.6px}

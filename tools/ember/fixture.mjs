@@ -12,13 +12,13 @@ export async function settleCursor(page){
 export const initFixture=({data,coach,fixed,theme})=>{
    localStorage.setItem('apex-theme',theme);
    // React development build exposes commits through the DevTools integration hook.
-   window.__emberCommits=[];window.__emberCanvasFonts=[];window.__emberCanvasColors=[];
+   window.__emberCanvasFontMap=new WeakMap();window.__emberCommits=[];window.__emberCanvasFonts=[];window.__emberCanvasColors=[];
    window.__emberStrokes=new WeakMap();
    const stroke=CanvasRenderingContext2D.prototype.stroke,clear=CanvasRenderingContext2D.prototype.clearRect;
    CanvasRenderingContext2D.prototype.clearRect=function(...args){window.__emberStrokes.set(this.canvas,[]);return clear.apply(this,args);};
    CanvasRenderingContext2D.prototype.stroke=function(...args){const colors=window.__emberStrokes.get(this.canvas)||[];colors.push({color:String(this.strokeStyle),dash:this.getLineDash()});window.__emberStrokes.set(this.canvas,colors);return stroke.apply(this,args);};
    const fillText=CanvasRenderingContext2D.prototype.fillText;
-   CanvasRenderingContext2D.prototype.fillText=function(...args){if(!window.__emberCanvasFonts.includes(this.font))window.__emberCanvasFonts.push(this.font);if(!window.__emberCanvasColors.includes(String(this.fillStyle)))window.__emberCanvasColors.push(String(this.fillStyle));return fillText.apply(this,args);};
+   CanvasRenderingContext2D.prototype.fillText=function(...args){const fonts=window.__emberCanvasFontMap.get(this.canvas)||[];if(!fonts.includes(this.font))fonts.push(this.font);window.__emberCanvasFontMap.set(this.canvas,fonts);if(!window.__emberCanvasFonts.includes(this.font))window.__emberCanvasFonts.push(this.font);if(!window.__emberCanvasColors.includes(String(this.fillStyle)))window.__emberCanvasColors.push(String(this.fillStyle));return fillText.apply(this,args);};
    window.__REACT_DEVTOOLS_GLOBAL_HOOK__={supportsFiber:true,inject:()=>1,onCommitFiberRoot:(_id,root)=>{const counts={};const walk=f=>{if(!f)return;const name=typeof f.type==='function'?(f.type.displayName||f.type.name):null;if(name && (!f.alternate || f.memoizedProps!==f.alternate.memoizedProps || f.memoizedState!==f.alternate.memoizedState))counts[name]=(counts[name]||0)+1;walk(f.child);walk(f.sibling);};walk(root.current);window.__emberCommits.push(counts);},onCommitFiberUnmount:()=>{}};
    const entry=structuredClone(data.snapshot.entries[0]);
    entry.workspace={contentVersion:entry.contentVersion,primary:fixed.primary,comparison:fixed.comparison,axis:fixed.axis,channels:fixed.channels,layout:'comfortable',view:'telemetry',zoom:{...fixed.zoom,primary:fixed.primary,comparison:fixed.comparison,axis:fixed.axis}};

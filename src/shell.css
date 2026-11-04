@@ -117,6 +117,34 @@
 .premium .shell:has([data-workspace=telemetry]) .compare-toggle.on{border-color:var(--trace-comparison);color:var(--trace-comparison)}
 .premium .shell:has([data-workspace=telemetry]) .library-entry.active .session-track{color:var(--ink);font-weight:600}
 .premium .shell:has([data-workspace=telemetry]) .session-track{font-size:13px}
+/* B.1: keep the timing sheet continuous; reserve depth for the selected lap. */
+.app.premium .titlebar .ttt-wordmark>small{letter-spacing:0;text-transform:capitalize}
+.premium .shell:has([data-workspace=telemetry]) .library-entry.active :is(.session-meta,.session-facts),
+.premium .shell:has([data-workspace=telemetry]) .lap-table-head,
+.premium:has([data-workspace=telemetry]) .header-actions .local-badge,
+.premium:has([data-workspace=telemetry]) .statusbar>span:nth-child(2){display:none}
+.premium .shell:has([data-workspace=telemetry]) .library-entry{border-radius:var(--radius-control);border:0}
+.premium .shell:has([data-workspace=telemetry]) .library-entry.active{background:var(--layer-raised);box-shadow:var(--depth-raised)}
+.premium .shell:has([data-workspace=telemetry]) .session-track{font-size:14px;line-height:1.6}
+.premium .shell:has([data-workspace=telemetry]) .session-group-heading{letter-spacing:0}
+.premium .shell:has([data-workspace=telemetry]) .lap-list .lap-row{border-radius:var(--radius-control);border-bottom-color:transparent}
+.premium .shell:has([data-workspace=telemetry]) .lap-list .lap-row.selected{box-shadow:var(--depth-focused)}
+.premium .shell:has([data-workspace=telemetry]) .lap-list .lap-row.compared{border-right:0;box-shadow:inset -2px 0 var(--trace-comparison),var(--depth-raised)}
+.premium .shell:has([data-workspace=telemetry]) .selection-rail{border-radius:var(--radius-pill);top:9px;bottom:9px}
+.premium .shell:has([data-workspace=telemetry]) .compare-toggle{border-radius:var(--radius-pill)}
+.premium .shell:has([data-workspace=telemetry]) .lap-time small{text-transform:capitalize;letter-spacing:0}
+.premium .shell:has([data-workspace=telemetry]) .sidebar-footer:focus-visible{outline-offset:-3px}
+.premium .sidebar-footer[data-tooltip]{position:relative}
+.premium .sidebar-footer[data-tooltip]:not([data-tooltip-dismissed]):is(:hover,:focus-visible)::after{content:attr(data-tooltip);position:absolute;z-index:90;bottom:100%;left:12px;width:max-content;max-width:min(480px,calc(100vw - 24px));padding:12px 16px;border-radius:var(--radius-floating);background:var(--layer-focused);color:var(--ink);box-shadow:var(--shadow-floating);font:12px/1.6 var(--font-sans);white-space:normal;overflow-wrap:anywhere}
+.premium .main:has([data-workspace=telemetry])>.workspace-heading h1{font-size:30px;letter-spacing:-.8px}
+.premium .main:has([data-workspace=telemetry])>.workspace-heading p>span{margin-inline:5px}
+.premium .main:has([data-workspace=telemetry]) .best-stat>span,
+.premium .main:has([data-workspace=telemetry]) .lap-chip small,
+.premium .main:has([data-workspace=telemetry]) .overall-delta small{letter-spacing:0;text-transform:none}
+.premium .main:has([data-workspace=telemetry])>.lap-summary{border-top:0;border-bottom-color:var(--grid)}
+.premium .main:has([data-workspace=telemetry]) .lap-chip>div{min-width:max-content}
+.premium .main:has([data-workspace=telemetry]) .overall-delta{padding:6px 14px;border-radius:var(--radius-control);background:var(--layer-raised);box-shadow:var(--depth-focused)}
+.app.premium .explorer-popover{border-radius:var(--radius-floating);box-shadow:var(--shadow-floating)}
 @media(max-width:700px){
  .premium .main:has([data-workspace=telemetry])>.workspace-heading h1{font-size:24px}
  .premium .main:has([data-workspace=telemetry])>.lap-summary{gap:10px;margin:10px 0 2px;padding:10px 0}
