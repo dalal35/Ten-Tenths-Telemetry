@@ -46,3 +46,6 @@ src-tauri/resources/youtube/sources/
 
 # Browser demo / Pages build
 dist-website/
+
+# Ember captures are local review artifacts.
+docs/ember/screenshots/
