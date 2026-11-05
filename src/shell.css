@@ -93,63 +93,184 @@
 @container workspace-view (height < 560px){.video-sticky-player{position:static}}
 
 /* Ember telemetry: the timing header introduces the comparison; plots carry the evidence. */
-.premium .main:has([data-workspace=telemetry])>.workspace-heading h1{font-size:30px;letter-spacing:-.7px;font-weight:600}
-.premium .main:has([data-workspace=telemetry])>.workspace-heading .active-recording{color:var(--muted);font-size:12px}
-.premium .main:has([data-workspace=telemetry])>.lap-summary{margin:14px 0 6px;padding:12px 0;gap:28px;align-items:center}
-.premium .main:has([data-workspace=telemetry]) .lap-chip{gap:12px}
-.premium .main:has([data-workspace=telemetry]) .lap-chip>div{gap:6px}
-.premium .main:has([data-workspace=telemetry]) .lap-chip strong{font:400 28px/1.2 var(--font-display);letter-spacing:-1.2px;font-variant-numeric:tabular-nums}
-.premium .main:has([data-workspace=telemetry]) .lap-chip.unselected strong{font:400 12px/1.5 var(--font-sans);letter-spacing:0}
-.premium .main:has([data-workspace=telemetry]) .lap-chip .dot{width:20px;height:0;border-radius:0;background:none;border-top:2px solid var(--trace-primary)}
-.premium .main:has([data-workspace=telemetry]) .lap-chip .dot.amber{border-color:var(--trace-comparison);border-top-style:dashed}
-.premium .main:has([data-workspace=telemetry]) .lap-chip small{font-size:11px;letter-spacing:.025em}
-.premium .main:has([data-workspace=telemetry]) .overall-delta strong{font-size:28px;line-height:1.2;letter-spacing:-1px}
-.premium .main:has([data-workspace=telemetry]) .overall-delta[data-delta=ahead] strong{color:var(--delta-ahead)}
-.premium .main:has([data-workspace=telemetry]) .overall-delta[data-delta=behind] strong{color:var(--delta-behind)}
-.premium .main:has([data-workspace=telemetry]) .best-stat strong{font-size:25px;letter-spacing:-1px}
-.premium .main:has([data-workspace=telemetry]) .best-stat>span{font-size:11px}
-.premium .shell:has([data-workspace=telemetry]) .lap-list .lap-row{min-height:48px}
-.premium .shell:has([data-workspace=telemetry]) .lap-list .lap-row.selected{background:color-mix(in srgb,var(--accent) 9%,var(--surface-2))}
-.premium .shell:has([data-workspace=telemetry]) .lap-list .lap-row.compared{background:color-mix(in srgb,var(--trace-comparison) 8%,var(--panel));border-right:2px dashed var(--trace-comparison)}
-.premium .shell:has([data-workspace=telemetry]) .lap-time{font-size:14px;letter-spacing:-.4px}
-.premium .shell:has([data-workspace=telemetry]) .lap-number{color:var(--muted);font-size:12px}
-.premium .shell:has([data-workspace=telemetry]) .compare-toggle{width:30px;min-height:30px;color:var(--muted)}
-.premium .shell:has([data-workspace=telemetry]) .compare-toggle.on{border-color:var(--trace-comparison);color:var(--trace-comparison)}
-.premium .shell:has([data-workspace=telemetry]) .library-entry.active .session-track{color:var(--ink);font-weight:600}
-.premium .shell:has([data-workspace=telemetry]) .session-track{font-size:13px}
+.premium .main>.workspace-heading h1{font-size:30px;letter-spacing:-.7px;font-weight:600}
+.premium .main>.workspace-heading .active-recording{color:var(--muted);font-size:12px}
+.premium .main>.lap-summary{margin:14px 0 6px;padding:12px 0;gap:28px;align-items:center}
+.premium .main .lap-chip{gap:12px}
+.premium .main .lap-chip>div{gap:6px}
+.premium .main .lap-chip strong{font:400 28px/1.2 var(--font-display);letter-spacing:-1.2px;font-variant-numeric:tabular-nums}
+.premium .main .lap-chip.unselected strong{font:400 12px/1.5 var(--font-sans);letter-spacing:0}
+.premium .main .lap-chip .dot{width:20px;height:0;border-radius:0;background:none;border-top:2px solid var(--trace-primary)}
+.premium .main .lap-chip .dot.amber{border-color:var(--trace-comparison);border-top-style:dashed}
+.premium .main .lap-chip small{font-size:11px;letter-spacing:.025em}
+.premium .main .overall-delta strong{font-size:28px;line-height:1.2;letter-spacing:-1px}
+.premium .main .overall-delta[data-delta=ahead] strong{color:var(--delta-ahead)}
+.premium .main .overall-delta[data-delta=behind] strong{color:var(--delta-behind)}
+.premium .main .best-stat strong{font-size:25px;letter-spacing:-1px}
+.premium .main .best-stat>span{font-size:11px}
+.premium .shell .lap-list .lap-row{min-height:48px}
+.premium .shell .lap-list .lap-row.selected{background:color-mix(in srgb,var(--accent) 9%,var(--surface-2))}
+.premium .shell .lap-list .lap-row.compared{background:color-mix(in srgb,var(--trace-comparison) 8%,var(--panel));border-right:2px dashed var(--trace-comparison)}
+.premium .shell .lap-time{font-size:14px;letter-spacing:-.4px}
+.premium .shell .lap-number{color:var(--muted);font-size:12px}
+.premium .shell .compare-toggle{width:30px;min-height:30px;color:var(--muted)}
+.premium .shell .compare-toggle.on{border-color:var(--trace-comparison);color:var(--trace-comparison)}
+.premium .shell .library-entry.active .session-track{color:var(--ink);font-weight:600}
+.premium .shell .session-track{font-size:13px}
 /* B.1: keep the timing sheet continuous; reserve depth for the selected lap. */
 .app.premium .titlebar .ttt-wordmark>small{letter-spacing:0;text-transform:capitalize}
-.premium .shell:has([data-workspace=telemetry]) .library-entry.active :is(.session-meta,.session-facts),
-.premium .shell:has([data-workspace=telemetry]) .lap-table-head,
-.premium:has([data-workspace=telemetry]) .header-actions .local-badge,
-.premium:has([data-workspace=telemetry]) .statusbar>span:nth-child(2){display:none}
-.premium .shell:has([data-workspace=telemetry]) .library-entry{border-radius:var(--radius-control);border:0}
-.premium .shell:has([data-workspace=telemetry]) .library-entry.active{background:var(--layer-raised);box-shadow:var(--depth-raised)}
-.premium .shell:has([data-workspace=telemetry]) .session-track{font-size:14px;line-height:1.6}
-.premium .shell:has([data-workspace=telemetry]) .session-group-heading{letter-spacing:0}
-.premium .shell:has([data-workspace=telemetry]) .lap-list .lap-row{border-radius:var(--radius-control);border-bottom-color:transparent}
-.premium .shell:has([data-workspace=telemetry]) .lap-list .lap-row.selected{box-shadow:var(--depth-focused)}
-.premium .shell:has([data-workspace=telemetry]) .lap-list .lap-row.compared{border-right:0;box-shadow:inset -2px 0 var(--trace-comparison),var(--depth-raised)}
-.premium .shell:has([data-workspace=telemetry]) .selection-rail{border-radius:var(--radius-pill);top:9px;bottom:9px}
-.premium .shell:has([data-workspace=telemetry]) .compare-toggle{border-radius:var(--radius-pill)}
-.premium .shell:has([data-workspace=telemetry]) .lap-time small{text-transform:capitalize;letter-spacing:0}
-.premium .shell:has([data-workspace=telemetry]) .sidebar-footer:focus-visible{outline-offset:-3px}
+.premium .shell .library-entry.active :is(.session-meta,.session-facts),
+.premium .shell .lap-table-head,
+.premium .header-actions .local-badge,
+.premium .statusbar>span:nth-child(2){display:none}
+.premium .shell .library-entry{border-radius:var(--radius-control);border:0}
+.premium .shell .library-entry.active{background:var(--layer-raised);box-shadow:var(--depth-raised)}
+.premium .shell .session-track{font-size:14px;line-height:1.6}
+.premium .shell .session-group-heading{letter-spacing:0}
+.premium .shell .lap-list .lap-row{border-radius:var(--radius-control);border-bottom-color:transparent}
+.premium .shell .lap-list .lap-row.selected{box-shadow:var(--depth-focused)}
+.premium .shell .lap-list .lap-row.compared{border-right:0;box-shadow:inset -2px 0 var(--trace-comparison),var(--depth-raised)}
+.premium .shell .selection-rail{border-radius:var(--radius-pill);top:9px;bottom:9px}
+.premium .shell .compare-toggle{border-radius:var(--radius-pill)}
+.premium .shell .lap-time small{text-transform:capitalize;letter-spacing:0}
+.premium .shell .sidebar-footer:focus-visible{outline-offset:-3px}
 .premium .sidebar-footer[data-tooltip]{position:relative}
 .premium .sidebar-footer[data-tooltip]:not([data-tooltip-dismissed]):is(:hover,:focus-visible)::after{content:attr(data-tooltip);position:absolute;z-index:90;bottom:100%;left:12px;width:max-content;max-width:min(480px,calc(100vw - 24px));padding:12px 16px;border-radius:var(--radius-floating);background:var(--layer-focused);color:var(--ink);box-shadow:var(--shadow-floating);font:12px/1.6 var(--font-sans);white-space:normal;overflow-wrap:anywhere}
-.premium .main:has([data-workspace=telemetry])>.workspace-heading h1{font-size:30px;letter-spacing:-.8px}
-.premium .main:has([data-workspace=telemetry])>.workspace-heading p>span{margin-inline:5px}
-.premium .main:has([data-workspace=telemetry]) .best-stat>span,
-.premium .main:has([data-workspace=telemetry]) .lap-chip small,
-.premium .main:has([data-workspace=telemetry]) .overall-delta small{letter-spacing:0;text-transform:none}
-.premium .main:has([data-workspace=telemetry])>.lap-summary{border-top:0;border-bottom-color:var(--grid)}
-.premium .main:has([data-workspace=telemetry]) .lap-chip>div{min-width:max-content}
-.premium .main:has([data-workspace=telemetry]) .overall-delta{padding:6px 14px;border-radius:var(--radius-control);background:var(--layer-raised);box-shadow:var(--depth-focused)}
+.premium .main>.workspace-heading h1{font-size:30px;letter-spacing:-.8px}
+.premium .main>.workspace-heading p>span{margin-inline:5px}
+.premium .main .best-stat>span,
+.premium .main .lap-chip small,
+.premium .main .overall-delta small{letter-spacing:0;text-transform:none}
+.premium .main>.lap-summary{border-top:0;border-bottom-color:var(--grid)}
+.premium .main .lap-chip>div{min-width:max-content}
+.premium .main .overall-delta{padding:6px 14px;border-radius:var(--radius-control);background:var(--layer-raised);box-shadow:var(--depth-focused)}
 .app.premium .explorer-popover{border-radius:var(--radius-floating);box-shadow:var(--shadow-floating)}
 @media(max-width:700px){
- .premium .main:has([data-workspace=telemetry])>.workspace-heading h1{font-size:24px}
- .premium .main:has([data-workspace=telemetry])>.lap-summary{gap:10px;margin:10px 0 2px;padding:10px 0}
- .premium .main:has([data-workspace=telemetry]) .overall-delta strong{font-size:23px}
+ .premium .main>.workspace-heading h1{font-size:24px}
+ .premium .main>.lap-summary{gap:10px;margin:10px 0 2px;padding:10px 0}
+ .premium .main .overall-delta strong{font-size:23px}
  .app.premium .titlebar .workspace-switch.segmented button{font-size:11px;padding-inline:5px}
  .app.premium .titlebar .import-button{font-size:11px}
- .premium .main:has([data-workspace=telemetry]) .compact-lap-selectors select{font-size:12px}
+ .premium .main .compact-lap-selectors select{font-size:12px}
 }
+
+/* Shared approved Ember chrome. No workspace-dependent shell geometry. */
+/* Approved Telemetry composition; shared chrome lives in shell.css and root tokens. */
+.app.premium>.titlebar {
+  height:60px; min-height:60px; gap:24px; padding-inline:24px 18px;
+  background:var(--glass-panel); border-color:var(--border); box-shadow:var(--glass-edge);
+}
+.app.premium .titlebar .ttt-brand {flex-basis:260px;width:260px}
+.app.premium .titlebar .ttt-wordmark>span {font-size:18px;font-weight:650}
+.app.premium .titlebar .ttt-wordmark>small {font-size:14px;color:var(--muted)}
+.app.premium .titlebar .workspace-switch {justify-content:center;align-items:center;gap:18px}
+.app.premium .titlebar .workspace-switch.segmented button {height:36px;padding:0 18px;font-size:14px;font-weight:450;border-radius:14px}
+.app.premium .titlebar .workspace-switch.segmented button.active {background:var(--glass-focused);box-shadow:var(--glass-edge),0 2px 5px #0002}
+.app.premium .workspace-selection {display:none}
+.app.premium .titlebar .import-button {background:var(--glass-focused);border-color:var(--border);color:var(--ink);border-radius:14px;padding:7px 12px;font-size:14px;min-height:36px;box-shadow:var(--glass-edge)}
+.app.premium .titlebar .import-button:hover {background:var(--surface-4)}
+.app.premium .titlebar .import-button kbd {font-size:12px}
+.app.premium .header-actions {gap:20px}
+.app.premium .header-actions .icon-button {background:var(--glass-raised);border-radius:50%;width:34px;height:34px}
+.app.premium>.statusbar {display:none}
+.app.premium .shell {background:transparent}
+.app.premium .shell>.explorer-slot {background:var(--glass-panel);border-radius:0 20px 20px 0;box-shadow:var(--glass-edge);border-color:var(--border)}
+.app.premium .shell .sidebar {background:transparent}
+.app.premium .shell .explorer-heading {position:relative;min-height:62px;padding:12px 18px;gap:12px}
+.app.premium .shell .explorer-section-toggle {font-size:14px;gap:12px;white-space:nowrap;padding:0}
+.app.premium .shell .explorer-section-toggle>span {font-size:12px}
+.app.premium .shell .explorer-section-toggle>span:first-child,
+.app.premium .shell .laps-heading>span {background:var(--surface-4);border-radius:10px;min-width:26px;text-align:center;padding:2px 5px;margin-left:auto}
+.app.premium .shell .explorer-section-toggle>span:last-child {display:none}
+.app.premium .shell .explorer-heading>.explorer-icon {width:20px;min-width:20px}
+.app.premium .shell .explorer-heading>.explorer-icon:last-child {position:absolute;right:2px;top:17px;opacity:0}
+.app.premium .shell .explorer-heading:hover>.explorer-icon:last-child,
+.app.premium .shell .explorer-heading:focus-within>.explorer-icon:last-child {opacity:1}
+.app.premium .shell .explorer-tools {padding:9px 20px;min-height:42px}
+.app.premium .shell .explorer-tools>button:first-child {font-size:13px}
+.app.premium .shell .session-list {padding:0 14px 12px}
+.app.premium .shell .session-group-heading {min-height:32px;font-size:13px;padding:4px}
+.app.premium .shell .library-entry.active {background:var(--glass-focused);border:1px solid var(--control);border-radius:15px;box-shadow:var(--glass-edge),0 4px 10px #0002}
+.app.premium .shell .session-button {padding:7px 12px;gap:2px}
+.app.premium .shell .session-track {font-size:14px}
+.app.premium .shell .session-source {font-size:12px;color:var(--muted)}
+.app.premium .shell .selection-rail {top:5px;bottom:5px;width:3px;background:var(--trace-primary)}
+.app.premium .shell .laps-heading {display:flex;align-items:center;gap:12px;min-height:50px;padding:12px 14px 12px 26px;font-size:14px;border-top:1px solid var(--grid)}
+.app.premium .shell .laps-heading>span {font-size:12px}
+.app.premium .shell .lap-list {padding:0 8px 12px 14px}
+.app.premium .shell .lap-list .lap-row {min-height:38px;border-radius:15px}
+.app.premium .shell .lap-region .lap-row:first-child:not(.selected) .lap-time small {position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.app.premium .shell .lap-select {min-height:38px;padding:6px 12px;gap:26px}
+.app.premium .shell .lap-number {font-size:14px;width:22px}
+.app.premium .shell .lap-time {font-size:16px;letter-spacing:-.25px;font-weight:450}
+.app.premium .shell .lap-time small {font-size:13px;color:var(--trace-primary);margin-top:2px}
+.app.premium .shell .lap-list .lap-row.selected {background:linear-gradient(125deg,#b898e51a,transparent 70%),var(--glass-focused);border:1px solid #9a88b65c;box-shadow:var(--glass-edge),0 5px 12px #0002;min-height:58px}
+.app.premium .shell .lap-list .lap-row.selected .selection-rail {background:var(--delta-trace)}
+.app.premium .shell .lap-list .lap-row.compared {background:color-mix(in srgb,var(--trace-comparison) 11%,var(--surface-2));border:1px solid color-mix(in srgb,var(--trace-comparison) 25%,transparent);box-shadow:var(--glass-edge);min-height:44px;margin-top:4px}
+.app.premium .shell .compare-toggle:not(.on) {opacity:0}
+.app.premium .shell .lap-row:is(:hover,:focus-within) .compare-toggle {opacity:1}
+.app.premium .shell .compare-toggle.on {width:26px;height:26px;min-height:26px;flex-shrink:0;font-size:13px}
+.app.premium .shell .sidebar-footer {min-height:24px;padding:4px 16px;font-size:11px;background:transparent;border:0;opacity:0}
+.app.premium .shell .sidebar-footer:is(:hover,:focus-visible) {opacity:1}
+.app.premium .shell>.main {padding:22px 12px 36px 18px;background:transparent}
+.app.premium .main>.workspace-heading {padding-inline:26px;min-height:91px}
+.app.premium .main>.workspace-heading .active-recording {font-size:14px;margin:0 0 3px;color:var(--muted)}
+.app.premium .main>.workspace-heading h1 {font-size:36px;font-weight:600;letter-spacing:-.8px;margin:0 0 3px;line-height:1.2}
+.app.premium .main>.workspace-heading p {font-size:14px;margin-top:2px}
+.app.premium .main>.lap-summary {width:100%;height:96px;min-height:96px;margin:0 0 10px;padding:0 16px 12px 26px;gap:42px;border:0;flex-wrap:nowrap}
+.app.premium .main .lap-chip {align-items:flex-start;gap:17px;position:relative}
+.app.premium .main .lap-chip>div {gap:4px}
+.app.premium .main .lap-chip .dot {width:26px;border-top-width:3px;border-radius:3px;margin-top:8px}
+.app.premium .main .lap-chip .dot.amber {border-top-style:solid}
+.app.premium .main .lap-chip small {font-size:14px}
+.app.premium .main .lap-chip strong {font:450 40px/1.15 var(--font-sans);letter-spacing:-1px}
+.app.premium .main .lap-chip+.lap-chip {padding-left:28px;border-left:1px solid var(--border)}
+.app.premium .main .lap-chip>button {position:absolute;right:-26px;top:20px;width:24px;height:28px;opacity:0}
+.app.premium .main .lap-chip:is(:hover,:focus-within)>button {opacity:1}
+.app.premium .main .overall-delta {padding:10px 20px;min-width:166px;gap:3px;text-align:center;background:var(--glass-raised);border:1px solid var(--grid);border-radius:18px;box-shadow:var(--glass-edge),var(--glass-shadow)}
+.app.premium .main .overall-delta small {font-size:14px}
+.app.premium .main .overall-delta strong {font:500 30px/1.2 var(--font-sans);letter-spacing:-.5px}
+.app.premium .main .overall-delta strong span {font-size:16px}
+@media(hover:none) {
+  .app.premium .shell .compare-toggle:not(.on),
+  .app.premium .shell .explorer-heading>.explorer-icon:last-child,
+  .app.premium .shell .sidebar-footer,
+  .app.premium .main .lap-chip>button {opacity:1}
+  .app.premium .shell .compare-toggle {min-height:32px;width:32px}}
+@media(max-width:1400px) {
+  .app.premium .titlebar .ttt-brand {flex-basis:200px;width:200px}
+  .app.premium .titlebar .workspace-switch {gap:7px}
+  .app.premium .titlebar .workspace-switch.segmented button {padding-inline:12px}
+  .app.premium .main>.lap-summary {gap:24px;padding-left:14px}
+  .app.premium .main .lap-chip+.lap-chip {padding-left:18px}
+  .app.premium .main .lap-chip {gap:10px}
+  .app.premium .main .lap-chip small {font-size:12px}
+  .app.premium .main .lap-chip strong {font-size:34px}
+  .app.premium .main .overall-delta {min-width:135px;padding-inline:12px}}
+@media(max-width:1100px) {
+  .app.premium .titlebar .ttt-brand {flex-basis:145px;width:145px}
+  .app.premium .titlebar .workspace-switch {gap:2px}
+  .app.premium .titlebar .workspace-switch.segmented button {font-size:12px;padding-inline:8px;gap:5px}
+  .app.premium .header-actions {gap:8px}
+  .app.premium .main>.workspace-heading {padding-inline:8px}
+  .app.premium .main>.lap-summary {width:100%}}
+@media(max-width:700px) {
+  .app.premium>.titlebar {height:52px;min-height:52px;gap:6px;padding:0 8px}
+  .app.premium .titlebar .ttt-brand {flex-basis:28px;width:28px}
+  .app.premium .titlebar .workspace-switch {gap:1px}
+  .app.premium .titlebar .workspace-switch.segmented button {font-size:11px;padding-inline:5px;height:34px;gap:4px}
+  .app.premium .header-actions {gap:4px}
+  .app.premium .header-actions .icon-button {width:28px;height:28px}
+  .app.premium .titlebar .import-button {font-size:11px;min-height:32px;padding-inline:7px}
+  .app.premium .shell>.main {padding:14px 12px 20px}
+  .app.premium .main>.workspace-heading {min-height:82px;padding:0}
+  .app.premium .main>.workspace-heading h1 {font-size:26px}
+  .app.premium .main>.workspace-heading p {font-size:12px}
+  .app.premium .main>.lap-summary {min-height:78px;height:auto;padding:0 0 10px;gap:10px}
+  .app.premium .main .overall-delta {min-width:120px;padding:8px 10px}
+  .app.premium .main .overall-delta strong {font-size:23px}
+  .app.premium .main .overall-delta small {font-size:12px}}
+.app.premium {font-size:14px}
+.app.premium .titlebar .local-badge,.app.premium .workspace-selection {display:none}
+
+.app.premium .shell[data-narrow=true] .compact-lap-selectors label {font-size:var(--text-label)}

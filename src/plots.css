@@ -75,3 +75,15 @@
  .app.premium [data-workspace=telemetry] .chart-tools{gap:4px}
  .app.premium [data-workspace=telemetry] .plots .axis-label{flex-wrap:wrap}
 }
+
+/* Synchronized evidence uses the same instruments in every workbench. */
+.app.premium [data-workspace]:not([data-workspace=telemetry]) .plots {border:0;background:transparent}
+.app.premium [data-workspace]:not([data-workspace=telemetry]) .plots .plot-row {margin:0 0 8px;padding:10px 16px 0;border:1px solid var(--grid);border-radius:var(--radius-instrument);box-shadow:var(--glass-panel-edge)}
+.app.premium [data-workspace]:not([data-workspace=telemetry]) .plots .plot-title {font-size:16px;font-weight:650}
+.app.premium [data-workspace]:not([data-workspace=telemetry]) .plots .plot-title small {font-size:13px}
+.app.premium [data-workspace]:not([data-workspace=telemetry]) .plots .readout {font-size:14px;font-weight:500;font-variant-numeric:tabular-nums;gap:20px}
+@media(max-width:700px) {
+  .app.premium [data-workspace]:not([data-workspace=telemetry]) .plots .plot-row {padding-inline:8px}
+  .app.premium [data-workspace]:not([data-workspace=telemetry]) .plots .plot-title {font-size:14px}
+  .app.premium [data-workspace]:not([data-workspace=telemetry]) .plots .readout {font-size:12px;gap:10px}
+}

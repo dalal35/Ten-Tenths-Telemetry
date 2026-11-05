@@ -183,7 +183,7 @@ try {
   await expect(rawReceipt).not.toHaveAttribute('inert','');
   await expect(rawReceipt).not.toHaveAttribute('aria-hidden','true');
   await expect(receipt.getByText(/Recording unavailable/)).toBeVisible();
-  const unavailable=receipt.getByRole('button',{name:'Open Warm-up'});
+  const unavailable=receipt.getByRole('button',{name:'Open recording Warm-up'});
   await expect(unavailable).toBeDisabled();
   const beforeUnavailable=await page.evaluate(()=>({active:JSON.parse(localStorage.getItem('library-premium-fixture')).activeSessionId,loads:window.__loadLog.length}));
   await unavailable.evaluate(button=>button.click());

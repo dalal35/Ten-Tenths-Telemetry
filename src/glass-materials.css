@@ -61,14 +61,13 @@
 .glass-filter-definitions {position:fixed;overflow:hidden;pointer-events:none}
 
 /* Base: one stable graphite ground, with no sampled desktop or live shader. */
-.app.premium,.app.premium:has([data-workspace=telemetry]),.app.premium .glass-base {background:var(--glass-base-fill)}
+.app.premium,.app.premium .glass-base {background:var(--glass-base-fill)}
 .app.premium .shell,.app.premium .shell>.main,.app.premium .workspace-viewport {background:transparent}
 
 /* Panels: static translucency and edge lighting. Their descendants can contain
    telemetry or media; no filter/backdrop-filter is placed on these ancestors. */
 .app.premium :is(.glass-panel,.advanced-workspace,.coach-focus,.coach-license,.coach-empty,.launch-import,.video-sync-inspector,.video-timeline),
 .app.premium .shell>.explorer-slot,
-.app.premium .shell:has([data-workspace=telemetry])>.explorer-slot,
 .app.premium [data-workspace=telemetry] :is(.chart-workspace,.inspector),
 .app.premium .video-premium>.video-surfaces>.video-studio-grid>.video-timeline {
   background:var(--glass-panel-fill);border-color:var(--glass-panel-border);box-shadow:var(--glass-panel-shadow);
@@ -78,9 +77,9 @@
 
 /* Raised: working chrome and evidence sheets; no extra wrappers or cards. */
 .app.premium :is(.glass-raised,.titlebar,.analysis-panel-heading,.analysis-setup,.analysis-statistics,.preset-manager,.point-inspector,.surface-footer,.formula-picker>label,.coach-overview,.coach-experiment,.coach-corner-review,.video-canvas-heading,.video-instruments,.video-anchor-controls,.video-source-controls,.video-segment-editor,.video-cache-controls,.video-view-switch,.recording-summary,.merge-overview,.import-receipt>footer),
-.app.premium:has([data-workspace=telemetry])>.titlebar,
+.app.premium>.titlebar,
 .app.premium [data-workspace=telemetry] :is(.track-map-frame,.track-map-meta,.segment-section),
-.app.premium .main:has([data-workspace=telemetry]) .overall-delta,
+.app.premium .main .overall-delta,
 .merge-dialog :is(.recording-summary,.merge-overview) {
   background:var(--glass-raised-fill);border-color:var(--glass-raised-border);box-shadow:var(--glass-raised-shadow);
 }
@@ -102,15 +101,14 @@
 /* Interactive: shared material, preserving semantic action/selection colors. */
 .app.premium :is(.glass-interactive,.axis-switch .control-selection,.video-view-selection,.channel-control>button,.video-view-switch,.advanced-workspace .setup-toggle,.analysis-setup button,.coach-overview>.import-button,.video-marker-list button,.import-receipt footer .receipt-done),
 .app.premium .titlebar .workspace-switch.segmented button.active,
-.app.premium:has([data-workspace=telemetry]) .titlebar .workspace-switch button.active,
 .app.premium [data-workspace=telemetry] :is(.channel-control>button,.axis-switch button.active,.axis-switch .control-selection),
-.app.premium .shell:has([data-workspace=telemetry]) .library-entry.active {
+.app.premium .shell .library-entry.active {
   background:var(--glass-interactive-fill);border-color:var(--glass-interactive-border);box-shadow:var(--glass-interactive-shadow);
 }
 .app.premium .axis-switch .control-selection {border-radius:inherit}
 .app.premium .library-entry.active {background:var(--glass-interactive-fill);box-shadow:var(--glass-interactive-shadow)}
 .app.premium .lap-list .lap-row.selected,
-.app.premium .shell:has([data-workspace=telemetry]) .lap-list .lap-row.selected {background:var(--glass-interactive-fill);box-shadow:var(--glass-interactive-shadow)}
+.app.premium .shell .lap-list .lap-row.selected {background:var(--glass-interactive-fill);box-shadow:var(--glass-interactive-shadow)}
 .app.premium .coach-opportunity-list button.selected {background:var(--glass-raised-fill);box-shadow:var(--glass-raised-shadow)}
 .app.premium :is(.axis-switch,.channel-control>button,.advanced-workspace .setup-toggle,.analysis-setup button,.video-marker-list button) {border-radius:var(--radius-control)}
 .app.premium :is(.glass-interactive,.channel-control>button,.advanced-workspace .setup-toggle,.analysis-setup button,.video-marker-list button):hover:not(:disabled),
@@ -119,10 +117,8 @@
 }
 .app.premium :is(.glass-interactive,.channel-control>button,.axis-switch button,.titlebar .workspace-switch button,.setup-toggle):active:not(:disabled) {box-shadow:var(--glass-pressed-shadow)}
 .app.premium :is(button,summary,input,select,textarea,[tabindex]):focus-visible {outline-color:var(--accent-focus)}
-/* Vermilion remains the global primary action. Telemetry keeps its approved
-   neutral import control; semantic traces/rails are never recolored. */
-.app.premium .titlebar .import-button {box-shadow:var(--glass-focused-edge),0 3px 8px #00000024}
-.app.premium:has([data-workspace=telemetry]) .titlebar .import-button {background:var(--glass-interactive-fill);border-color:var(--glass-interactive-border);box-shadow:var(--glass-interactive-shadow)}
+/* Shared neutral shell action; semantic traces and selections retain their roles. */
+.app.premium .titlebar .import-button {background:var(--glass-interactive-fill);border-color:var(--glass-interactive-border);box-shadow:var(--glass-interactive-shadow)}
 
 /* Data surfaces: opaque, crisp, and free of compositor sampling/filtering. */
 .app.premium :is(.analysis-surface,.event-table,.event-table th,.coach-profile-chart,.coach-evidence-table,.formula-editor textarea,.formula-error),
@@ -137,7 +133,7 @@
 /* Diffusion is limited to leaf controls and bounded floating content. */
 @supports ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))) {
   :root[data-glass-quality=full] .app.premium .titlebar .workspace-switch.segmented button.active,
-  :root[data-glass-quality=full] .app.premium:has([data-workspace=telemetry]) .titlebar :is(.import-button,.workspace-switch button.active),
+  :root[data-glass-quality=full] .app.premium .titlebar :is(.import-button,.workspace-switch button.active),
   :root[data-glass-quality=full] .app.premium [data-workspace=telemetry] :is(.channel-control>button,.axis-switch button.active),
   :root[data-glass-quality=full] .app.premium :is(.glass-interactive,.channel-control>button,.axis-switch button.active,.video-view-switch button[aria-pressed=true]) {
     backdrop-filter:blur(var(--glass-control-blur)) saturate(120%);-webkit-backdrop-filter:blur(var(--glass-control-blur)) saturate(120%);
@@ -152,7 +148,7 @@
 /* True, static 3px edge displacement. A short allowlist bounds the sampled
    area; SVG filters never touch a whole panel, menu, chart, video or text. */
 :root[data-glass-refraction=supported][data-glass-quality=full] .app.premium .titlebar .workspace-switch.segmented button.active,
-:root[data-glass-refraction=supported][data-glass-quality=full] .app.premium:has([data-workspace=telemetry]) .titlebar .workspace-switch button.active,
+:root[data-glass-refraction=supported][data-glass-quality=full] .app.premium .titlebar .workspace-switch button.active,
 :root[data-glass-refraction=supported][data-glass-quality=full] .app.premium [data-workspace=telemetry] .axis-switch button.active,
 :root[data-glass-refraction=supported][data-glass-quality=full] .app.premium .axis-switch button.active,
 :root[data-glass-refraction=supported][data-glass-quality=full] .app.premium .video-view-switch button[aria-pressed=true] {
@@ -176,3 +172,9 @@
 /* Resizing needs no new listener or React update. Pause leaf sampling until
    the existing pointer gesture releases; no will-change/GPU layer blanket. */
 :root[data-glass-quality] .app.premium:has(:is(.explorer-resizer,.panel-resizer,.video-resize):active) :is(.titlebar .workspace-switch button.active,.channel-control>button,.axis-switch button.active,.video-view-switch button[aria-pressed=true]) {backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+
+/* Inspector geometry may differ, but the material and controls share one owner. */
+.app.premium [data-workspace]:not([data-workspace=telemetry]) .inspector {padding:16px;border:1px solid var(--glass-panel-border);border-radius:var(--radius-instrument);background:var(--glass-panel-fill);box-shadow:var(--glass-panel-shadow)}
+.app.premium [data-workspace]:not([data-workspace=telemetry]) .track-map-frame {border-radius:var(--radius-control) var(--radius-control) 0 0;background:var(--glass-raised-fill);box-shadow:var(--glass-panel-edge)}
+.app.premium [data-workspace]:not([data-workspace=telemetry]) .track-map-meta {border-radius:0 0 var(--radius-control) var(--radius-control);background:var(--glass-raised-fill)}
+.app.premium .corner-controls button {border-radius:var(--radius-control);font-size:12px;min-height:32px}

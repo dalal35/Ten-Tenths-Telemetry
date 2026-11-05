@@ -132,3 +132,10 @@
 .premium [data-workspace=telemetry] .segment-card.selected{background:var(--layer-focused);box-shadow:inset 2px 0 var(--accent),var(--depth-focused)}
 .premium [data-workspace=telemetry] .speed-instrument strong{letter-spacing:-1.5px}
 .premium [data-workspace=telemetry] .delta-instrument strong{letter-spacing:-.6px}
+
+/* Instrument values remain readable inside Video's deliberately narrow GPS rail. */
+.app.premium [data-workspace]:not([data-workspace=telemetry]) .inspector .track-instruments {gap:8px;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.app.premium [data-workspace]:not([data-workspace=telemetry]) .inspector .speed-instrument strong {font-size:28px;line-height:1.2}
+.app.premium [data-workspace]:not([data-workspace=telemetry]) .inspector .speed-instrument strong small {font-size:11px;margin-left:3px}
+.app.premium [data-workspace]:not([data-workspace=telemetry]) .inspector .delta-instrument {padding-left:8px}
+.app.premium [data-workspace]:not([data-workspace=telemetry]) .inspector .delta-instrument strong {font-size:18px;letter-spacing:-.4px}

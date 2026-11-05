@@ -1,100 +1,5 @@
-/* The supplied Ember reference owns this composition. Other workspaces retain
-   their existing presentation. No filters are applied to telemetry canvases. */
-.app.premium:has([data-workspace=telemetry]) {
-  --font-display:var(--font-sans); --font-mono:var(--font-sans);
-  --surface-0:#101216; --surface-1:#22262c; --surface-2:#292d35;
-  --surface-3:#30343e; --surface-4:#3a3f49;
-  --ink:#f4f5f8; --muted:#c5c8d0; --subtle:#b3b7c2;
-  --border:#474c57; --grid:#373c45; --control:#7c8492;
-  --trace-primary:#6ee2f5; --trace-comparison:#ffc064;
-  --delta-trace:#d5a2f6; --delta-ahead:#69e6c6; --delta-behind:#f398da;
-  background:radial-gradient(ellipse at 46% 34%,#232730 0%,#14171c 44%,#101216 85%);
-  font-size:14px;
-}
-:root[data-theme=light] .app.premium:has([data-workspace=telemetry]) {
-  --surface-0:#edf0f3; --surface-1:#fff; --surface-2:#f3f5f8;
-  --surface-3:#e2e6ee; --surface-4:#d6dce5;
-  --ink:#19232c; --muted:#414b59; --subtle:#505c6b;
-  --border:#b7bfcd; --grid:#d9dee6; --control:#65717c;
-  --trace-primary:#006396; --trace-comparison:#805000;
-  --delta-ahead:#00695c; --delta-behind:#9f2577; --delta-trace:#74419c;
-  background:radial-gradient(ellipse at 46% 34%,#fff,#edf0f3 85%);
-}
-.app.premium:has([data-workspace=telemetry])>.titlebar {
-  height:60px; min-height:60px; gap:24px; padding-inline:24px 18px;
-  background:var(--glass-panel); border-color:var(--border); box-shadow:var(--glass-edge);
-}
-.app.premium:has([data-workspace=telemetry]) .titlebar .ttt-brand {flex-basis:260px;width:260px}
-.app.premium:has([data-workspace=telemetry]) .titlebar .ttt-wordmark>span {font-size:18px;font-weight:650}
-.app.premium:has([data-workspace=telemetry]) .titlebar .ttt-wordmark>small {font-size:14px;color:var(--muted)}
-.app.premium:has([data-workspace=telemetry]) .titlebar .workspace-switch {justify-content:center;align-items:center;gap:18px}
-.app.premium:has([data-workspace=telemetry]) .titlebar .workspace-switch button {height:36px;padding:0 18px;font-size:14px;font-weight:450;border-radius:14px}
-.app.premium:has([data-workspace=telemetry]) .titlebar .workspace-switch button.active {background:var(--glass-focused);box-shadow:var(--glass-edge),0 2px 5px #0002}
-.app.premium:has([data-workspace=telemetry]) .workspace-selection {display:none}
-.app.premium:has([data-workspace=telemetry]) .titlebar .import-button {background:var(--glass-focused);border-color:var(--border);color:var(--ink);border-radius:14px;padding:7px 12px;font-size:14px;min-height:36px;box-shadow:var(--glass-edge)}
-.app.premium:has([data-workspace=telemetry]) .titlebar .import-button:hover {background:var(--surface-4)}
-.app.premium:has([data-workspace=telemetry]) .titlebar .import-button kbd {font-size:12px}
-.app.premium:has([data-workspace=telemetry]) .header-actions {gap:20px}
-.app.premium:has([data-workspace=telemetry]) .header-actions .icon-button {background:var(--glass-raised);border-radius:50%;width:34px;height:34px}
-.app.premium:has([data-workspace=telemetry])>.statusbar {display:none}
-.app.premium .shell:has([data-workspace=telemetry]) {background:transparent}
-.app.premium .shell:has([data-workspace=telemetry])>.explorer-slot {background:var(--glass-panel);border-radius:0 20px 20px 0;box-shadow:var(--glass-edge);border-color:var(--border)}
-.app.premium .shell:has([data-workspace=telemetry]) .sidebar {background:transparent}
-.app.premium .shell:has([data-workspace=telemetry]) .explorer-heading {position:relative;min-height:62px;padding:12px 18px;gap:12px}
-.app.premium .shell:has([data-workspace=telemetry]) .explorer-section-toggle {font-size:14px;gap:12px;white-space:nowrap;padding:0}
-.app.premium .shell:has([data-workspace=telemetry]) .explorer-section-toggle>span {font-size:12px}
-.app.premium .shell:has([data-workspace=telemetry]) .explorer-section-toggle>span:first-child,
-.app.premium .shell:has([data-workspace=telemetry]) .laps-heading>span {background:var(--surface-4);border-radius:10px;min-width:26px;text-align:center;padding:2px 5px;margin-left:auto}
-.app.premium .shell:has([data-workspace=telemetry]) .explorer-section-toggle>span:last-child {display:none}
-.app.premium .shell:has([data-workspace=telemetry]) .explorer-heading>.explorer-icon {width:20px;min-width:20px}
-.app.premium .shell:has([data-workspace=telemetry]) .explorer-heading>.explorer-icon:last-child {position:absolute;right:2px;top:17px;opacity:0}
-.app.premium .shell:has([data-workspace=telemetry]) .explorer-heading:hover>.explorer-icon:last-child,
-.app.premium .shell:has([data-workspace=telemetry]) .explorer-heading:focus-within>.explorer-icon:last-child {opacity:1}
-.app.premium .shell:has([data-workspace=telemetry]) .explorer-tools {padding:9px 20px;min-height:42px}
-.app.premium .shell:has([data-workspace=telemetry]) .explorer-tools>button:first-child {font-size:13px}
-.app.premium .shell:has([data-workspace=telemetry]) .session-list {padding:0 14px 12px}
-.app.premium .shell:has([data-workspace=telemetry]) .session-group-heading {min-height:32px;font-size:13px;padding:4px}
-.app.premium .shell:has([data-workspace=telemetry]) .library-entry.active {background:var(--glass-focused);border:1px solid var(--control);border-radius:15px;box-shadow:var(--glass-edge),0 4px 10px #0002}
-.app.premium .shell:has([data-workspace=telemetry]) .session-button {padding:7px 12px;gap:2px}
-.app.premium .shell:has([data-workspace=telemetry]) .session-track {font-size:14px}
-.app.premium .shell:has([data-workspace=telemetry]) .session-source {font-size:12px;color:var(--muted)}
-.app.premium .shell:has([data-workspace=telemetry]) .selection-rail {top:5px;bottom:5px;width:3px;background:var(--trace-primary)}
-.app.premium .shell:has([data-workspace=telemetry]) .laps-heading {display:flex;align-items:center;gap:12px;min-height:50px;padding:12px 14px 12px 26px;font-size:14px;border-top:1px solid var(--grid)}
-.app.premium .shell:has([data-workspace=telemetry]) .laps-heading>span {font-size:12px}
-.app.premium .shell:has([data-workspace=telemetry]) .lap-list {padding:0 8px 12px 14px}
-.app.premium .shell:has([data-workspace=telemetry]) .lap-list .lap-row {min-height:38px;border-radius:15px}
-.app.premium .shell:has([data-workspace=telemetry]) .lap-region .lap-row:first-child:not(.selected) .lap-time small {position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
-.app.premium .shell:has([data-workspace=telemetry]) .lap-select {min-height:38px;padding:6px 12px;gap:26px}
-.app.premium .shell:has([data-workspace=telemetry]) .lap-number {font-size:14px;width:22px}
-.app.premium .shell:has([data-workspace=telemetry]) .lap-time {font-size:16px;letter-spacing:-.25px;font-weight:450}
-.app.premium .shell:has([data-workspace=telemetry]) .lap-time small {font-size:13px;color:var(--trace-primary);margin-top:2px}
-.app.premium .shell:has([data-workspace=telemetry]) .lap-list .lap-row.selected {background:linear-gradient(125deg,#b898e51a,transparent 70%),var(--glass-focused);border:1px solid #9a88b65c;box-shadow:var(--glass-edge),0 5px 12px #0002;min-height:58px}
-.app.premium .shell:has([data-workspace=telemetry]) .lap-list .lap-row.selected .selection-rail {background:var(--delta-trace)}
-.app.premium .shell:has([data-workspace=telemetry]) .lap-list .lap-row.compared {background:color-mix(in srgb,var(--trace-comparison) 11%,var(--surface-2));border:1px solid color-mix(in srgb,var(--trace-comparison) 25%,transparent);box-shadow:var(--glass-edge);min-height:44px;margin-top:4px}
-.app.premium .shell:has([data-workspace=telemetry]) .compare-toggle:not(.on) {opacity:0}
-.app.premium .shell:has([data-workspace=telemetry]) .lap-row:is(:hover,:focus-within) .compare-toggle {opacity:1}
-.app.premium .shell:has([data-workspace=telemetry]) .compare-toggle.on {width:26px;height:26px;min-height:26px;flex-shrink:0;font-size:13px}
-.app.premium .shell:has([data-workspace=telemetry]) .sidebar-footer {min-height:24px;padding:4px 16px;font-size:11px;background:transparent;border:0;opacity:0}
-.app.premium .shell:has([data-workspace=telemetry]) .sidebar-footer:is(:hover,:focus-visible) {opacity:1}
-.app.premium .shell:has([data-workspace=telemetry])>.main {padding:22px 12px 36px 18px;background:transparent}
-.app.premium .main:has([data-workspace=telemetry])>.workspace-heading {padding-inline:26px;min-height:91px}
-.app.premium .main:has([data-workspace=telemetry])>.workspace-heading .active-recording {font-size:14px;margin:0 0 3px;color:var(--muted)}
-.app.premium .main:has([data-workspace=telemetry])>.workspace-heading h1 {font-size:36px;font-weight:600;letter-spacing:-.8px;margin:0 0 3px;line-height:1.2}
-.app.premium .main:has([data-workspace=telemetry])>.workspace-heading p {font-size:14px;margin-top:2px}
-.app.premium .main:has([data-workspace=telemetry])>.lap-summary {width:calc(100% - clamp(320px,28%,392px) - 16px);height:96px;min-height:96px;margin:0 0 10px;padding:0 16px 12px 26px;gap:42px;border:0;flex-wrap:nowrap}
-.app.premium .main:has([data-workspace=telemetry]) .lap-chip {align-items:flex-start;gap:17px;position:relative}
-.app.premium .main:has([data-workspace=telemetry]) .lap-chip>div {gap:4px}
-.app.premium .main:has([data-workspace=telemetry]) .lap-chip .dot {width:26px;border-top-width:3px;border-radius:3px;margin-top:8px}
-.app.premium .main:has([data-workspace=telemetry]) .lap-chip .dot.amber {border-top-style:solid}
-.app.premium .main:has([data-workspace=telemetry]) .lap-chip small {font-size:14px}
-.app.premium .main:has([data-workspace=telemetry]) .lap-chip strong {font:450 40px/1.15 var(--font-sans);letter-spacing:-1px}
-.app.premium .main:has([data-workspace=telemetry]) .lap-chip+.lap-chip {padding-left:28px;border-left:1px solid var(--border)}
-.app.premium .main:has([data-workspace=telemetry]) .lap-chip>button {position:absolute;right:-26px;top:20px;width:24px;height:28px;opacity:0}
-.app.premium .main:has([data-workspace=telemetry]) .lap-chip:is(:hover,:focus-within)>button {opacity:1}
-.app.premium .main:has([data-workspace=telemetry]) .overall-delta {padding:10px 20px;min-width:166px;gap:3px;text-align:center;background:var(--glass-raised);border:1px solid var(--grid);border-radius:18px;box-shadow:var(--glass-edge),var(--glass-shadow)}
-.app.premium .main:has([data-workspace=telemetry]) .overall-delta small {font-size:14px}
-.app.premium .main:has([data-workspace=telemetry]) .overall-delta strong {font:500 30px/1.2 var(--font-sans);letter-spacing:-.5px}
-.app.premium .main:has([data-workspace=telemetry]) .overall-delta strong span {font-size:16px}
+/* Approved Telemetry composition. Shared shell and tokens have shared owners. */
+.app.premium .main:has([data-workspace=telemetry])>.lap-summary {width:calc(100% - clamp(320px,28%,392px) - 16px)}
 .app.premium [data-workspace=telemetry] {overflow:visible;container-type:normal;background:transparent}
 .app.premium [data-workspace=telemetry]>.workspace-body {display:grid;grid-template-columns:minmax(0,1fr) clamp(320px,28%,392px);gap:16px;min-height:100%}
 .app.premium [data-workspace=telemetry] .chart-workspace {background:var(--glass-panel);border:1px solid var(--border);border-radius:22px;padding:16px 15px 12px;box-shadow:var(--glass-edge),var(--glass-shadow);align-self:start;max-height:calc(100vh - 315px);overflow:auto}
@@ -174,30 +79,9 @@
 .app.premium [data-workspace=telemetry] .track-options>summary {width:24px;height:24px;font-size:16px}
 .app.premium [data-workspace=telemetry] .telemetry-options-panel .corner-controls {margin:0;display:flex;flex-direction:column;align-items:stretch}
 @media(hover:none) {
-  .app.premium .shell:has([data-workspace=telemetry]) .compare-toggle:not(.on),
-  .app.premium .shell:has([data-workspace=telemetry]) .explorer-heading>.explorer-icon:last-child,
-  .app.premium .shell:has([data-workspace=telemetry]) .sidebar-footer,
-  .app.premium .main:has([data-workspace=telemetry]) .lap-chip>button {opacity:1}
-  .app.premium .shell:has([data-workspace=telemetry]) .compare-toggle {min-height:32px;width:32px}
   .telemetry-options summary {min-width:32px;min-height:32px}
 }
-@media(max-width:1400px) {
-  .app.premium:has([data-workspace=telemetry]) .titlebar .ttt-brand {flex-basis:200px;width:200px}
-  .app.premium:has([data-workspace=telemetry]) .titlebar .workspace-switch {gap:7px}
-  .app.premium:has([data-workspace=telemetry]) .titlebar .workspace-switch button {padding-inline:12px}
-  .app.premium .main:has([data-workspace=telemetry])>.lap-summary {gap:24px;padding-left:14px}
-  .app.premium .main:has([data-workspace=telemetry]) .lap-chip+.lap-chip {padding-left:18px}
-  .app.premium .main:has([data-workspace=telemetry]) .lap-chip {gap:10px}
-  .app.premium .main:has([data-workspace=telemetry]) .lap-chip small {font-size:12px}
-  .app.premium .main:has([data-workspace=telemetry]) .lap-chip strong {font-size:34px}
-  .app.premium .main:has([data-workspace=telemetry]) .overall-delta {min-width:135px;padding-inline:12px}
-}
 @media(max-width:1100px) {
-  .app.premium:has([data-workspace=telemetry]) .titlebar .ttt-brand {flex-basis:145px;width:145px}
-  .app.premium:has([data-workspace=telemetry]) .titlebar .workspace-switch {gap:2px}
-  .app.premium:has([data-workspace=telemetry]) .titlebar .workspace-switch button {font-size:12px;padding-inline:8px;gap:5px}
-  .app.premium:has([data-workspace=telemetry]) .header-actions {gap:8px}
-  .app.premium .main:has([data-workspace=telemetry])>.workspace-heading {padding-inline:8px}
   .app.premium .main:has([data-workspace=telemetry])>.lap-summary {width:100%}
   .app.premium [data-workspace=telemetry]>.workspace-body {grid-template-columns:minmax(0,1fr)}
   .app.premium [data-workspace=telemetry] {overflow:auto}
@@ -209,21 +93,6 @@
   .app.premium [data-workspace=telemetry] .segment-list {max-height:360px}
 }
 @media(max-width:700px) {
-  .app.premium:has([data-workspace=telemetry])>.titlebar {height:52px;min-height:52px;gap:6px;padding:0 8px}
-  .app.premium:has([data-workspace=telemetry]) .titlebar .ttt-brand {flex-basis:28px;width:28px}
-  .app.premium:has([data-workspace=telemetry]) .titlebar .workspace-switch {gap:1px}
-  .app.premium:has([data-workspace=telemetry]) .titlebar .workspace-switch button {font-size:11px;padding-inline:5px;height:34px;gap:4px}
-  .app.premium:has([data-workspace=telemetry]) .header-actions {gap:4px}
-  .app.premium:has([data-workspace=telemetry]) .header-actions .icon-button {width:28px;height:28px}
-  .app.premium:has([data-workspace=telemetry]) .titlebar .import-button {font-size:11px;min-height:32px;padding-inline:7px}
-  .app.premium .shell:has([data-workspace=telemetry])>.main {padding:14px 12px 20px}
-  .app.premium .main:has([data-workspace=telemetry])>.workspace-heading {min-height:82px;padding:0}
-  .app.premium .main:has([data-workspace=telemetry])>.workspace-heading h1 {font-size:26px}
-  .app.premium .main:has([data-workspace=telemetry])>.workspace-heading p {font-size:12px}
-  .app.premium .main:has([data-workspace=telemetry])>.lap-summary {min-height:78px;height:auto;padding:0 0 10px;gap:10px}
-  .app.premium .main:has([data-workspace=telemetry]) .overall-delta {min-width:120px;padding:8px 10px}
-  .app.premium .main:has([data-workspace=telemetry]) .overall-delta strong {font-size:23px}
-  .app.premium .main:has([data-workspace=telemetry]) .overall-delta small {font-size:12px}
   .app.premium [data-workspace=telemetry] .chart-workspace {padding:12px 8px;border-radius:18px}
   .app.premium [data-workspace=telemetry] .chart-toolbar {padding:0 2px 12px;min-height:48px;flex-wrap:nowrap;gap:5px}
   .app.premium [data-workspace=telemetry] .axis-switch button {width:76px;font-size:12px}

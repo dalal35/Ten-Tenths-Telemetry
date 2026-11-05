@@ -2,30 +2,30 @@
 .app.premium .session-list .library-entry { border-bottom-color:var(--border); }
 .app.premium .library-entry .session-button { padding:9px 8px 10px; gap:3px; }
 .app.premium .session-track { font-size:12px; font-weight:600; color:var(--ink); }
-.app.premium .session-meta { color:var(--muted); font-size:10px; }
-.app.premium .session-facts { display:block; width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--subtle); font:10px/1.4 var(--font-mono); }
-.app.premium .session-source { display:block; width:100%; overflow:hidden; direction:rtl; text-align:left; text-overflow:ellipsis; white-space:nowrap; color:var(--muted); font:10px/1.4 var(--font-mono); }
-.app.premium .session-group-heading { padding:10px 5px 6px; font-size:10px; letter-spacing:.02em; }
+.app.premium .session-meta { color:var(--muted); font-size:11px; }
+.app.premium .session-facts { display:block; width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--subtle); font:11px/1.4 var(--font-mono); }
+.app.premium .session-source { display:block; width:100%; overflow:hidden; direction:rtl; text-align:left; text-overflow:ellipsis; white-space:nowrap; color:var(--muted); font:11px/1.4 var(--font-mono); }
+.app.premium .session-group-heading { padding:10px 5px 6px; font-size:11px; letter-spacing:.02em; }
 .app.premium .session-group-heading small { color:var(--muted); opacity:1; }
 .app.premium .library-entry.active .session-track { color:var(--cyan); }
 .app.premium .library-entry .row-actions { opacity:.8; }
 .app.premium .merge-selection { margin:4px 10px 7px; padding:9px; border:1px solid var(--border); background:var(--surface); }
 .app.premium .merge-selection span { flex-basis:100%; font-size:11px; color:var(--ink); }
-.app.premium .merge-selection button { min-height:28px; padding:5px 8px; font-size:10px; }
+.app.premium .merge-selection button { min-height:28px; padding:5px 8px; font-size:11px; }
 .app.premium .merge-selection button:first-of-type { border-color:var(--cyan); }
 .app.premium .sidebar-hint { margin:12px 0; padding:0 7px; color:var(--muted); line-height:1.65; }
-.app.premium .file-status { padding:0 8px 8px; font-size:10px; }
+.app.premium .file-status { padding:0 8px 8px; font-size:11px; }
 .app.premium .lap-list .lap-row.compared { box-shadow:inset -2px 0 var(--amber); }
 
 /* Details uses a native top-layer dialog, so its rules must also work outside .app. */
 .merge-dialog.session-details,.merge-dialog.library-merge { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-floating); box-shadow:var(--shadow-floating); }
 .merge-dialog.session-details { width:min(520px,calc(100vw - 32px)); }
-.merge-dialog .library-dialog-kicker { color:var(--cyan); font:10px/1.4 var(--font-mono); letter-spacing:.08em; }
+.merge-dialog .library-dialog-kicker { color:var(--cyan); font:11px/1.4 var(--font-mono); letter-spacing:0; }
 .merge-dialog .library-dialog-kicker span { color:var(--subtle); padding:0 3px; }
 .merge-dialog .library-dialog-intro { margin:0 0 18px; color:var(--muted); line-height:1.6; }
 .merge-dialog .recording-summary { margin:0 0 20px; border:1px solid var(--border); background:var(--bg); }
 .merge-dialog .recording-summary-source { display:flex; flex-direction:column; gap:5px; min-width:0; padding:12px 14px; border-bottom:1px solid var(--border); }
-.merge-dialog .recording-summary-source>span,.merge-dialog .merge-source-heading { color:var(--muted); font:10px/1.4 var(--font-mono); letter-spacing:.04em; text-transform:uppercase; }
+.merge-dialog .recording-summary-source>span,.merge-dialog .merge-source-heading { color:var(--muted); font:11px/1.4 var(--font-mono); letter-spacing:.04em; text-transform:uppercase; }
 .merge-dialog .recording-summary-source strong { overflow-wrap:anywhere; font-size:12px; font-weight:600; }
 .merge-dialog .recording-summary-stats,.merge-dialog .merge-overview { display:flex; flex-wrap:wrap; gap:9px 22px; padding:10px 14px; color:var(--muted); font-size:11px; }
 .merge-dialog .recording-summary-stats strong,.merge-dialog .merge-overview strong { color:var(--ink); font-weight:600; }
@@ -35,10 +35,10 @@
 .merge-dialog .merge-source-heading { margin-bottom:7px; }
 .merge-dialog .merge-source-list { margin:0; padding:0; border-top:1px solid var(--border); list-style:none; }
 .merge-dialog .merge-source-list li { display:flex; align-items:flex-start; gap:12px; min-width:0; padding:10px 2px; border-bottom:1px solid var(--border); line-height:1.4; }
-.merge-dialog .merge-source-index { flex:none; padding-top:1px; color:var(--cyan); font:10px/1.5 var(--font-mono); }
+.merge-dialog .merge-source-index { flex:none; padding-top:1px; color:var(--cyan); font:11px/1.5 var(--font-mono); }
 .merge-dialog .merge-source-list li>span:last-child { display:flex; flex-direction:column; gap:3px; min-width:0; }
 .merge-dialog .merge-source-list strong { font-size:12px; font-weight:600; overflow-wrap:anywhere; }
-.merge-dialog .merge-source-list small { color:var(--muted); font-size:10px; overflow-wrap:anywhere; }
+.merge-dialog .merge-source-list small { color:var(--muted); font-size:11px; overflow-wrap:anywhere; }
 .merge-dialog .merge-preserved { margin:12px 0 0; color:var(--muted); font-size:11px; }
 .merge-dialog .merge-warnings { padding:10px 12px 10px 28px; border-left:2px solid var(--amber); background:var(--bg); color:var(--ink); }
 .merge-dialog .merge-ack { color:var(--ink); }
@@ -46,3 +46,8 @@
   .merge-dialog .recording-summary { margin-bottom:12px; }
   .merge-dialog .recording-summary-source,.merge-dialog .recording-summary-stats { padding-block:7px; }
 }
+
+/* Top-layer fields use the same geometry as the desktop controls. */
+.merge-dialog :is(input,select,textarea) {font-family:var(--font-sans);font-size:13px;border-radius:var(--radius-control);border-color:var(--control)}
+.merge-dialog :is(.recording-summary,.merge-overview) {border-radius:var(--radius-control);overflow:hidden}
+.merge-dialog .merge-actions button {min-height:36px;border-radius:var(--radius-control);font-size:12px}

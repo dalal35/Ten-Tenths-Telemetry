@@ -8,21 +8,23 @@
 
 :root{
   --font-sans:'Geist','IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-  --font-mono:'IBM Plex Mono',ui-monospace,monospace;
-  --font-display:var(--font-mono);--font-ui:var(--font-sans);--font-data:var(--font-mono);
+  --font-code:'IBM Plex Mono',ui-monospace,monospace;
+  --font-mono:var(--font-sans);
+  --font-display:var(--font-sans);--font-ui:var(--font-sans);--font-data:var(--font-sans);
   --font-chart:var(--font-sans);
   /* Ember is authoritative here; legacy role names are compatibility aliases. */
-  --surface-0:#101113;--surface-1:#171A1E;--surface-2:#202328;--surface-3:#26292D;--surface-4:#30343A;
+  --surface-0:#101216;--surface-1:#22262c;--surface-2:#292d35;--surface-3:#30343e;--surface-4:#3a3f49;
   --bg:var(--surface-0);--chrome:var(--surface-0);--panel:var(--surface-1);--surface:var(--surface-2);--raised:var(--surface-3);
-  --border:#3C434B;--divider:var(--border);--line:var(--divider);--control:#84909C;--grid:#2D333A;--hover:#FFFFFF0A;
-  --text-primary:#DDE7ED;--text-secondary:#B4C0CA;--text-tertiary:#AAB6C1;
+  --border:#474c57;--divider:var(--border);--line:var(--divider);--control:#7c8492;--grid:#373c45;--hover:#FFFFFF0A;
+  --text-primary:#f4f5f8;--text-secondary:#c5c8d0;--text-tertiary:#b3b7c2;
   --ink:var(--text-primary);--text:var(--ink);--muted:var(--text-secondary);--subtle:var(--text-tertiary);
   --accent:#FF6049;--accent-hover:#FF806B;--accent-pressed:#F45B45;--accent-focus:#FF9B89;--accent-ink:#101113;
-  --trace-primary:#79C9F2;--trace-comparison:#FFC27B;--delta-ahead:#65DCC3;--delta-behind:#F59BDB;--delta-trace:#D8B6FF;
+  --trace-primary:#6ee2f5;--trace-comparison:#ffc064;--delta-ahead:#69e6c6;--delta-behind:#f398da;--delta-trace:#d5a2f6;
   --cyan:var(--trace-primary);--amber:var(--trace-comparison);--positive:var(--delta-ahead);--negative:var(--delta-behind);--soft:var(--surface-3);
   --space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:20px;--space-6:24px;--space-8:32px;--space-10:40px;
   --text-body:12px;--text-label:11px;--text-data:12px;--text-title:28px;
   --radius-control:10px;--radius-surface:18px;--radius-floating:20px;--radius-pill:999px;
+  --radius-tab:14px;--radius-chart:22px;--radius-instrument:20px;
   --radius-panel:var(--radius-surface);--radius-sheet:var(--radius-floating);
   --layer-base:var(--surface-0);--layer-raised:var(--surface-2);--layer-focused:var(--surface-3);
   --edge-raised:#FFFFFF12;--edge-focused:#FFFFFF20;
@@ -34,9 +36,9 @@
   font-family:var(--font-sans);font-size:13px;line-height:1.45;color:var(--ink);background:var(--bg);color-scheme:dark;
 }
 :root[data-theme=light]{
-  --surface-0:#EDF0F3;--surface-1:#FFFFFF;--surface-2:#F6F8FA;--surface-3:#E4E9EE;--surface-4:#D8E0E7;
-  --border:#B7C2CC;--control:#65717C;--grid:#E1E6EB;--hover:#10111308;
-  --text-primary:#19232C;--text-secondary:#424F5B;--text-tertiary:#4D5A66;
+  --surface-0:#edf0f3;--surface-1:#fff;--surface-2:#f3f5f8;--surface-3:#e2e6ee;--surface-4:#d6dce5;
+  --border:#b7bfcd;--control:#65717c;--grid:#d9dee6;--hover:#10111308;
+  --text-primary:#19232c;--text-secondary:#414b59;--text-tertiary:#505c6b;
   --accent:#B72E1D;--accent-hover:#9F2517;--accent-pressed:#892013;--accent-focus:#B72E1D;--accent-ink:#FFFFFF;
   --trace-primary:#006396;--trace-comparison:#805000;--delta-ahead:#00695C;--delta-behind:#9F2577;--delta-trace:#74419C;
   --shadow-surface:0 1px 2px #19232C10;--shadow-floating:0 16px 48px #19232C24;
@@ -120,3 +122,16 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .app.premium .u-select{background:color-mix(in srgb,var(--accent) 16%,transparent)!important}
 .app.premium .u-cursor-x{border-color:var(--muted)!important}
 .app.premium .plots [data-plot]:focus-visible{outline-color:var(--accent-focus)}
+
+/* Shared chart controls inherit the approved Telemetry instrument dimensions. */
+.app.premium .axis-switch {padding:2px;background:var(--glass-raised-fill);border:1px solid var(--grid);border-radius:var(--radius-control);box-shadow:var(--glass-panel-edge)}
+.app.premium .axis-switch.segmented button {font-size:14px;min-height:34px;width:100px;border-radius:var(--radius-tab);padding:6px 15px}
+.app.premium .axis-switch.segmented button.active {background:var(--glass-interactive-fill);box-shadow:var(--glass-interactive-shadow)}
+.app.premium .chart-tools .channel-control>button {min-height:40px;padding:8px 16px;font-size:14px;border:1px solid var(--glass-interactive-border)}
+.app.premium .channel-control>button span {background:transparent;font:inherit;margin-inline:10px;padding:0}
+.app.premium .workspace-heading p>span {color:var(--muted)}
+.app.premium .titlebar .import-button kbd {font-family:var(--font-code)}
+@media(max-width:700px) {
+  .app.premium .axis-switch.segmented button {width:76px;font-size:12px}
+  .app.premium .chart-tools .channel-control>button {font-size:12px;padding-inline:10px;min-height:36px}
+}

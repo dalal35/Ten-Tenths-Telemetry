@@ -57,7 +57,12 @@ try{
  const expected=data.report.primaryOpportunityIds.map(id=>data.report.opportunities.find(item=>item.id===id));
  assert(expected.every(Boolean),'Backend primary IDs must resolve to opportunities');
  await expect(opportunities).toHaveCount(expected.length);
- for(let i=0;i<expected.length;i++)await expect(opportunities.nth(i)).toHaveAttribute('aria-label',new RegExp(expected[i].label));
+ // Visible experiment titles must remain part of the accessible name. A custom
+ // aria-label containing only the backend evidence label hides that title.
+ for(let i=0;i<expected.length;i++){
+  const title=await opportunities.nth(i).locator('strong').innerText();
+  await expect(opportunities.nth(i)).toHaveAccessibleName(new RegExp(title.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
+ }
  await expect(opportunities.first()).toHaveAttribute('aria-pressed','true');
  await expect(page.locator('.coach-focus')).toContainText(expected[0].label);
  await page.evaluate(()=>document.fonts.ready);

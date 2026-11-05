@@ -272,9 +272,9 @@ export function VideoWorkspace(props:VideoWorkspaceProps) {
       {usable&&!needsYouTubeDownload&&(sample.state==='loading'||sample.state==='buffering')&&<div className="video-player-message" role="status">{sample.state==='buffering'?'Buffering footage…':'Loading footage…'}</div>}
       {overlay&&<VideoInstruments session={session} time={usable&&props.telemetryReady!==false&&sample.state!=='error'&&!needsYouTubeDownload?telemetryTime:null} analysis={props.analysis??null} axis={props.axis??'distance'}/>}
       <div className="video-controls">
-        <button className="video-transport-step" aria-label="Back 5 seconds" title="Back 5 seconds" disabled={!usable||!player.current||busy||nativeYouTube} onClick={()=>seekRelative(-5)}>−5s</button>
+        <button className="video-transport-step" aria-label="−5s Back 5 seconds" title="Back 5 seconds" disabled={!usable||!player.current||busy||nativeYouTube} onClick={()=>seekRelative(-5)}>−5s</button>
         <button className="video-play-button" disabled={!usable||!player.current||busy||nativeYouTube} onClick={togglePlayback}><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true">{sample.state==='playing'||sample.state==='buffering'?<path d="M3 2h3v12H3zm7 0h3v12h-3z"/>:<path d="m4 1 10 7-10 7z"/>}</svg>{sample.state==='playing'||sample.state==='buffering'?'Pause':'Play'}</button>
-        <button className="video-transport-step" aria-label="Forward 5 seconds" title="Forward 5 seconds" disabled={!usable||!player.current||busy||nativeYouTube} onClick={()=>seekRelative(5)}>+5s</button>
+        <button className="video-transport-step" aria-label="+5s Forward 5 seconds" title="Forward 5 seconds" disabled={!usable||!player.current||busy||nativeYouTube} onClick={()=>seekRelative(5)}>+5s</button>
         <span className="mono">Video {sample.time.toFixed(2)}s {knownDuration?`/ ${knownDuration.toFixed(2)}s`:''}</span>
         <label>Playback speed<select disabled={!usable||!player.current||busy||nativeYouTube} value={sample.rate} onChange={event=>{const rate=Number(event.target.value);void operation(adapter=>adapter.setRate(rate));}}>{(player.current?.supportedRates()??[1]).map(rate=><option key={rate} value={rate}>{rate}×</option>)}</select></label>
         <button className="video-overlay-toggle" aria-label={overlay?'Hide telemetry overlay':'Show telemetry overlay'} aria-pressed={overlay} onClick={()=>setOverlay(value=>!value)}>Telemetry</button>
@@ -306,7 +306,7 @@ export function VideoWorkspace(props:VideoWorkspaceProps) {
 
     {reverse.kind==='ambiguous'&&<div className="video-confirm"><p>Repeated footage: choose a segment to seek.</p><div className="video-actions">{reverse.segmentIds.map(id=><button key={id} onClick={()=>{change({...state,selectedSegmentId:id});onSeekTelemetry(telemetryTime!,id);}}>Use segment {state.segments.findIndex(segment=>segment.id===id)+1}</button>)}</div></div>}
     {state.segments.length>0&&reverse.kind==='unavailable'&&<p className="video-note">Footage unavailable at this telemetry time.</p>}
-    <div className="video-coverage" aria-label="Recorded lap coverage">{session.laps.map(lap=><span key={lap.id} data-coverage={coverage[lap.id]}>Lap {lap.number} · {coverage[lap.id]==='none'?'no':coverage[lap.id]} coverage</span>)}</div>
+    <div className="video-coverage" role="region" aria-label="Recorded lap coverage" tabIndex={0}>{session.laps.map(lap=><span key={lap.id} data-coverage={coverage[lap.id]}>Lap {lap.number} · {coverage[lap.id]==='none'?'no':coverage[lap.id]} coverage</span>)}</div>
     <SegmentEditor segments={state.segments} laps={session.laps} duration={knownDuration} selectedSegmentId={state.selectedSegmentId} onSelect={id=>change({...state,selectedSegmentId:id})} onChange={segments=>saveSegments(segments)}/>
     <div className="video-media-heading"><span className="video-step-label"><b>03</b> Media &amp; storage</span><small>Local files stay on this computer</small></div>
     <div className="video-source-controls">
