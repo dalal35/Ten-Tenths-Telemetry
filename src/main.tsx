@@ -9,4 +9,5 @@ import './motion.css';
 import './design-system.css';
 import './coach/coach-premium.css';
 import './shell.css';
+import './telemetry-reference.css';
 ReactDOM.createRoot(document.getElementById('root')!).render(<React.StrictMode><MotionConfig reducedMotion="user" transition={motionTokens.spring}><App premium /></MotionConfig></React.StrictMode>);

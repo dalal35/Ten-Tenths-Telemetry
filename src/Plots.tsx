@@ -7,6 +7,9 @@ import type { Workspace } from './workspace';
 import type { Analysis, Axis, Series, TrackSegment, AdvancedEvent } from './types';
 import { interpolate, mergeSeries } from './telemetry';
 const noEvents:AdvancedEvent[]=[];
+const rpmReadout=new Intl.NumberFormat('en-US',{maximumFractionDigits:0});
+// Include 4× decades for the reference's readable distance-axis rhythm.
+const referenceIncrements=Array.from({length:20},(_,i)=>[1,2,4,5].map(n=>n*10**(i-8))).flat();
 type Row={id:string;name:string;unit:string;primary:Series;comparison?:Series;primaryUnavailable?:boolean};
 function updateReadout(element:HTMLElement|undefined,row:Row,position:number|null){
   if(!element)return;
@@ -14,7 +17,7 @@ function updateReadout(element:HTMLElement|undefined,row:Row,position:number|nul
     const value=position==null||!series?null:interpolate(series.x,series.values,position,series.gaps);
     if(value==null||!Number.isFinite(value))return '—';
     if(row.id==='__delta')return `${value>0?'+':''}${value.toFixed(3)}`;
-    return value.toFixed(row.unit.toLowerCase()==='rpm'?0:1);
+    return row.unit.toLowerCase()==='rpm'&&element.closest('.premium [data-workspace=telemetry]')?rpmReadout.format(value):value.toFixed(row.unit.toLowerCase()==='rpm'?0:1);
   };
   const primary=element.querySelector<HTMLElement>('[data-primary-value]');
   const comparison=element.querySelector<HTMLElement>('[data-comparison-value]');
@@ -65,16 +68,17 @@ export default function Plots({analysis,axis,onCursor,resetVersion,cursor=null,e
       return {ink:color('--muted','--ink'),grid:color('--grid','--border'),primary:color('--trace-primary','--cyan'),comparison:color('--trace-comparison','--amber'),delta:color('--delta-trace','--cyan'),font:style.getPropertyValue('--font-chart').trim()||"'IBM Plex Mono', ui-monospace, monospace"};
     };
     let palette=readPalette();
-    const axisFont=`11px ${palette.font}`;
+    const reference=!!host.current.closest('.premium [data-workspace="telemetry"]');
+    const axisFont=`${reference?13:11}px ${palette.font}`;
     let initialized=false;
     const fallbackHeight=layout==='compact'?120:152;
     const plotHeight=(node:HTMLElement)=>{
       const height=Number.parseFloat(getComputedStyle(node).height);
-      return Number.isFinite(height)&&height>0?Math.max(120,Math.min(260,height)):fallbackHeight;
+      return Number.isFinite(height)&&height>0?Math.max(reference?100:120,Math.min(260,height)):fallbackHeight;
     };
     plots.current=rows.map((row,i)=>{
       const pairs=[row.primary,...(row.comparison?[row.comparison]:[])];
-      const plot=new uPlot({width:Math.max(nodes[i].clientWidth,200),height:plotHeight(nodes[i]),padding:[14,18,0,0],legend:{show:false},cursor:{sync:{key:'telemetry'},drag:{x:true,y:false,setScale:true},points:{size:5}},select:{show:true,left:0,top:0,width:0,height:0},scales:{x:{time:false}},axes:[{font:axisFont,stroke:()=>palette.ink,grid:{show:false},ticks:{stroke:()=>palette.grid},size:32,values:(_u,ticks)=>ticks.map(n=>`${Math.round(n*10)/10}`)},{font:axisFont,stroke:()=>palette.ink,grid:{stroke:()=>palette.grid,width:1},ticks:{stroke:()=>palette.grid},size:68,gap:10}],series:[{},...pairs.map((s,index)=>({label:s.name,stroke:()=>row.id==='__delta'?palette.delta:index?palette.comparison:palette.primary,width:index?1.5:2,dash:index?[6,4]:undefined,spanGaps:false}))],hooks:{ready:[u=>{applyingCursor.current=true;try{const position=sharedCursor.current,left=position==null?-10:u.valToPos(position,'x');if(Number.isFinite(left))u.setCursor({left,top:30});}finally{applyingCursor.current=false;}}],draw:[u=>{
+      const plot=new uPlot({width:Math.max(nodes[i].clientWidth,200),height:plotHeight(nodes[i]),padding:[14,18,0,0],legend:{show:false},cursor:{sync:{key:'telemetry'},drag:{x:true,y:false,setScale:true},points:{size:5}},select:{show:true,left:0,top:0,width:0,height:0},scales:{x:{time:false}},axes:[{font:axisFont,space:reference?80:50,incrs:reference&&axis==='distance'?referenceIncrements:undefined,stroke:()=>palette.ink,grid:{show:false},ticks:{stroke:()=>palette.grid},size:32,values:(_u,ticks)=>ticks.map(n=>`${Math.round(n*10)/10}`)},{font:axisFont,stroke:()=>palette.ink,space:reference?22:50,incrs:reference?referenceIncrements:undefined,grid:{stroke:()=>palette.grid,width:1},ticks:{stroke:()=>palette.grid},size:68,gap:10}],series:[{},...pairs.map((s,index)=>({label:s.name,stroke:()=>row.id==='__delta'?palette.delta:index?palette.comparison:palette.primary,width:index?1.5:2,fill:reference&&row.id==='__delta'?()=>`${palette.delta}10`:undefined,dash:index?[6,4]:undefined,spanGaps:false}))],hooks:{ready:[u=>{applyingCursor.current=true;try{const position=sharedCursor.current,left=position==null?-10:u.valToPos(position,'x');if(Number.isFinite(left))u.setCursor({left,top:30});}finally{applyingCursor.current=false;}}],draw:[u=>{
         // Zero is a meaningful reference only when it falls inside the visible delta scale.
         if(row.id==='__delta'&&u.scales.y.min!=null&&u.scales.y.max!=null&&u.scales.y.min<=0&&u.scales.y.max>=0){
           const y=u.valToPos(0,'y',true);u.ctx.save();u.ctx.strokeStyle=palette.ink;u.ctx.globalAlpha=.45;u.ctx.lineWidth=window.devicePixelRatio;u.ctx.setLineDash([4*window.devicePixelRatio,4*window.devicePixelRatio]);u.ctx.beginPath();u.ctx.moveTo(u.bbox.left,y);u.ctx.lineTo(u.bbox.left+u.bbox.width,y);u.ctx.stroke();u.ctx.restore();
