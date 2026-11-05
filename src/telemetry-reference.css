@@ -8,11 +8,6 @@
   --border:#474c57; --grid:#373c45; --control:#7c8492;
   --trace-primary:#6ee2f5; --trace-comparison:#ffc064;
   --delta-trace:#d5a2f6; --delta-ahead:#69e6c6; --delta-behind:#f398da;
-  --glass-panel:linear-gradient(125deg,#ffffff08,transparent 45%,#ffffff03),#242830ed;
-  --glass-raised:linear-gradient(135deg,#ffffff08,transparent 60%),#252932ed;
-  --glass-focused:linear-gradient(140deg,#ffffff16,transparent 65%),#424550ec;
-  --glass-edge:inset 0 1px 0 #ffffff0c,inset 1px 0 0 #ffffff04;
-  --glass-shadow:0 12px 28px #00000024;
   background:radial-gradient(ellipse at 46% 34%,#232730 0%,#14171c 44%,#101216 85%);
   font-size:14px;
 }
@@ -23,11 +18,6 @@
   --border:#b7bfcd; --grid:#d9dee6; --control:#65717c;
   --trace-primary:#006396; --trace-comparison:#805000;
   --delta-ahead:#00695c; --delta-behind:#9f2577; --delta-trace:#74419c;
-  --glass-panel:linear-gradient(130deg,#fff9,transparent 70%),#f7f9fcec;
-  --glass-raised:linear-gradient(130deg,#fffc,transparent 70%),#e9edf4ec;
-  --glass-focused:linear-gradient(130deg,#fffc,transparent 70%),#d9dfebee;
-  --glass-edge:inset 0 1px 0 #fff,inset 1px 0 0 #ffffff80;
-  --glass-shadow:0 12px 28px #24324b0c;
   background:radial-gradient(ellipse at 46% 34%,#fff,#edf0f3 85%);
 }
 .app.premium:has([data-workspace=telemetry])>.titlebar {
@@ -183,15 +173,6 @@
 .app.premium [data-workspace=telemetry] .track-options {position:absolute;right:8px;top:-2px}
 .app.premium [data-workspace=telemetry] .track-options>summary {width:24px;height:24px;font-size:16px}
 .app.premium [data-workspace=telemetry] .telemetry-options-panel .corner-controls {margin:0;display:flex;flex-direction:column;align-items:stretch}
-@supports ((backdrop-filter:blur(12px)) or (-webkit-backdrop-filter:blur(12px))) {
-  .app.premium:has([data-workspace=telemetry]) .titlebar :is(.import-button,.workspace-switch button.active),
-  .app.premium [data-workspace=telemetry] :is(.channel-control>button,.axis-switch button.active) {backdrop-filter:blur(12px) saturate(115%);-webkit-backdrop-filter:blur(12px) saturate(115%)}
-  .app.premium [data-workspace=telemetry] .telemetry-options-panel {background:color-mix(in srgb,var(--surface-2) 94%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
-}
-@media (prefers-reduced-transparency:reduce),(forced-colors:active) {
-  .app.premium:has([data-workspace=telemetry]) {--glass-panel:var(--surface-1);--glass-raised:var(--surface-2);--glass-focused:var(--surface-3);--glass-shadow:none}
-  .app.premium:has([data-workspace=telemetry]) :is(.titlebar .import-button,.titlebar .workspace-switch button.active,.channel-control>button,.axis-switch button.active,.telemetry-options-panel) {backdrop-filter:none;-webkit-backdrop-filter:none}
-}
 @media(hover:none) {
   .app.premium .shell:has([data-workspace=telemetry]) .compare-toggle:not(.on),
   .app.premium .shell:has([data-workspace=telemetry]) .explorer-heading>.explorer-icon:last-child,
