@@ -178,3 +178,7 @@
 .app.premium [data-workspace]:not([data-workspace=telemetry]) .track-map-frame {border-radius:var(--radius-control) var(--radius-control) 0 0;background:var(--glass-raised-fill);box-shadow:var(--glass-panel-edge)}
 .app.premium [data-workspace]:not([data-workspace=telemetry]) .track-map-meta {border-radius:0 0 var(--radius-control) var(--radius-control);background:var(--glass-raised-fill)}
 .app.premium .corner-controls button {border-radius:var(--radius-control);font-size:12px;min-height:32px}
+
+/* One select treatment everywhere; the native menu and keyboard behaviour stay intact. */
+.app.premium select{appearance:none;-webkit-appearance:none;padding-right:28px!important;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none' stroke='%23929b9f' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m1 1 4 4 4-4'/%3E%3C/svg%3E")!important;background-repeat:no-repeat!important;background-position:right 10px center!important}
+.app.premium select option{background:var(--panel);color:var(--ink)}

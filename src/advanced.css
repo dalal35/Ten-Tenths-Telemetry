@@ -124,7 +124,7 @@
 .app .saved-formulas>div>div{display:flex;gap:10px;flex-wrap:wrap}
 .app .saved-formulas button{color:var(--muted);min-height:28px}
 .app .formula-picker{padding:0 0 0 20px;border-left:1px solid var(--border);max-height:600px;overflow:auto;overscroll-behavior:contain}
-.app .formula-picker>label{position:sticky;top:0;background:var(--panel);padding:0 0 12px}
+.app .formula-picker>label{position:sticky;top:0;background:var(--surface-1,var(--panel));padding:0 0 12px}
 .app .formula-picker button{display:flex;flex-direction:column;gap:4px;width:100%;text-align:left;padding:11px 4px;border-bottom:1px solid var(--border);min-height:50px;overflow-wrap:anywhere}
 .app .formula-picker button span{font-size:12px}
 .app:not(.premium) .formula-picker button small{font-size:10px;line-height:1.5;color:var(--muted)}
@@ -222,18 +222,6 @@
 /* Also used by the original App harness, which does not load premium foundations. */
 body:has(.advanced-tab),.main:has(.advanced-tab){min-width:0}
 .main:has(.advanced-tab) .chart-toolbar,.main:has(.advanced-tab) .chart-tools,.main:has(.advanced-tab) .chart-help{flex-wrap:wrap}
-@container charts (min-width:1000px){
- .app .analysis-output[data-tool=traction]{display:grid;grid-template-columns:minmax(0,1fr) 238px;column-gap:14px;align-items:start}
- .app .analysis-output[data-tool=traction]>.analysis-legend,.app .analysis-output[data-tool=traction]>.analysis-notes{grid-column:1/-1}
- .app .analysis-output[data-tool=traction]>.analysis-surface{grid-column:1;grid-row:2}
- .app .analysis-output[data-tool=traction]>.panel-resizer{grid-column:1;grid-row:3}
- .app .analysis-output[data-tool=traction]>.analysis-statistics{grid-column:2;grid-row:2 / span 2;grid-template-columns:1fr;margin:0}
- .app .analysis-output[data-tool=traction]>.analysis-statistics section+section{border-left:0;border-top:1px solid var(--border)}
- .app .analysis-output[data-tool=traction]>.analysis-statistics .stat-header{flex-direction:column;align-items:flex-start;gap:2px}
- .app .analysis-output[data-tool=traction]>.analysis-statistics .stat-metrics{gap:10px 6px}
- .app .analysis-output[data-tool=traction] .stat-metrics dd{font-size:11px}
- .app .analysis-output[data-tool=traction] .analysis-busy{grid-column:1/-1}
-}
 .app:not(.premium) .advanced-workspace .analysis-legend .orientation-note{color:var(--amber);width:100%;font-size:10px}
 .app.premium .advanced-workspace .analysis-legend .orientation-note{color:var(--amber);width:100%;font-size:11px}
 .app .event-table .event-evidence{font:11px/1.6 var(--font-sans,sans-serif);color:var(--muted);white-space:normal;margin-top:4px;max-width:240px}
@@ -243,3 +231,68 @@ body:has(.advanced-tab),.main:has(.advanced-tab){min-width:0}
 /* Figures align like Telemetry; actual expressions retain a code face. */
 .app.premium .advanced-workspace :is(.point-inspector,.event-table,.analysis-statistics p,.stat-metrics dd) {font-variant-numeric:tabular-nums}
 .app.premium .advanced-workspace :is(.formula-editor textarea,.saved-formulas code) {font-family:var(--font-code)}
+
+/* Analysis Studio: one continuous workspace with a dedicated configuration rail. */
+.app:is(.premium,:not(.premium)) .advanced-workspace.advanced-workspace{border:0;background:transparent;border-radius:0;box-shadow:none}
+.app:is(.premium,:not(.premium)) .advanced-workspace .advanced-heading{box-sizing:border-box;height:48px;padding:0 180px 8px 0;align-items:center}
+.app:is(.premium,:not(.premium)) .advanced-workspace .advanced-heading h2{font:600 var(--workspace-title,28px)/1.15 var(--font-sans,system-ui,sans-serif);letter-spacing:-.025em}
+.app:is(.premium,:not(.premium)) .advanced-workspace .advanced-heading p{display:none}
+.app:is(.premium,:not(.premium)) .advanced-workspace .preset-select{flex-direction:row;align-items:center;gap:12px;max-width:none}
+.app:is(.premium,:not(.premium)) .advanced-workspace .preset-select>label{white-space:nowrap}
+.app:is(.premium,:not(.premium)) .advanced-workspace .preset-select>div{min-width:200px}
+.app:is(.premium,:not(.premium)) .advanced-workspace .advanced-nav{padding:0;margin:0 0 8px;border:0}
+.app:is(.premium,:not(.premium)) .advanced-workspace .advanced-nav .tool-tabs{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;padding:4px;background:var(--surface);border:1px solid var(--border);border-radius:16px}
+.app:is(.premium,:not(.premium)) .advanced-workspace .advanced-nav .tool-tabs button{min-height:36px;border-radius:12px;white-space:normal;font-size:12px}
+.app:is(.premium,:not(.premium)) .advanced-workspace .advanced-nav .tool-tabs button .control-selection{inset:0;height:auto;background:var(--raised);border:1px solid var(--border);border-radius:12px}
+.app:is(.premium,:not(.premium)) .advanced-workspace .advanced-fieldset{border:1px solid var(--border);border-radius:16px;background:var(--panel);overflow:hidden}
+.app:is(.premium,:not(.premium)) .advanced-workspace .analysis-panel-heading{background:transparent;padding:3px 12px;border-bottom:1px solid var(--border);min-height:36px;box-sizing:border-box}
+.app:is(.premium,:not(.premium)) .advanced-workspace .analysis-panel-heading h3{font-size:13px;font-weight:600}
+.app:is(.premium,:not(.premium)) .advanced-workspace .analysis-panel-heading p{display:none}
+.app:is(.premium,:not(.premium)) .advanced-workspace .analysis-layout{grid-template-columns:240px minmax(0,1fr);padding:8px;gap:10px}
+.app:is(.premium,:not(.premium)) .advanced-workspace .analysis-layout[data-setup=false],.app:is(.premium,:not(.premium)) .advanced-workspace .analysis-layout.math-layout{grid-template-columns:minmax(0,1fr)}
+.app:is(.premium,:not(.premium)) .advanced-workspace .analysis-setup{padding:12px;border:1px solid var(--border);border-radius:12px;background:var(--surface);max-height:max(290px,calc(100vh - 454px));overflow:auto;overscroll-behavior:contain}
+.app:is(.premium,:not(.premium)) .advanced-workspace .analysis-setup .analysis-filters,.app:is(.premium,:not(.premium)) .advanced-workspace .analysis-setup .analysis-controls{gap:8px}
+.app:is(.premium,:not(.premium)) .advanced-workspace .analysis-output{padding:0;min-width:0}
+.app:is(.premium,:not(.premium)) .advanced-workspace :is(select,input:not([type=checkbox]),textarea){border-radius:12px}
+.app:is(.premium,:not(.premium)) .advanced-workspace .analysis-legend{padding:2px 0 6px}
+.app:is(.premium,:not(.premium)) .advanced-workspace .analysis-surface{position:relative;border-radius:12px}
+.app:is(.premium,:not(.premium)) .advanced-workspace .analysis-statistics{border-radius:12px;max-height:max(276px,calc(100vh - 454px));overflow:auto;overscroll-behavior:contain}
+.app:is(.premium,:not(.premium)) .advanced-workspace .analysis-statistics section{padding:10px 12px}
+.app:is(.premium,:not(.premium)) .advanced-workspace .analysis-statistics strong{font-weight:600}
+.app:is(.premium,:not(.premium)) .advanced-workspace .analysis-statistics .primary-stat strong{color:var(--cyan)}
+.app:is(.premium,:not(.premium)) .advanced-workspace .analysis-statistics .comparison-stat strong{color:var(--amber)}
+@container charts (min-width:850px){
+ .app:is(.premium,:not(.premium)) .advanced-workspace .analysis-output[data-tool=traction]{display:grid;grid-template-columns:minmax(0,1fr) minmax(200px,250px);column-gap:12px;align-items:start}
+ .app:is(.premium,:not(.premium)) .advanced-workspace .analysis-output[data-tool=traction]>.analysis-legend,.app:is(.premium,:not(.premium)) .advanced-workspace .analysis-output[data-tool=traction]>.analysis-notes,.app:is(.premium,:not(.premium)) .advanced-workspace .analysis-output[data-tool=traction]>.error-banner{grid-column:1/-1}
+ .app:is(.premium,:not(.premium)) .advanced-workspace .analysis-output[data-tool=traction]>.analysis-surface{grid-column:1;grid-row:2}
+ .app:is(.premium,:not(.premium)) .advanced-workspace .analysis-output[data-tool=traction]>.panel-resizer{grid-column:1;grid-row:3}
+ .app:is(.premium,:not(.premium)) .advanced-workspace .analysis-output[data-tool=traction]>.analysis-statistics{grid-column:2;grid-row:2;align-self:stretch;align-content:start;grid-template-columns:1fr;margin:0}
+ .app:is(.premium,:not(.premium)) .advanced-workspace .analysis-output[data-tool=traction]>.analysis-statistics section+section{border-left:0;border-top:1px solid var(--border)}
+ .app:is(.premium,:not(.premium)) .advanced-workspace .analysis-output[data-tool=traction]>.analysis-statistics .stat-header{flex-direction:column;align-items:flex-start;gap:2px;margin-bottom:6px}
+ .app:is(.premium,:not(.premium)) .advanced-workspace .analysis-output[data-tool=traction] .stat-metrics{gap:5px 6px}
+ .app:is(.premium,:not(.premium)) .advanced-workspace .analysis-output[data-tool=traction] .stat-metrics dt{margin-bottom:1px}
+ .app:is(.premium,:not(.premium)) .advanced-workspace .analysis-output[data-tool=traction] .stat-support{margin-top:6px}
+ .app:is(.premium,:not(.premium)) .advanced-workspace .analysis-output[data-tool=traction] .orientation-note{width:auto}
+ .app:is(.premium,:not(.premium)) .advanced-workspace .analysis-output[data-tool=traction]>.analysis-busy{grid-column:1/-1}
+}
+@container charts (max-width:850px){
+ .app:is(.premium,:not(.premium)) .advanced-workspace .analysis-layout{grid-template-columns:200px minmax(0,1fr)}
+ .app:is(.premium,:not(.premium)) .advanced-workspace .analysis-layout[data-setup=false],.app:is(.premium,:not(.premium)) .advanced-workspace .analysis-layout.math-layout{grid-template-columns:minmax(0,1fr)}
+}
+@container charts (max-width:620px){
+ .app:is(.premium,:not(.premium)) .advanced-workspace .advanced-heading{padding:8px 0 14px}
+ .app:is(.premium,:not(.premium)) .advanced-workspace .advanced-heading .preset-select>label{display:none}
+ .app:is(.premium,:not(.premium)) .advanced-workspace .advanced-heading .preset-select>div{min-width:0}
+ .app:is(.premium,:not(.premium)) .advanced-workspace .advanced-nav .tool-tabs{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .app:is(.premium,:not(.premium)) .advanced-workspace .advanced-nav .tool-tabs button{flex-direction:row;justify-content:center;min-height:40px}
+ .app:is(.premium,:not(.premium)) .advanced-workspace .analysis-layout{grid-template-columns:minmax(0,1fr)}
+ .app:is(.premium,:not(.premium)) .advanced-workspace .analysis-setup{border:1px solid var(--border)}
+}
+
+/* Keep filter controls compact: field search stays one small affordance on its label row. */
+.app.premium .advanced-workspace .analysis-setup .channel-select-heading button{width:22px;min-width:22px;height:22px;min-height:22px;padding:2px;border:0!important;background:transparent!important;box-shadow:none!important;backdrop-filter:none}
+.app:is(.premium,:not(.premium)) .advanced-workspace .channel-select-heading{min-height:22px;margin-bottom:2px}
+.app:is(.premium,:not(.premium)) .advanced-workspace .analysis-setup .analysis-filters{margin-bottom:10px;padding-bottom:10px}
+.app:is(.premium,:not(.premium)) .advanced-workspace .analysis-setup :is(select,input:not([type=checkbox])){min-height:32px;padding-block:5px}
+.app:is(.premium,:not(.premium)) .advanced-workspace .analysis-surface{margin:0}
+.app:is(.premium,:not(.premium)) .advanced-workspace .panel-resizer{height:8px}

@@ -7,7 +7,7 @@
 @font-face{font-family:'Barlow Condensed';src:url('/fonts/BarlowCondensed-Medium.ttf') format('truetype');font-style:normal;font-weight:500;font-display:swap}
 
 :root{
-  --font-sans:'Geist','IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --font-sans:-apple-system,BlinkMacSystemFont,'Segoe UI','Geist',sans-serif;
   --font-code:'IBM Plex Mono',ui-monospace,monospace;
   --font-mono:var(--font-sans);
   --font-display:var(--font-sans);--font-ui:var(--font-sans);--font-data:var(--font-sans);
@@ -23,8 +23,8 @@
   --cyan:var(--trace-primary);--amber:var(--trace-comparison);--positive:var(--delta-ahead);--negative:var(--delta-behind);--soft:var(--surface-3);
   --space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:20px;--space-6:24px;--space-8:32px;--space-10:40px;
   --text-body:12px;--text-label:11px;--text-data:12px;--text-title:28px;
-  --radius-control:10px;--radius-surface:18px;--radius-floating:20px;--radius-pill:999px;
-  --radius-tab:14px;--radius-chart:22px;--radius-instrument:20px;
+  --radius-control:10px;--radius-surface:16px;--radius-floating:20px;--radius-pill:999px;
+  --radius-tab:14px;--radius-chart:16px;--radius-instrument:16px;
   --radius-panel:var(--radius-surface);--radius-sheet:var(--radius-floating);
   --layer-base:var(--surface-0);--layer-raised:var(--surface-2);--layer-focused:var(--surface-3);
   --edge-raised:#FFFFFF12;--edge-focused:#FFFFFF20;

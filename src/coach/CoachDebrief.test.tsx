@@ -18,6 +18,23 @@ describe('premium coach debrief',()=>{
   expect(html).toContain('Inspect minimum Speed telemetry');
   expect(html).not.toContain('NaN');
  });
+ it('keeps recorded and simulated gain ranges distinct',()=>{
+  const range={lowerSeconds:.05,upperSeconds:.2,assumption:'Repeat the faster recorded section.',method:'Recorded section difference.'};
+  const render=(next:Opportunity)=>renderToStaticMarkup(<CoachDebrief report={{...report,opportunities:[next]}} findings={[next]} explanations={[]} channels={[]} onInspect={()=>{}} lapLabel={()=> 'Lap 1'}/>);
+  const demonstrated=render({...finding,status:'proven',referenceLapId:'reference',observedLossSeconds:.2,estimatedGainSeconds:.1,evidence:[...finding.evidence,{id:'e2',metric:'sectionElapsed',unit:'s',lapValue:5,referenceValue:4.8,channelIds:[]}],gainRange:{...range,basis:'demonstrated'}} as Opportunity);
+  expect(demonstrated).toContain('Recorded range');
+  expect(demonstrated).toContain('Recorded gain range');
+  expect(demonstrated).not.toContain('Simulated range');
+  expect(demonstrated).not.toContain('Simulated estimate');
+  const simulated=render({...finding,gainRange:{...range,basis:'hypothesis'}} as Opportunity);
+  expect(simulated).toContain('Simulated range');
+  expect(simulated).toContain('Simulated estimate');
+ });
+ it('still tells the driver how to verify the experiment on track',()=>{
+  const html=renderToStaticMarkup(<CoachDebrief report={report} findings={[{...finding,coaching:{mechanism:'exit-recovery',title:'Corner 1: Exit',validation:'Compare exit speed over repeated laps.',hypotheses:[]}} as Opportunity]} explanations={[]} channels={[]} onInspect={()=>{}} lapLabel={()=> 'Lap 1'}/>);
+  expect(html).toContain('Verify on track');
+  expect(html).toContain('Compare exit speed over repeated laps.');
+ });
  it('preserves an honest empty report',()=>{
   const html=renderToStaticMarkup(<CoachDebrief report={{...report,sectionAssessments:[]}} findings={[]} explanations={[]} channels={[]} onInspect={()=>{}} lapLabel={()=> 'Lap 1'}/>);
   expect(html).toContain('No supported opportunity');

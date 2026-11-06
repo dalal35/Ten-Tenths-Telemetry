@@ -19,6 +19,14 @@ try{
   w.video={version:1,sessionId:'integration',contentVersion:'v1',source:{type:'local',path:'/fixture/video.mp4',size:100,modifiedMs:1},segments:[{id:'first',videoStart:0,videoEnd:40,anchorVideoTime:0,anchorTelemetryTime:100,anchorLapId:'lap1',correctionSeconds:0},{id:'cut',videoStart:40,videoEnd:60,anchorVideoTime:40,anchorTelemetryTime:160,anchorLapId:'lap4',correctionSeconds:0}],selectedSegmentId:'first',preferences:{panelHeight:300,playbackRate:1,pausedVideoTime:0}};
   w.entry={...w.session,contentVersion:'v1',status:'ready',channelCount:2,lapCount:4,lastUsed:0,workspace:{contentVersion:'v1',primary:'lap1',comparison:null,axis:'distance',channels:['speed','rpm'],layout:'comfortable',zoom:null,view:'video',video:w.video}};
   const restoreMode=localStorage.getItem('video-fixture-mode');if(restoreMode==='unattached')w.entry.workspace={...w.entry.workspace,view:'telemetry',video:{...w.video,source:null,segments:[]}};if(restoreMode==='corrupt')w.entry.workspace.video={...w.video,segments:'broken'};if(restoreMode==='future')w.entry.workspace.video={...w.video,version:99};
+  if(restoreMode==='boundary'){
+   w.duration=2636.72;
+   w.session.laps=[{id:'lap7',number:7,start:179.435,end:206.53,duration:27.095,complete:true},{id:'lap8',number:8,start:206.53,end:233.115,duration:26.585,complete:true}];
+   w.video={...w.video,segments:[{id:'first',videoStart:1211.45,videoEnd:1600,anchorVideoTime:1211.45,anchorTelemetryTime:0,correctionSeconds:0}],preferences:{...w.video.preferences,pausedVideoTime:1416.98}};
+   // Include lap 1 so the original mapping anchor remains valid.
+   w.session.laps.unshift({id:'lap1',number:1,start:0,end:41.295,duration:41.295,complete:false});
+   w.entry={...w.entry,laps:w.session.laps,workspace:{...w.entry.workspace,view:'telemetry',primary:'lap8',comparison:'lap7',video:w.video}};
+  }
   w.secondSession={...w.session,id:'second',name:'Second circuit',track:'Second circuit',laps:laps.map(l=>({...l,id:'second-'+l.id,start:l.start+200,end:l.end+200}))};w.secondEntry={...w.entry,...w.secondSession,workspace:{...w.entry.workspace,primary:'second-lap1',video:{...w.video,sessionId:'second',source:{...w.video.source,path:'/fixture/second.mp4'},segments:w.video.segments.map(seg=>({...seg,anchorLapId:'second-'+seg.anchorLapId,anchorTelemetryTime:seg.anchorTelemetryTime+200}))}}};
   if(restoreMode==='merge'){
    w.secondSession={...w.secondSession,laps:w.session.laps.map(l=>({...l}))};w.secondEntry={...w.secondEntry,laps:w.secondSession.laps,workspace:{...w.secondEntry.workspace,primary:'lap1',video:{...w.video,sessionId:'second',source:{...w.video.source,path:'/fixture/second.mp4'}}}};
@@ -54,12 +62,93 @@ try{
   HTMLMediaElement.prototype.load=function(){if(sources.has(this))queueMicrotask(()=>this.dispatchEvent(new Event('loadedmetadata')));};HTMLMediaElement.prototype.play=async function(){this.dataset.playing='1';this.dispatchEvent(new Event('playing'));};HTMLMediaElement.prototype.pause=function(){delete this.dataset.playing;this.dispatchEvent(new Event('pause'));};
   w.advance=t=>{const el=document.querySelector('video');times.set(el,t);el.dispatchEvent(new Event('timeupdate'));};
  });
- await page.goto(`${server.resolvedUrls.local[0]}tests/video-integration.html`);
+ // Exercise selection persistence in the shipped premium/StrictMode entry point.
+ await page.goto(server.resolvedUrls.local[0]);
  await expect(page.getByRole('button',{name:'Video',exact:true})).toBeVisible();
  await expect(page.getByRole('button',{name:'Play',exact:true})).toBeEnabled();
  await expect(page.getByRole('button',{name:'Estimate sync'})).toHaveCount(0);
  await expect(page.getByLabel('Automatic sync estimate',{exact:true})).toHaveCount(0);
  await expect(page.locator('.readout').first()).not.toContainText('—');
+ // A retained paused player must not replace selections made in another tab.
+ await page.getByRole('button',{name:'Telemetry',exact:true}).click();
+ await page.locator('.lap-select').nth(1).click();
+ await page.getByRole('button',{name:'Compare lap 1',exact:true}).click();
+ await page.getByRole('button',{name:/^Channels/}).click();await page.getByRole('checkbox',{name:/RPM/}).uncheck();await page.keyboard.press('Escape');
+ for(let cycle=0;cycle<3;cycle++){
+  await page.getByRole('button',{name:'Advanced',exact:true}).click();
+  await page.getByRole('tab',{name:'Shift Analysis',exact:true}).click();
+  await expect(page.locator('.event-table tbody tr.primary-stat')).toContainText('Lap 2');
+  await page.getByRole('button',{name:'Video',exact:true}).click();
+  await expect(page.getByRole('status',{name:'Video sync status'})).toHaveText('ready');
+  await expect(page.locator('.lap-row.selected .lap-number')).toHaveText('Lap 2');
+  await expect(page.locator('.lap-chip').nth(1)).toContainText('Reference · Lap 1');
+  await expect(page.locator('.video-telemetry-time')).toContainText('Telemetry 120.');
+  await page.getByRole('button',{name:'Telemetry',exact:true}).click();
+  await expect(page.locator('.lap-row.selected .lap-number')).toHaveText('Lap 2');
+  await expect(page.locator('.comparison-line')).toHaveCount(1);
+  await expect(page.locator('.plot-row:not([hidden])')).toHaveCount(cycle===0?1:2);
+  await page.locator('[data-plot]').first().focus();await page.keyboard.press('Home');await page.keyboard.press('ArrowRight');
+  await expect(page.locator('.readout [data-primary-value]').first()).not.toHaveText('—');
+  await expect(page.locator('.readout [data-comparison-value]').first()).not.toHaveText('—');
+  if(cycle===0){await page.getByRole('button',{name:/^Channels/}).click();await page.getByRole('checkbox',{name:/RPM/}).check();await page.keyboard.press('Escape');}
+ }
+ await page.screenshot({path:'.tools/lap-selection-navigation.png'});
+ // Unmapped footage must hold the requested lap, rather than restoring a stale frame's lap.
+ await page.locator('.lap-select').nth(2).click();
+ await page.getByRole('button',{name:'Advanced',exact:true}).click();
+ await expect(page.locator('.event-table tbody tr.primary-stat')).toContainText('Lap 3');
+ const unmappedSeeks=await page.evaluate(()=>window.seeks.length);
+ await page.getByRole('button',{name:'Video',exact:true}).click();
+ await expect(page.getByRole('status',{name:'Video sync status'})).toHaveText('unavailable');
+ await expect(page.locator('.lap-row.selected .lap-number')).toHaveText('Lap 3');
+ await expect(page.locator('.video-telemetry-time')).toHaveText('Telemetry 140.00s');
+ assert.equal(await page.evaluate(()=>window.seeks.length),unmappedSeeks,'Returning with an uncovered lap holds media without discarding selection');
+ await page.getByRole('button',{name:'Telemetry',exact:true}).click();
+ await page.getByRole('button',{name:'Clear comparison',exact:true}).click();
+ await page.locator('.lap-select').nth(3).click();
+ await page.getByRole('button',{name:'Advanced',exact:true}).click();
+ await expect(page.locator('.event-table tbody tr.primary-stat')).toContainText('Lap 4');
+ await page.getByRole('button',{name:'Video',exact:true}).click();
+ await expect(page.getByRole('status',{name:'Video sync status'})).toHaveText('ready');
+ await expect(page.locator('.lap-row.selected .lap-number')).toHaveText('Lap 4');
+ await expect(page.locator('.video-telemetry-time')).toHaveText('Telemetry 160.00s');
+ await page.getByRole('button',{name:'Telemetry',exact:true}).click();
+ await expect(page.locator('.comparison-line')).toHaveCount(0);
+ await page.setViewportSize({width:1280,height:800});await page.screenshot({path:'.tools/lap-selection-navigation-laptop.png'});await page.setViewportSize({width:1500,height:1100});
+ // Change the comparison in each workspace, without ever playing the video.
+ await page.evaluate(()=>window.comparisonEvent=true);
+ for(const [view,reference] of [['Telemetry',1],['Advanced',2],['Video',3]]){
+  await page.getByRole('button',{name:view,exact:true}).click();
+  await page.getByRole('button',{name:`Compare lap ${reference}`,exact:true}).click();
+  for(const target of ['Telemetry','Advanced','Video','Telemetry']){
+   await page.getByRole('button',{name:target,exact:true}).click();
+   await expect(page.locator('.lap-row.compared .lap-number')).toHaveText(`Lap ${reference}`);
+   await expect(page.getByLabel('Comparison lap',{exact:true})).toHaveValue(`lap${reference}`);
+   await expect(page.locator('.comparison-line')).toHaveCount(1);
+   await page.locator('[data-plot]').first().focus();await page.keyboard.press('Home');await page.keyboard.press('ArrowRight');
+   await expect(page.locator('.readout [data-comparison-value]').first()).not.toHaveText('—');
+   if(target==='Advanced')await expect(page.locator('.event-table tbody tr.comparison-stat')).toContainText(`Lap ${reference}`);
+  }
+ }
+ // Decimal recording/video offsets must not turn a seek to lap 8 into lap 7.
+ await page.evaluate(()=>localStorage.setItem('video-fixture-mode','boundary'));
+ await page.reload();
+ for(let cycle=0;cycle<3;cycle++){
+  await expect(page.locator('.lap-row.selected .lap-number')).toHaveText('Lap 8');
+  await page.getByRole('button',{name:'Advanced',exact:true}).click();
+  await page.getByRole('button',{name:'Video',exact:true}).click();
+  await expect(page.getByRole('status',{name:'Video sync status'})).toHaveText('ready');
+  await page.evaluate(()=>window.advance(document.querySelector('video').currentTime));
+  await page.waitForTimeout(150); // Observe multiple controller ticks after seek completion.
+  await expect(page.locator('.lap-row.selected .lap-number')).toHaveText('Lap 8');
+  await expect(page.locator('.lap-row.compared .lap-number')).toHaveText('Lap 7');
+  await expect(page.locator('.video-telemetry-time')).toHaveText('Telemetry 206.53s');
+  await page.getByRole('button',{name:'Telemetry',exact:true}).click();
+  await expect(page.locator('.comparison-line')).toHaveCount(1);
+ }
+ await page.evaluate(()=>localStorage.removeItem('video-fixture-mode'));
+ // Keep the existing sync scenarios independent of the navigation regression.
+ await page.goto(`${server.resolvedUrls.local[0]}tests/video-integration.html`);await expect(page.getByRole('button',{name:'Play',exact:true})).toBeEnabled();
  // An attached source belongs only to Video; Advanced is always its dedicated workspace.
  await page.getByRole('button',{name:'Advanced',exact:true}).click();
  await expect(page.locator('.advanced-workspace')).toBeVisible();
@@ -118,10 +207,10 @@ try{
  await expect(page.getByText('Aligning telemetry…',{exact:true})).toBeHidden();
  await page.evaluate(()=>window.retainedVideo=document.querySelector('video'));
  await page.evaluate(()=>{window.delayAnalysis=true;window.advance(22);});
- await expect(page.locator('.lap-row.selected')).toContainText('02');
+ await expect(page.locator('.lap-row.selected .lap-number')).toHaveText('Lap 2');
  await expect(page.getByText('Aligning telemetry…',{exact:true})).toBeVisible();
  assert(await page.evaluate(()=>window.retainedVideo===document.querySelector('video')),'analysis loading retains media element');
- await page.evaluate(()=>window.advance(45));await expect(page.locator('.lap-row.selected')).toContainText('04');
+ await page.evaluate(()=>window.advance(45));await expect(page.locator('.lap-row.selected .lap-number')).toHaveText('Lap 4');
  await expect.poll(()=>page.evaluate(()=>window.pending.length)).toBe(2);
  assert.deepEqual(await page.evaluate(()=>window.pending.map(request=>request.args.primaryId)),['lap2','lap4'],'Only the intended new lap analyses are deferred');
  await page.evaluate(()=>{window.pending[1].resolve();});
@@ -192,7 +281,7 @@ try{
  // Playback changes the readouts, GPS and highlighted corner without changing graph zoom or persisting ticks.
  await page.evaluate(()=>{window.duration=60;document.querySelector('video').dispatchEvent(new Event('durationchange'));});await page.locator('.lap-select').nth(0).click();await expect(page.getByRole('status',{name:'Video sync status'})).toContainText('ready');await page.getByRole('button',{name:'Focus Corner 1',exact:true}).focus();await page.keyboard.press('Enter');await expect(page.getByRole('status',{name:'Video sync status'})).toContainText('ready');await page.getByRole('button',{name:'Play',exact:true}).click();const savesBeforeTicks=await page.evaluate(()=>window.saves.length),zoomBeforeTicks=await page.evaluate(()=>window.saves.at(-1).zoom);await page.evaluate(()=>window.advance(16));await expect(page.getByRole('button',{name:'Focus Corner 2',exact:true})).toHaveAttribute('aria-pressed','true');await expect(page.locator('.track-position-control output')).toContainText('16.');await expect(page.locator('.readout [data-primary-value]').nth(1)).toHaveText(/62\d\d/);assert.equal(await page.evaluate(()=>window.saves.length),savesBeforeTicks,'playing clock ticks are not persisted');assert.deepEqual(await page.evaluate(()=>window.saves.at(-1).zoom),zoomBeforeTicks,'playback corner highlighting does not zoom');await page.getByRole('button',{name:'Pause',exact:true}).click();await expect.poll(()=>page.evaluate(()=>window.saves.at(-1).video.preferences.pausedVideoTime)).toBe(16);assert.equal(await page.evaluate(()=>window.saves.at(-1).video.version),1,'cache/IPC serialize raw video state');await expect(page.getByText(/Focus: Corner 1/)).toBeVisible();await page.getByRole('button',{name:'Telemetry',exact:true}).click();await expect(page.getByRole('button',{name:'Focus Corner 2',exact:true})).toHaveAttribute('aria-pressed','false');await page.getByRole('button',{name:'Video',exact:true}).click();await expect(page.getByRole('button',{name:'Play',exact:true})).toBeEnabled();
  // Late completion from the disposed session cannot publish against the new session.
- await page.evaluate(()=>{window.duration=60;document.querySelector('video').dispatchEvent(new Event('durationchange'));});await expect(page.getByRole('status',{name:'Video sync status'})).toContainText('ready');await page.evaluate(()=>window.delaySeek=true);await page.locator('.lap-select').nth(1).click();await expect(page.getByRole('status',{name:'Video sync status'})).toContainText('seeking');await page.evaluate(()=>{window.oldFinish=window.finishSeek;window.oldVideo=document.querySelector('video');window.delaySeek=false;});await page.getByRole('button',{name:/Second circuit Test/}).click();await expect(page.getByRole('heading',{name:'Second circuit',exact:true})).toBeVisible();await expect(page.getByRole('button',{name:'Play',exact:true})).toBeEnabled();await expect(page.locator('.track-position-control output')).toContainText('0.0 m');await page.evaluate(()=>window.oldFinish());await expect(page.locator('.track-position-control output')).toContainText('0.0 m');assert(await page.evaluate(()=>window.oldVideo!==document.querySelector('video')));await expect(page.locator('.lap-row.selected')).toContainText('01');
+ await page.evaluate(()=>{window.duration=60;document.querySelector('video').dispatchEvent(new Event('durationchange'));});await expect(page.getByRole('status',{name:'Video sync status'})).toContainText('ready');await page.evaluate(()=>window.delaySeek=true);await page.locator('.lap-select').nth(1).click();await expect(page.getByRole('status',{name:'Video sync status'})).toContainText('seeking');await page.evaluate(()=>{window.oldFinish=window.finishSeek;window.oldVideo=document.querySelector('video');window.delaySeek=false;});await page.getByRole('button',{name:/Second circuit Test/}).click();await expect(page.getByRole('heading',{name:'Second circuit',exact:true})).toBeVisible();await expect(page.getByRole('button',{name:'Play',exact:true})).toBeEnabled();await expect(page.locator('.track-position-control output')).toContainText('0.0 m');await page.evaluate(()=>window.oldFinish());await expect(page.locator('.track-position-control output')).toContainText('0.0 m');assert(await page.evaluate(()=>window.oldVideo!==document.querySelector('video')));await expect(page.locator('.lap-row.selected .lap-number')).toHaveText('Lap 1');
  // No attached source: both dedicated tabs still render and share saved analysis mode.
  await page.evaluate(()=>localStorage.setItem('video-fixture-mode','unattached'));await page.reload();
  await page.getByRole('button',{name:'Advanced',exact:true}).click();await expect(page.locator('.advanced-workspace')).toBeVisible();await expect(page.locator('.video-workspace')).toHaveCount(0);
@@ -232,10 +321,10 @@ try{
  await page.evaluate(()=>{window.delaySeek=true;});await page.locator('.lap-select').nth(1).click();await expect(page.getByRole('status',{name:'Video sync status'})).toHaveText('seeking');
  await page.evaluate(()=>{window.oldFinish=window.finishSeek;window.oldVideo=document.querySelector('video');window.delaySeek=false;});
  await page.locator('.lap-select').nth(4).click();await expect(page.getByRole('button',{name:'Play',exact:true})).toBeEnabled();
- assert.match(await page.evaluate(()=>document.querySelector('video').src),/second/);await expect(page.locator('.lap-row.selected')).toContainText('05');
- await page.evaluate(()=>window.oldFinish());await page.waitForTimeout(150);await expect(page.locator('.lap-row.selected')).toContainText('05');
+ assert.match(await page.evaluate(()=>document.querySelector('video').src),/second/);await expect(page.locator('.lap-row.selected .lap-number')).toHaveText('Lap 5');
+ await page.evaluate(()=>window.oldFinish());await page.waitForTimeout(150);await expect(page.locator('.lap-row.selected .lap-number')).toHaveText('Lap 5');
  assert(await page.evaluate(()=>window.oldVideo!==document.querySelector('video')),'Changing source disposes the old player');
- await page.getByRole('button',{name:'Play',exact:true}).click();await page.evaluate(()=>window.advance(22));await expect(page.locator('.lap-row.selected')).toContainText('06');
+ await page.getByRole('button',{name:'Play',exact:true}).click();await page.evaluate(()=>window.advance(22));await expect(page.locator('.lap-row.selected .lap-number')).toHaveText('Lap 6');
  await page.getByRole('button',{name:'Pause',exact:true}).click();await expect.poll(()=>page.evaluate(()=>window.mergedEntry.workspace.sourceVideos.second.preferences.pausedVideoTime)).toBe(22);
  assert.equal(await page.evaluate(()=>JSON.stringify([window.entry.workspace.video,window.secondEntry.workspace.video])),await page.evaluate(()=>window.originalVideos),'Merged video edits leave both original mappings untouched');
  await page.locator('.library-entry.active').getByRole('button',{name:'Session actions',exact:true}).click();await page.getByRole('menuitem',{name:'Unmerge',exact:true}).click();await expect(page.getByRole('heading',{name:'Synthetic circuit',exact:true})).toBeVisible();await expect(page.getByRole('button',{name:'Play',exact:true})).toBeEnabled();

@@ -28,6 +28,11 @@ export function SegmentEditor({segments,laps,duration,selectedSegmentId,onSelect
   const numberField=(key:string,label:string)=><label>{label}<input type="number" step="any" value={draft[key]??''} onChange={event=>setDraft({...draft,[key]:event.target.value})}/></label>;
   return <section className="video-segment-editor" aria-label="Edited footage segments">
     <div className="video-step-label"><b>02</b> Refine the mapping</div>
+    <p className="video-refine-help">Adjust the sync to keep video aligned with telemetry.</p>
+    <div className="video-actions video-nudge-actions">
+      <button type="button" aria-label="Nudge −0.10 s correction" disabled={!selected} onClick={()=>selected&&apply(segments.map(segment=>segment.id===selected.id?{...segment,correctionSeconds:Number((segment.correctionSeconds-.1).toFixed(6))}:segment))}><span aria-hidden="true">←</span> <span className="video-nudge-word">Nudge </span>−0.10 s</button>
+      <button type="button" aria-label="Nudge +0.10 s correction" disabled={!selected} onClick={()=>selected&&apply(segments.map(segment=>segment.id===selected.id?{...segment,correctionSeconds:Number((segment.correctionSeconds+.1).toFixed(6))}:segment))}><span aria-hidden="true">→</span> <span className="video-nudge-word">Nudge </span>+0.10 s</button>
+    </div>
     <div className="video-section-title"><h3>Segments</h3><small>Each cut has its own alignment</small></div>
     <div className="video-segment-tabs" aria-label="Select segment">
       {segments.map((segment,index)=><button key={segment.id} aria-pressed={segment.id===selectedSegmentId} onClick={()=>onSelect(segment.id)}>Segment {index+1} <span className="mono">{segment.videoStart.toFixed(1)}–{segment.videoEnd.toFixed(1)}s</span></button>)}
@@ -46,8 +51,6 @@ export function SegmentEditor({segments,laps,duration,selectedSegmentId,onSelect
         </div>
         <p className="video-note">Positive correction maps this frame to a later telemetry time. Trim an existing segment before adding a cut; the anchor must stay inside its bounds.</p>
         <div className="video-actions"><button type="submit" className="video-primary">Apply segment edits</button>
-          <button type="button" aria-label="Correction −0.1 s" onClick={()=>apply(segments.map(segment=>segment.id===selected.id?{...segment,correctionSeconds:Number((segment.correctionSeconds-.1).toFixed(6))}:segment))}>−0.1 s</button>
-          <button type="button" aria-label="Correction +0.1 s" onClick={()=>apply(segments.map(segment=>segment.id===selected.id?{...segment,correctionSeconds:Number((segment.correctionSeconds+.1).toFixed(6))}:segment))}>+0.1 s</button>
           <button type="button" className="video-remove" onClick={()=>apply(segments.filter(segment=>segment.id!==selected.id))}>Remove selected segment</button>
         </div>
       </form>

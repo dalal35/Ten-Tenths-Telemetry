@@ -5,6 +5,8 @@ describe('responsive analysis layout',()=>{
   expect(analysisPanelHeight(900,500)).toBe(240);
   expect(analysisPanelHeight(900,1440)).toBe(900);
   expect(analysisPanelHeight(240,500)).toBe(240);
+  expect(analysisPanelHeight(900,928,510)).toBe(418);
+  expect(analysisPanelHeight(900,700,510)).toBe(240);
  });
  it('gives traction equal pixels per G on wide and narrow canvases',()=>{
   for(const [width,height] of [[1400,420],[320,700]]){

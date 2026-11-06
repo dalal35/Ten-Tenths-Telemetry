@@ -47,5 +47,8 @@ src-tauri/resources/youtube/sources/
 # Browser demo / Pages build
 dist-website/
 
+# Local browser-automation output.
+.playwright-mcp/
+
 # Ember captures are local review artifacts.
 docs/ember/screenshots/

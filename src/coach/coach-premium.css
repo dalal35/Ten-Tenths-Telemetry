@@ -183,3 +183,125 @@
  .app.premium .coach-full-lap{margin-top:20px}
  .app.premium .coach-profile-scrub{flex-direction:column;align-items:stretch;gap:8px}
 }
+/* Reference debrief: three equal-height evidence surfaces and a compact disclosure. */
+.app.premium .coach-overview{gap:0;padding:20px 24px}
+.app.premium .coach-stat{padding:0 24px;min-width:0}
+.app.premium .coach-stat:first-child{padding-left:0}
+.app.premium .coach-stat:nth-child(2),.app.premium .coach-stat:nth-child(3){border-left:1px solid var(--border)}
+.app.premium .coach-stat:nth-child(3){padding-left:24px}
+.app.premium .coach-debrief-grid{grid-template-columns:minmax(220px,.72fr) minmax(0,2.15fr);gap:16px;align-items:stretch}
+.app.premium .coach-focus-column{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:16px;align-items:stretch}
+.app.premium .coach-opportunities,.app.premium .coach-focus,.app.premium .coach-focus-column>.coach-full-lap{min-width:0;padding:20px;border:1px solid var(--glass-raised-border);border-radius:16px;background:var(--glass-raised);box-shadow:var(--glass-raised-shadow)}
+.app.premium .coach-block-heading h3,.app.premium .coach-profile-heading h3{font-size:16px;font-weight:600}
+.app.premium .coach-opportunity-list{margin-top:14px}
+.app.premium .coach-opportunity-list li{border:0;margin-bottom:8px}
+.app.premium .coach-opportunity-list button{min-height:0;padding:12px;border:1px solid var(--border);border-radius:10px;background:var(--panel);color:var(--ink)}
+.app.premium .coach-opportunity-list button.selected{border-color:var(--cyan);background:var(--raised)}
+.app.premium .coach-opportunity-list button.selected::before{display:none}
+.app.premium .coach-opportunity-rank{padding:2px 0 0}
+.app.premium .coach-opportunity-copy>span{font:400 14px/1.4 var(--font-sans);letter-spacing:0;margin-top:2px}
+.app.premium .coach-opportunity-copy>span>small{font-size:10px}
+.app.premium .coach-focus-top{margin-bottom:14px}
+.app.premium .coach-focus .coach-card-heading small{display:none}
+.app.premium .coach-focus .coach-card-heading h3{font:600 26px/1.16 var(--font-sans);letter-spacing:-.3px;margin:0}
+.app.premium .coach-focus-summary{display:block;margin:18px 0}
+.app.premium .coach-time-potential strong.mono{font:600 30px/1.15 var(--font-sans)}
+.app.premium .coach-gain-interval{display:none}
+.app.premium .coach-uncertainty{border:0;padding:0;margin-top:8px}
+.app.premium .coach-experiment{grid-template-columns:1fr;gap:14px;padding:16px;border:1px solid var(--border);border-radius:10px;background:var(--panel)}
+.app.premium .coach-action p,.app.premium .coach-verify p{margin-top:5px}
+.app.premium .coach-focus-column>.coach-full-lap{margin:0}
+.app.premium .coach-profile-heading{display:block}
+.app.premium .coach-profile-heading span{display:block;margin-top:5px}
+.app.premium .coach-profile-chart{height:190px}
+.app.premium .coach-profile-scrub{flex-direction:column;align-items:stretch}
+.app.premium .coach-profile-readout{border-radius:8px}
+.app.premium .coach-lap-intelligence{margin-top:20px;padding:0;border:1px solid var(--glass-raised-border);border-radius:16px;background:var(--glass-raised);overflow:hidden}
+.app.premium .coach-lap-intelligence>summary{display:flex;align-items:center;gap:28px;min-height:64px;padding:0 22px;color:var(--ink);list-style:none}
+.app.premium .coach-lap-intelligence>summary::-webkit-details-marker{display:none}
+.app.premium .coach-lap-intelligence>summary::after{content:'⌄';margin-left:auto;font-size:20px}
+.app.premium .coach-lap-intelligence[open]>summary::after{content:'⌃'}
+.app.premium .coach-lap-intelligence>summary strong{font-size:16px;white-space:nowrap}
+.app.premium .coach-lap-intelligence>summary span{padding-left:28px;border-left:1px solid var(--border);font-size:12px;color:var(--muted)}
+.app.premium .coach-lap-intelligence>.coach-circuit-context,.app.premium .coach-lap-intelligence>.coach-corner-review,.app.premium .coach-lap-intelligence>.coach-channel-support{margin:0 22px;padding:20px 0}
+.app.premium .coach-lap-intelligence>.coach-circuit-context>svg{max-width:320px}
+@container(max-width:850px){
+ .app.premium .coach-debrief-grid{grid-template-columns:minmax(200px,.7fr) minmax(0,1.3fr)}
+ .app.premium .coach-focus-column{grid-template-columns:minmax(0,1fr)}
+}
+@container(max-width:660px){
+ .app.premium .coach-overview{grid-template-columns:1fr 1fr;gap:16px}
+ .app.premium .coach-stat,.app.premium .coach-stat:nth-child(3){padding:0;border:0;grid-column:auto;grid-row:auto}
+ .app.premium .coach-overview>.import-button{grid-column:auto;grid-row:auto}
+ .app.premium .coach-debrief-grid{grid-template-columns:minmax(0,1fr)}
+ .app.premium .coach-opportunity-list{display:block;overflow:visible}
+ .app.premium .coach-opportunity-list button{min-height:0;grid-template-columns:24px minmax(0,1fr) 12px}
+ .app.premium .coach-opportunity-list button>span:last-child{display:block}
+ .app.premium .coach-lap-intelligence>summary span{display:none}
+ .app.premium .coach-lap-intelligence>.coach-circuit-context{display:block}
+}
+
+/* Keep the debrief and lap-intelligence entry visible at desktop heights. */
+.app.premium .coach-stat strong,.app.premium .coach-stat:nth-child(2) strong,.app.premium .coach-stat:nth-child(3)>strong{font:400 30px/1.15 var(--font-sans);letter-spacing:0}
+.app.premium .coach-profile-chart{background:transparent;box-shadow:none;border:0;height:150px}
+.app.premium .coach-profile-note{font-size:12px;line-height:1.45;margin:8px 0}
+.app.premium .coach-profile-legend{margin-top:8px}
+.app.premium .coach-profile-selection-label{margin:4px 0}
+.app.premium .coach-profile-scrub{margin:4px 0 8px;gap:4px}
+.app.premium .coach-profile-readout{padding:8px;gap:6px 12px}
+.app.premium .coach-focus .coach-why,.app.premium .coach-action p{font-size:14px;line-height:1.45}
+.app.premium .coach-focus .coach-why{margin-bottom:12px}
+.app.premium .coach-focus-summary{margin:12px 0}
+.app.premium .coach-focus .coach-uncertainty{font-size:11px;line-height:1.4;color:var(--muted);margin:5px 0 0}
+.app.premium .coach-experiment{padding:12px}
+.app.premium .coach-progress{min-height:22px;margin:0 0 10px;padding:2px 0}
+/* Coach fits one desktop screen: summary, three evidence surfaces and the intelligence row. */
+.app.premium .coach-heading{padding:0 0 8px;align-items:flex-end}
+.app.premium .coach-heading h2{font-size:var(--workspace-title,28px);line-height:1.15}
+.app.premium .coach-heading-note{margin:2px 0 0}
+.app.premium .coach-model-status{display:flex;flex-direction:column;align-items:flex-end;gap:1px;font-size:11px}
+.app.premium .coach-model-status .coach-progress{order:-1;min-height:0;margin:0;padding:0;font-size:11px;color:var(--muted)}
+.app.premium .coach-overview{padding:12px 20px}
+.app.premium .coach-stat{gap:1px}
+.app.premium .coach-stat strong,.app.premium .coach-stat:nth-child(2) strong,.app.premium .coach-stat:nth-child(3)>strong{font-size:26px}
+.app.premium .coach-debrief{margin-top:10px}
+.app.premium .coach-debrief-grid{gap:12px}
+.app.premium .coach-focus-column{gap:12px}
+.app.premium .coach-opportunities,.app.premium .coach-focus,.app.premium .coach-focus-column>.coach-full-lap{padding:14px 16px}
+.app.premium .coach-opportunity-list{margin-top:8px}
+.app.premium .coach-opportunity-list li{margin-bottom:6px}
+.app.premium .coach-opportunity-list button{padding:8px 10px}
+.app.premium .coach-opportunity-copy>span>small{display:inline;margin-left:6px;white-space:nowrap}
+.app.premium .coach-focus-top{margin-bottom:8px}
+.app.premium .coach-focus .coach-card-heading h3{font-size:22px}
+.app.premium .coach-time-potential strong.mono{font-size:26px}
+.app.premium .coach-focus-summary{margin:6px 0 8px}
+.app.premium .coach-focus .coach-why{margin-bottom:8px;font-size:13px}
+.app.premium .coach-action p{font-size:13px}
+.app.premium .coach-experiment{padding:10px 12px}
+.app.premium .coach-profile-note{margin:4px 0;font-size:11px;line-height:1.4}
+.app.premium .coach-profile-heading span{margin-top:2px}
+.app.premium .coach-profile-legend{margin-top:4px}
+.app.premium .coach-profile-selection-label{margin:2px 0 0;font-size:11px}
+.app.premium .coach-profile-chart{height:clamp(128px,calc(100cqh - 560px),190px)}
+.app.premium .coach-profile-scrub{margin:2px 0 6px}
+.app.premium .coach-profile-readout{padding:6px 8px;gap:4px 10px;font-size:11px}
+.app.premium .coach-lap-intelligence{margin-top:10px}
+.app.premium .coach-lap-intelligence>summary{min-height:46px}
+@container workspace-view (min-width:640px){
+ .app.premium .coach-opportunities,.app.premium .coach-focus,.app.premium .coach-focus-column>.coach-full-lap{height:max(300px,calc(100cqh - 258px));max-height:none;overflow:auto;overscroll-behavior:contain}
+}
+.app.premium .coach-lap-intelligence>summary::after{margin-top:-10px;line-height:1}
+.app.premium .coach-block-heading{flex-wrap:nowrap;gap:8px}
+.app.premium .coach-block-heading>span{white-space:nowrap}
+.app.premium .coach-profile-legend{flex-wrap:wrap}
+.app.premium .coach-opportunity-copy>span{white-space:nowrap}
+@container (max-width:1050px){
+ .app.premium .coach-opportunities .coach-block-heading>span{display:none}
+ .app.premium .coach-opportunity-copy>span{white-space:normal}
+ .app.premium .coach-opportunity-copy>span>small:first-of-type{margin-left:0}
+ .app.premium .coach-opportunity-copy>span>small:last-of-type{display:block;margin-left:0}
+}
+@container workspace-view (height < 700px){
+ .app.premium .coach-profile-note{display:none}
+}

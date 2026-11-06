@@ -1022,7 +1022,8 @@ mod recording_tests {
                     gap >= opportunity.start_meters.unwrap()
                         && gap <= opportunity.end_meters.unwrap()
                 );
-                assert!(opportunity.action.contains("Review the speed trace near"));
+                assert!(opportunity.action.contains("Biggest gap:"));
+                assert!(opportunity.action.contains("compared with the simulated lap"));
             }
             println!(
                 "PHYSICS {file}: {}",

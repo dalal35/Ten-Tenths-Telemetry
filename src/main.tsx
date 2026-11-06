@@ -12,5 +12,6 @@ import './coach/coach-premium.css';
 import './shell.css';
 import './telemetry-reference.css';
 import './glass-materials.css';
+import './motion-premium.css';
 initializeGlassMaterials();
 ReactDOM.createRoot(document.getElementById('root')!).render(<React.StrictMode><GlassDefinitions/><MotionConfig reducedMotion="user" transition={motionTokens.spring}><App premium /></MotionConfig></React.StrictMode>);

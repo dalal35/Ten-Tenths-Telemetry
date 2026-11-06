@@ -95,11 +95,11 @@ try {
   await frame.getByRole('slider',{name:'Synchronized telemetry cursor'}).focus();
   await frame.keyboard.press('ArrowRight');
   await expect(frame.locator('.primary-marker circle')).toHaveCount(1);
-  await frame.getByRole('button',{name:'Compare Turn 1',exact:true}).click();
-  await expect(frame.getByRole('button',{name:'Compare Turn 1',exact:true})).toHaveAttribute('aria-pressed','true');
+  await frame.locator('.segment-card',{hasText:'Turn 1'}).first().click();
+  await expect(frame.locator('.segment-card',{hasText:'Turn 1'}).first()).toHaveAttribute('aria-pressed','true');
 
   await expect(frame.locator('.track .primary-line')).toHaveAttribute('d',/.+/);
-  await expect(frame.locator('.lap-summary')).toContainText('COMPARISON');
+  await expect(frame.locator('.lap-summary')).toContainText('Reference');
   await frame.locator('body').screenshot({path:'test-results/website-telemetry.png'});
   await frame.locator('.session-button').filter({hasText:'Afternoon'}).click();
   await expect(frame.locator('.workspace-heading')).toContainText('Afternoon');
@@ -133,9 +133,9 @@ try {
   await frame.getByRole('button',{name:'Advanced',exact:true}).click();
   await expect(frame.locator('.advanced-workspace')).toBeVisible();
   await expect(frame.locator('.analysis-statistics')).toContainText('samples');
-  await expect(frame.locator('.analysis-surface canvas')).toBeVisible();
+  await expect(frame.locator('.analysis-surface canvas:not(.analysis-cursor-layer)')).toBeVisible();
   await frame.getByRole('tab',{name:'Histograms',exact:true}).click();
-  await expect(frame.getByLabel('Distribution channel')).toBeVisible();
+  await expect(frame.getByLabel('Distribution channel',{exact:true})).toBeVisible();
   await frame.getByRole('tab',{name:'Scatter Plot',exact:true}).click();
   await expect(frame.getByLabel('X channel',{exact:true})).toBeVisible();
   await frame.getByRole('button',{name:'Video',exact:true}).click();

@@ -5,6 +5,7 @@ import {authorizeLocalVideo,pickLocalVideo,isNative,downloadYouTubeVideo,getYouT
 import type {YouTubeAsset,YouTubeCacheStatus,YouTubeDownloadStatus} from '../bridge';
 import type {Analysis,Axis,Session} from '../types';
 import {LayoutGroup,motion,useReducedMotion} from 'motion/react';
+import {motionTokens} from '../motion';
 import {VideoInstruments} from './VideoInstruments';
 import './video-premium.css';
 import {lapCoverage,lapMarkers,parseYouTubeUrl,telemetryToVideo,validateSegments} from './model';
@@ -38,6 +39,8 @@ export interface VideoWorkspaceProps {
 const idle:PlayerSnapshot={time:0,duration:null,rate:1,state:'loading',observedAtMs:0,seeking:false};
 const message=(error:unknown)=>error instanceof Error?error.message:String(error);
 const clampHeight=(height:number)=>Math.max(240,Math.min(900,height));
+// The saved default means "never resized": the stylesheet fits the player to the workspace.
+const DEFAULT_PANEL_HEIGHT=400;
 
 export function VideoWorkspace(props:VideoWorkspaceProps) {
   const {session,state,availability,telemetryTime,onChange,onSeekTelemetry,onSeekVideo,active=true}=props;
@@ -249,8 +252,8 @@ export function VideoWorkspace(props:VideoWorkspaceProps) {
       else if(['ArrowLeft','ArrowRight'].includes(event.key)){event.preventDefault();seekRelative(event.key==='ArrowLeft'?-5:5);}
     }} aria-label={active?"Video synchronization":undefined}>
     <div className="video-surfaces" hidden={!active}>
-    <header className="video-studio-heading"><div><span className="video-kicker">RACE CONTROL / ONBOARD</span><h2>Onboard <span>analysis</span></h2><p>{session.track||session.name} · Manual telemetry alignment</p></div>
-      <LayoutGroup id={`video-view-${session.id}`}><div className="video-view-switch" aria-label="Video layout">{[false,true].map(value=><button key={String(value)} aria-pressed={focus===value} onClick={()=>setFocus(value)}>{focus===value&&<motion.span className="video-view-selection" layoutId="view" transition={{duration:reduced?0:.18}}/>}<span>{value?'Focus video':'Show analysis'}</span></button>)}</div></LayoutGroup>
+    <header className="video-studio-heading"><div><span className="video-kicker">RACE CONTROL / ONBOARD</span><h2>Onboard Analysis</h2></div>
+      <LayoutGroup id={`video-view-${session.id}`}><div className="video-view-switch" aria-label="Video layout">{[false,true].map(value=><button key={String(value)} aria-pressed={focus===value} onClick={()=>setFocus(value)}>{focus===value&&<motion.span className="video-view-selection" layoutId="view" transition={reduced?{duration:0}:motionTokens.spring}/>}<span>{value?'Focus video':'Show analysis'}</span></button>)}</div></LayoutGroup>
     </header>
     <div className="video-feedback">
     {downloadStatus&&<div className="video-download-status" role="status"><span>{downloadStatus.phase==='complete'?'Download ready':downloadStatus.phase==='error'?downloadStatus.error:downloadStatus.phase==='cancelled'?'Download cancelled':`${downloadStatus.phase[0].toUpperCase()}${downloadStatus.phase.slice(1)}${downloadStatus.downloadedBytes===null?'':` · ${(downloadStatus.downloadedBytes/1048576).toFixed(1)} MiB`}${downloadStatus.totalBytes?` / ${(downloadStatus.totalBytes/1048576).toFixed(1)} MiB`:''}${downloadStatus.speedBytesPerSecond?` · ${(downloadStatus.speedBytesPerSecond/1048576).toFixed(1)} MiB/s`:''}${downloadStatus.etaSeconds===null?'':` · ${Math.ceil(downloadStatus.etaSeconds)}s left`}`}</span>{['preparing','downloading','merging','validating'].includes(downloadStatus.phase)&&<progress aria-label="YouTube download progress" max={downloadStatus.totalBytes??undefined} value={downloadStatus.totalBytes?downloadStatus.downloadedBytes??0:undefined}/>}</div>}
@@ -261,12 +264,16 @@ export function VideoWorkspace(props:VideoWorkspaceProps) {
     {(error||sample.error||props.syncError)&&<p role="alert" className="video-error">{error||sample.error||props.syncError} {state.source?.type==='local'?'If this file cannot decode, try a supported H.264 MP4 / MOV export.':''}</p>}
 </div><div className="video-studio-grid">
     <div ref={sticky} className="video-sticky-player">
-      <div className="video-section-title video-canvas-heading"><div><span className="video-camera-index">01</span><span className="video-source-label" title={state.source?.type==='local'?state.source.path:state.source?.url}>{fileName??'Onboard footage'}</span></div><span className="video-status" role="status">{!state.source?'No footage':nativeYouTube?'Download required':usable?sample.state:'Footage unavailable'}</span></div>
+      <div className="video-section-title video-canvas-heading"><div><span className="video-camera-index">01</span><span className="video-source-label" title={state.source?.type==='local'?state.source.path:state.source?.url}>{fileName??'Onboard footage'}</span></div><span className="video-status" role="status">{!state.source?'No footage':nativeYouTube?'Download required':usable?sample.state:'Footage unavailable'}</span><button className="video-attach" disabled={busy} onClick={()=>void choose(false)}>Attach footage</button><details className="video-help"><summary aria-label="Playback notes and shortcuts" title="Playback notes and shortcuts">?</summary><div className="video-help-panel">
+      {state.source?.type==='youtube'&&<p className="video-note">{isNative?'Playing the cached copy. The original YouTube URL and verified media identity are saved.':'YouTube synchronization uses approximate asynchronous timing. Native YouTube controls remain available in the player.'}</p>}
+      {state.source?.type==='local'&&<p className="video-note">Timing follows media timestamps and manual alignment; frame accuracy is not guaranteed.</p>}
+      <p className="video-note video-shortcuts"><kbd>K</kbd> play / pause <span>·</span> <kbd>← →</kbd> seek 5s <span>·</span> <kbd>Esc</kbd> leave focus view</p>
+      </div></details></div>
 
       {!usable||needsYouTubeDownload?<div className="video-placeholder"><svg viewBox="0 0 64 48" width="64" height="48" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true"><rect x="2" y="2" width="60" height="44" rx="3"/><path d="m27 16 13 8-13 8Z"/></svg>
         <strong>{state.source?.type==='youtube'&&isNative?'Download footage for desktop playback':state.source?'Footage unavailable':'Bring your onboard footage alongside telemetry'}</strong>
         <p>{nativeYouTube?'Download this YouTube video to play an authorized local copy.':currentAvailability==='missing'?'The saved file is missing. Locate it to preserve your segments.':currentAvailability==='changed'?'The file metadata changed. Confirm that the existing mappings still apply.':currentAvailability==='error'?'The video reference could not be checked. Locate the file or replace the footage.':'Attach a local MP4 / MOV or paste a YouTube link. Files stay on your computer.'}</p>
-      </div>:<div className="video-player-space" style={{height}}><div className="video-viewport">
+      </div>:<div className="video-player-space" style={height===DEFAULT_PANEL_HEIGHT?undefined:{height}}><div className="video-viewport">
         {state.source?.type==='local'||isNative&&state.source?.type==='youtube'?<video ref={video} controls={nativeControls} playsInline preload="metadata" aria-label="Onboard video"/>:<div ref={host} className="video-youtube-host"/>}
       </div></div>}
       {usable&&!needsYouTubeDownload&&(sample.state==='loading'||sample.state==='buffering')&&<div className="video-player-message" role="status">{sample.state==='buffering'?'Buffering footage…':'Loading footage…'}</div>}
@@ -275,25 +282,21 @@ export function VideoWorkspace(props:VideoWorkspaceProps) {
         <button className="video-transport-step" aria-label="−5s Back 5 seconds" title="Back 5 seconds" disabled={!usable||!player.current||busy||nativeYouTube} onClick={()=>seekRelative(-5)}>−5s</button>
         <button className="video-play-button" disabled={!usable||!player.current||busy||nativeYouTube} onClick={togglePlayback}><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true">{sample.state==='playing'||sample.state==='buffering'?<path d="M3 2h3v12H3zm7 0h3v12h-3z"/>:<path d="m4 1 10 7-10 7z"/>}</svg>{sample.state==='playing'||sample.state==='buffering'?'Pause':'Play'}</button>
         <button className="video-transport-step" aria-label="+5s Forward 5 seconds" title="Forward 5 seconds" disabled={!usable||!player.current||busy||nativeYouTube} onClick={()=>seekRelative(5)}>+5s</button>
-        <span className="mono">Video {sample.time.toFixed(2)}s {knownDuration?`/ ${knownDuration.toFixed(2)}s`:''}</span>
+        <span className="video-times"><span className="mono">Video {sample.time.toFixed(2)}s {knownDuration?`/ ${knownDuration.toFixed(2)}s`:''}</span><span className="video-telemetry-time">Telemetry <span className="mono">{telemetryTime===null?'unavailable':`${telemetryTime.toFixed(2)}s`}</span></span></span>
         <label>Playback speed<select disabled={!usable||!player.current||busy||nativeYouTube} value={sample.rate} onChange={event=>{const rate=Number(event.target.value);void operation(adapter=>adapter.setRate(rate));}}>{(player.current?.supportedRates()??[1]).map(rate=><option key={rate} value={rate}>{rate}×</option>)}</select></label>
         <button className="video-overlay-toggle" aria-label={overlay?'Hide telemetry overlay':'Show telemetry overlay'} aria-pressed={overlay} onClick={()=>setOverlay(value=>!value)}>Telemetry</button>
         {(state.source?.type==='local'||isNative&&state.source?.type==='youtube')&&<button aria-label={nativeControls?'Hide native video controls':'Show native video controls'} aria-pressed={nativeControls} title="Volume, fullscreen and native playback controls" onClick={()=>setNativeControls(value=>!value)}>Player controls</button>}
-        <span className="video-telemetry-time">Telemetry <span className="mono">{telemetryTime===null?'unavailable':`${telemetryTime.toFixed(2)}s`}</span></span>
       </div>
 
-      {state.source?.type==='youtube'&&<p className="video-note">{isNative?'Playing the cached copy. The original YouTube URL and verified media identity are saved.':'YouTube synchronization uses approximate asynchronous timing. Native YouTube controls remain available in the player.'}</p>}
-      {state.source?.type==='local'&&<p className="video-note">Timing follows media timestamps and manual alignment; frame accuracy is not guaranteed.</p>}
-      <p className="video-note video-shortcuts"><kbd>K</kbd> play / pause <span>·</span> <kbd>← →</kbd> seek 5s <span>·</span> <kbd>Esc</kbd> leave focus view</p>
       <div role="separator" tabIndex={0} aria-label="Resize video panel" aria-orientation="horizontal" aria-valuenow={height} aria-valuemin={240} aria-valuemax={900}
         className="video-resize" onKeyDown={event=>{if(['ArrowUp','ArrowDown','Home','End'].includes(event.key)){event.preventDefault();resize(event.key==='Home'?240:event.key==='End'?900:height+(event.key==='ArrowDown'?20:-20),true);}}}
-        onPointerDown={event=>{event.currentTarget.setPointerCapture(event.pointerId);event.currentTarget.dataset.startY=String(event.clientY);event.currentTarget.dataset.startHeight=String(height);}}
+        onPointerDown={event=>{event.currentTarget.setPointerCapture(event.pointerId);event.currentTarget.dataset.startY=String(event.clientY);event.currentTarget.dataset.startHeight=String(event.currentTarget.parentElement?.querySelector('.video-player-space')?.clientHeight||height);}}
         onPointerMove={event=>{if(event.currentTarget.hasPointerCapture(event.pointerId))resize(Number(event.currentTarget.dataset.startHeight)+event.clientY-Number(event.currentTarget.dataset.startY),false);}}
         onPointerUp={event=>{if(event.currentTarget.hasPointerCapture(event.pointerId)){event.currentTarget.releasePointerCapture(event.pointerId);resize(height,true);}}}><span/></div>
     </div>
     <VideoTimeline segments={state.segments} markers={markers} duration={knownDuration} time={sample.time} onSeekVideo={onSeekVideo}/>
     <aside className="video-sync-inspector" aria-label="Manual synchronization inspector">
-    <div className="video-inspector-heading"><span className="video-kicker">ALIGNMENT DESK</span><h3>Connect the crossing.</h3><div className="video-inspector-actions"><span className="video-manual-badge">Manual sync</span><button disabled={busy} onClick={()=>void choose(false)}>Attach footage</button></div></div>
+    <div className="video-inspector-heading"><h3>Manual alignment</h3><p>Sync the video with your telemetry.</p></div>
     <div className="video-anchor-controls"><div className="video-step-label"><b>01</b> Set your anchor</div>
       <p>Pause on the start/finish crossing, choose the matching recorded lap, then sync.</p>
       <div className="video-actions"><label>Anchor lap<select aria-label="Anchor lap" value={anchorLapId} onChange={event=>setAnchorLapId(event.target.value)}>{session.laps.map(lap=><option key={lap.id} value={lap.id}>Lap {lap.number} · start {lap.start.toFixed(2)}s</option>)}</select></label>
@@ -306,8 +309,8 @@ export function VideoWorkspace(props:VideoWorkspaceProps) {
 
     {reverse.kind==='ambiguous'&&<div className="video-confirm"><p>Repeated footage: choose a segment to seek.</p><div className="video-actions">{reverse.segmentIds.map(id=><button key={id} onClick={()=>{change({...state,selectedSegmentId:id});onSeekTelemetry(telemetryTime!,id);}}>Use segment {state.segments.findIndex(segment=>segment.id===id)+1}</button>)}</div></div>}
     {state.segments.length>0&&reverse.kind==='unavailable'&&<p className="video-note">Footage unavailable at this telemetry time.</p>}
-    <div className="video-coverage" role="region" aria-label="Recorded lap coverage" tabIndex={0}>{session.laps.map(lap=><span key={lap.id} data-coverage={coverage[lap.id]}>Lap {lap.number} · {coverage[lap.id]==='none'?'no':coverage[lap.id]} coverage</span>)}</div>
     <SegmentEditor segments={state.segments} laps={session.laps} duration={knownDuration} selectedSegmentId={state.selectedSegmentId} onSelect={id=>change({...state,selectedSegmentId:id})} onChange={segments=>saveSegments(segments)}/>
+    <div className="video-coverage" role="region" aria-label="Recorded lap coverage" tabIndex={0}>{session.laps.map(lap=><span key={lap.id} data-coverage={coverage[lap.id]}>Lap {lap.number} · {coverage[lap.id]==='none'?'no':coverage[lap.id]} coverage</span>)}</div>
     <div className="video-media-heading"><span className="video-step-label"><b>03</b> Media &amp; storage</span><small>Local files stay on this computer</small></div>
     <div className="video-source-controls">
       <button disabled={busy} onClick={()=>void choose(false)}>{state.source?'Replace footage':'Attach MP4 / MOV'}</button>

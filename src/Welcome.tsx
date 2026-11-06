@@ -12,8 +12,7 @@ export default function Welcome({onImport,busy,hasLibrary}:{onImport:()=>void;bu
  return <section className="launch-workspace" aria-labelledby="launch-title">
   <motion.div className="launch-intro" initial={reduced?false:{opacity:0,y:8}} animate={{opacity:1,y:0}} transition={{duration:reduced?0:.35}}>
    <div className="launch-kicker"><span aria-hidden="true"/> Ten Tenths Telemetry</div>
-   {/* React Bits BlurText's soft-focus reveal, limited to one phrase and disabled for reduced motion. */}
-   <h1 id="launch-title">Every lap.<br/>A little <motion.em initial={reduced?false:{opacity:0,filter:'blur(4px)'}} animate={{opacity:1,filter:'blur(0px)'}} transition={{duration:reduced?0:.4,delay:reduced?0:.05}}>closer.</motion.em></h1>
+   <h1 id="launch-title">Every lap.<br/>A little <motion.em initial={reduced?false:{opacity:0}} animate={{opacity:1}} transition={{duration:reduced?0:.4,delay:reduced?0:.05}}>closer.</motion.em></h1>
    <p className="launch-lead">Your line. Your inputs. Your next tenth.<br/>Bring the whole lap into focus.</p>
    <div className="launch-import">
     <div className="launch-import-heading"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h9l5 5v13H5zM14 3v6h5M12 17v-6m-3 3 3-3 3 3"/></svg><div><h2>{hasLibrary?'Continue your analysis':'Start with your first recording'}</h2><p>{hasLibrary?'Choose a session in the explorer or import another recording.':'Choose one recording, or bring in a whole day at the circuit.'}</p></div></div>

@@ -6,6 +6,8 @@ import {readFileSync,mkdirSync} from 'node:fs';
 import {dirname,basename,join} from 'node:path';
 import assert from 'node:assert/strict';
 
+// Coaching text keeps original units; the UI presents speeds in mph.
+const displayedSpeed=text=>text.replace(/(-?\d+(?:\.\d+)?)\s*m\/s(?![²\w^])/g,(_,value)=>`${(Number(value)*2.2369362921).toFixed(1)} mph`);
 const fixture=process.env.COACH_UI_DATA;
 assert(fixture,'Set COACH_UI_DATA to a cached coach_check JSON generated from a local recording.');
 const data=JSON.parse(readFileSync(fixture,'utf8'));
@@ -77,7 +79,7 @@ try{
  await expect(page.locator('.coach-focus')).toContainText(expected[1].label);
  await page.locator('.coach-focus details > summary').click();
  await expect(page.locator('.coach-focus details table')).toBeVisible();
- await expect(page.locator('.coach-focus details')).toContainText(expected[1].observation);
+ await expect(page.locator('.coach-focus details')).toContainText(displayedSpeed(expected[1].observation));
  await page.screenshot({path:`${prefix}-detail.png`});
  await page.locator('.coach-focus .coach-evidence-link').first().click();
  await expect(page.getByRole('button',{name:'Telemetry',exact:true})).toHaveClass(/active/);
@@ -99,6 +101,7 @@ try{
  }
  const target=data.report.sectionAssessments.find(section=>section.sectionId!==expected[1].sectionId&&section.endTime>section.startTime);
  assert(target,'A distinct measured section is required');
+ await page.locator('.coach-lap-intelligence>summary').click();
  const sections=page.locator('.coach-section-ribbon button');
  const sectionIndex=data.report.sectionAssessments.indexOf(target);
  await sections.nth(sectionIndex).click();
