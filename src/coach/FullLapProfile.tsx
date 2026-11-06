@@ -41,7 +41,7 @@ function FullLapProfile({diagnostics,profile,selectedRange,onSelectSection,inter
  },[drawable,profile,selectedRange?.startMeters,selectedRange?.endMeters]);
  return <section className="coach-full-lap" aria-label="Full-lap physics model">
   <div className="coach-profile-heading"><h3>Actual versus optimized speed</h3><span>{(diagnostics.coverageFraction*100).toFixed(1)}% simulation coverage · {diagnostics.coveredMeters.toFixed(0)} / {diagnostics.totalMeters.toFixed(0)} m</span></div>
-  <p className="coach-profile-note">Deterministic physics scenarios · conditional capacity, with calibration uncertainty. {interactive?'Numerical estimates come from the solver; local AI explanations are optional.':'Gemma interprets the results; numerical estimates come from the solver.'}</p>
+  <p className="coach-profile-note">Simulated from your laps, with calibration uncertainty. {interactive?'The numbers come from the simulation; local AI explanations are optional.':'Gemma explains the results; the numbers come from the simulation.'}</p>
   {drawable?<>
    <div className="coach-profile-legend"><span className="actual">Actual fastest lap</span><span className="conservative">Conservative</span><span className="nominal">Nominal</span></div>
    {selection&&<p className="coach-profile-selection-label">Selected: {selection.label} · {selection.start.toFixed(0)}–{selection.end.toFixed(0)} m</p>}

@@ -105,7 +105,7 @@ try{
  for(const card of await page.locator('.coach-card').all()){
   const timeRow=card.locator('.coach-time-potential');
   await expect(timeRow).toBeVisible();
-  assert(/Demonstrated opportunity|Engineering hypothesis|Scenario estimate:|Gain not yet quantifiable/.test(await timeRow.innerText()),'Every suggestion identifies its estimate type or explains missing quantification');
+  assert(/Demonstrated opportunity|Simulated ·|Scenario estimate:|Gain not yet quantifiable/.test(await timeRow.innerText()),'Every suggestion identifies its estimate type or explains missing quantification');
   if((await timeRow.innerText()).includes('Scenario estimate:')){
    await expect(timeRow).toContainText('Hypothetical');
    assert(!/Scenario estimate: 0\.000(?:–0\.000)? s/.test(await timeRow.innerText()),'Small positive scenarios must remain visible');

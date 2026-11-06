@@ -1,3 +1,4 @@
+import {displaySessionName,recordingLabel} from './sessionNames';
 import {useEffect,useRef,useState} from 'react';
 import {motion,useIsPresent,useReducedMotion} from 'motion/react';
 import {motionTokens} from './motion';
@@ -15,7 +16,7 @@ export default function SessionMerge({preview,entries,busy,error,onConfirm,onCan
     <p className="library-dialog-intro">Combine recordings into one session, with laps ordered oldest first. Unmerge any time to show them separately again.</p>
     <div className="merge-overview"><span><strong>{preview.sources.length}</strong> recordings</span><span><strong>{preview.laps.length}</strong> laps</span><span><strong>{preview.day}</strong> recording day</span></div>
     <div className="merge-source-heading">RECORDINGS TO COMBINE</div>
-    <ul className="merge-source-list">{preview.sources.map((source,index)=>{const entry=entries.find(e=>e.id===source.sessionId);return <li key={source.sessionId}><span className="merge-source-index">{String(index+1).padStart(2,'0')}</span><span><strong>{entry?.name||entry?.source.split(/[\\/]/).pop()||source.sessionId}</strong><small>{entry?.source.split(/[\\/]/).pop()||'Combined session'}{entry?` · ${entry.lapCount} laps`:''}</small></span></li>;})}</ul>
+    <ul className="merge-source-list">{preview.sources.map((source,index)=>{const entry=entries.find(e=>e.id===source.sessionId);return <li key={source.sessionId}><span className="merge-source-index">{String(index+1).padStart(2,'0')}</span><span><strong>{entry?displaySessionName(entry.name)||recordingLabel(entry):source.sessionId}</strong><small>{entry?recordingLabel(entry):'Combined session'}{entry?` · ${entry.lapCount} laps`:''}</small></span></li>;})}</ul>
     <p className="merge-preserved">Original files and saved workspaces stay intact.</p>
     {preview.warnings.length>0&&<><h3>Review recording differences</h3><ul className="merge-warnings">{preview.warnings.map(w=><li key={w}>{w}</li>)}</ul><label className="merge-ack"><input type="checkbox" checked={acknowledged} disabled={busy} onChange={e=>setAcknowledged(e.target.checked)}/> I have reviewed these warnings</label></>}
     {error&&<p role="alert" className="merge-error">{error} Cancel and review the sources again before retrying.</p>}

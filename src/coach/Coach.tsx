@@ -11,7 +11,7 @@ import {displaySpeedUnit,speedFactor} from '../speedDisplay';
 import {formatTime} from '../telemetry';
 import {lapDisplayNumber} from '../merging';
 import {CoachQueue,CoachRequests} from './requests';
-import {cardCoaching,visibleExplanations,rangeSeconds,supportedGain,supportedModel,supportedRange} from './presentation';
+import {confidenceLabel,cardCoaching,visibleExplanations,rangeSeconds,supportedGain,supportedModel,supportedRange} from './presentation';
 import {distinctFindings,prioritizeFindings} from './target';
 import TimePotential from './TimePotential';
 import FullLapProfile from './FullLapProfile';
@@ -55,7 +55,7 @@ export default function Coach({session,contentVersion,revision,active,onInspect,
   <form className="coach-overview" aria-busy={running} onSubmit={e=>{e.preventDefault();void run(!!result);}}>
    <div className="coach-stat"><small>FASTEST VALID LAP</small><strong className="mono">{fastest==null?'—':formatTime(fastest)}</strong>{report&&<small>{lapLabel(report.bestLapId)}</small>}</div>
    <div className="coach-stat"><small>{premium?'RECORDED COMPOSITE':'RECORDED THEORETICAL BEST'}</small><strong className="mono">{report?.theoreticalBestSeconds==null?'—':formatTime(report.theoreticalBestSeconds)}</strong><small>Compatible recorded sections</small></div>
-   <div className="coach-stat"><small>MODELED LAP-TIME RANGE</small><strong className="mono">{report?.fullLap?.modeledLapSeconds?`${formatTime(report.fullLap.modeledLapSeconds.lowerSeconds)}–${formatTime(report.fullLap.modeledLapSeconds.upperSeconds)}`:'Not yet quantifiable'}</strong><small>{premium?'Conditional physics estimate':'Deterministic physics · conditional estimate'}</small>{report?.improvementPotential&&<small>{premium?'Estimated gain':'ESTIMATED IMPROVEMENT'}: {rangeSeconds(report.improvementPotential)} s</small>}{report?.fullLap?.modeledLapSeconds&&report.fullLap.modeledLapSeconds.upperSeconds>report.bestLapSeconds&&<small>Conservative scenario is slower · no minimum gain established</small>}</div>
+   <div className="coach-stat"><small>MODELED LAP-TIME RANGE</small><strong className="mono">{report?.fullLap?.modeledLapSeconds?`${formatTime(report.fullLap.modeledLapSeconds.lowerSeconds)}–${formatTime(report.fullLap.modeledLapSeconds.upperSeconds)}`:'Not yet quantifiable'}</strong><small>{premium?'Simulated from your laps':'Simulated from your laps'}</small>{report?.improvementPotential&&<small>{premium?'Estimated gain':'ESTIMATED IMPROVEMENT'}: {rangeSeconds(report.improvementPotential)} s</small>}{report?.fullLap?.modeledLapSeconds&&report.fullLap.modeledLapSeconds.upperSeconds>report.bestLapSeconds&&<small>Conservative scenario is slower · no minimum gain established</small>}</div>
    <button type="submit" className="import-button" disabled={!termsReady||running}>Analyze</button>
    {running&&<button type="button" onClick={cancel}>Cancel analysis</button>}
   </form>
@@ -69,7 +69,7 @@ export default function Coach({session,contentVersion,revision,active,onInspect,
    {!findings.length&&<p className="coach-empty">No supported opportunity or meaningful signal was identified in the available channels. Review advanced details for missing evidence.</p>}
    <div className="coach-findings">{findings.map((finding,index)=>{const gain=supportedGain(finding),range=supportedRange(finding),model=supportedModel(finding),explanation=explanations.find(e=>e.opportunityId===finding.id),coaching=cardCoaching(finding,explanation);return <motion.article className="coach-card" key={finding.id} initial={reducedMotion?false:{opacity:0,y:12,scale:.99}} animate={{opacity:1,y:0,scale:1}} transition={reducedMotion?{duration:0}:{...motionTokens.spring,delay:index*.06}}>
     <div className="coach-card-heading"><span className="coach-rank mono">{String(index+1).padStart(2,'0')}</span><div><small>{finding.label}</small><h3>{coaching.title}</h3></div></div>
-    <div className="coach-card-meta"><span className={`coach-confidence ${finding.confidence}`}>{finding.confidence} confidence</span><span>{range?.basis==='demonstrated'?'Demonstrated opportunity':range||model?'Engineering hypothesis · simulated':finding.status==='likely'?'Improvement hypothesis':'Investigation idea'}</span></div>
+    <div className="coach-card-meta"><span className={`coach-confidence ${finding.confidence}`}>{confidenceLabel(finding.confidence)}</span><span>{range?.basis==='demonstrated'?'Demonstrated opportunity':range||model?'Simulated':finding.status==='likely'?'Improvement hypothesis':'Investigation idea'}</span></div>
     <TimePotential finding={finding}/>
     <p className="coach-why">{coaching.observation}</p>
     <div className="coach-action"><small>TRY THIS</small><p>{coaching.action}</p></div>

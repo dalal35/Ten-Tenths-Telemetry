@@ -38,11 +38,11 @@ describe('combined session explorer',()=>{
   expect(html).toMatch(/class="session-facts"[^>]*>[^<]*12 laps[^<]*8 channels/);
   expect(html).toContain('Driver');
  });
- it('distinguishes similarly named originals using their source file suffix',()=>{
+ it('distinguishes similarly named originals by the end of their file name',()=>{
   const entries=[{...a,name:'Warm-up',source:'/recordings/example_0361.xrk'},{...b,name:'Warm-up',source:'C:\\recordings\\example_0362.xrk'}];
   const html=render(entries,source(a));
-  expect(html).toMatch(/class="session-source"[^>]*>example_0361\.xrk/);
-  expect(html).toMatch(/class="session-source"[^>]*>example_0362\.xrk/);
+  expect(html).toMatch(/class="session-source"[^>]*>[^<]* · 0361</);
+  expect(html).toMatch(/class="session-source"[^>]*>[^<]* · 0362</);
   expect(render([a,b,combined])).toMatch(/class="session-source"[^>]*>2 source recordings/);
  });
  it('keeps unavailable original recordings and their repair actions reachable',()=>{

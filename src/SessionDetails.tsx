@@ -1,3 +1,4 @@
+import {displayTrack} from './sessionNames';
 import {useEffect,useLayoutEffect,useRef,useState} from 'react';
 import {createPortal} from 'react-dom';
 import {motion,useIsPresent,useReducedMotion} from 'motion/react';
@@ -39,7 +40,7 @@ export default function SessionDetails({entry,onSave,onClose}:Props){
       <p className="library-dialog-intro">Keep the details in your library easy to recognize. Your original recording stays in place.</p>
       <div className="recording-summary" aria-label="Recording summary">
         <div className="recording-summary-source"><span>{entry.mergeSources?'Combined session':'Original recording'}</span><strong title={entry.source}>{entry.mergeSources?`${entry.mergeSources.length} source recordings`:entry.source.split(/[\\/]/).pop()||'Source unavailable'}</strong></div>
-        <div className="recording-summary-stats"><span><strong>{entry.lapCount}</strong> laps</span><span><strong>{entry.channelCount}</strong> channels</span><span><strong>{entry.track.trim()||'Unknown'}</strong> circuit</span></div>
+        <div className="recording-summary-stats"><span><strong>{entry.lapCount}</strong> laps</span><span><strong>{entry.channelCount}</strong> channels</span><span><strong>{displayTrack(entry.track)||'Unknown'}</strong> circuit</span></div>
       </div>
       <label>Session name<input autoFocus required maxLength={200} value={name} disabled={busy} onChange={e=>setName(e.target.value)}/></label>
       <label>Recording date<input type="date" min="1970-01-01" max="9999-12-31" value={date} disabled={busy} onChange={e=>setDate(e.target.value)}/></label>

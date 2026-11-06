@@ -79,33 +79,33 @@ pub(super) fn extract(
     let (mechanism, title, hypothesis, experiment, validation) = if kind == "straight"
         && entry > 0.5
     {
-        ("downstream", "Carry the preceding exit", "The preceding exit may limit speed carried along this straight.", "Keep the approach repeatable; try opening the preceding exit arc and compare speed along the straight.", "Compare preceding-corner plus straight time, including any entry cost.")
+        ("downstream", "Carry more speed out of the last corner", "The corner before may be limiting your speed on this straight.", "Keep your approach the same, try a cleaner exit from the corner before, and compare your speed along the straight.", "Compare preceding-corner plus straight time, including any entry cost.")
     } else if kind == "straight" {
-        ("straight-recovery", "Investigate sustained speed recovery", "Sustained acceleration or model calibration may explain the increasing speed gap along this straight.", "Repeat the preceding exit and inspect where speed stops building; compare the speed trace before adjusting technique.", "Compare speed increase along the straight and combined preceding-corner time.")
+        ("straight-recovery", "Find where your speed stops building", "Your acceleration or the model may explain this growing gap on the straight.", "Repeat the same exit from the corner before, then check where your speed stops building before changing anything.", "Compare speed increase along the straight and combined preceding-corner time.")
     } else if dip > 0.6 && exit_gain > 0.02 {
-        ("recovery-interruption", "Smooth the exit recovery", "An exit correction may interrupt recovery; changing curvature could also explain the speed dip.", "Review the speed dip after minimum speed; try a smoother exit arc while holding approach speed repeatable.", "Check that the post-minimum speed dip shrinks and corner-plus-following time improves.")
+        ("recovery-interruption", "Smooth out your exit", "A correction on exit may be interrupting your speed, or the shape of the corner could explain the dip.", "Keep your approach the same and try a smoother exit line so the speed dip gets smaller.", "Check that the post-minimum speed dip shrinks and corner-plus-following time improves.")
     } else if entry_gain < -0.015 && exit_gain > 0.02 {
-        ("entry-exit-tradeoff", "Trade entry speed for exit", "A slower entry may allow earlier recovery; the modeled line and grip assumptions could also explain the tradeoff.", "Try a slightly more settled entry and open the exit arc earlier; accept the entry cost only if the whole interval improves.", "Compare entry time cost against exit and following-straight time gained.")
+        ("entry-exit-tradeoff", "Give up entry speed for a better exit", "A slower entry may let you build speed sooner, though the modeled line and grip could also explain this.", "Try a slightly calmer entry and straighten the exit earlier; keep it only if the whole corner gets faster.", "Compare entry time cost against exit and following-straight time gained.")
     } else if min_delta > 0.5 && location_delta < -8. && apex > first + 4 {
-        ("late-minimum", "Bring the minimum-speed transition earlier", "A late speed trough may delay the recovery; a changing corner radius could also explain its position.", "Keep approach speed repeatable and try completing the slowdown earlier so speed can start building before the recorded trough.", "Compare minimum-speed location and recovery onset, then verify corner-plus-following time and exit speed.")
+        ("late-minimum", "Reach your slowest point earlier", "Reaching your slowest point late may delay your exit, or the changing radius of the corner could explain it.", "Keep your approach speed the same and try finishing your slowdown earlier so your speed builds sooner.", "Compare minimum-speed location and recovery onset, then verify corner-plus-following time and exit speed.")
     } else if min_delta > 0.5
         && (peak as isize - apex as isize).abs() <= 5
         && (min_delta > 1.5 || exit_gain <= entry_gain.max(0.) * 1.25)
     {
-        ("minimum-speed", "Test the minimum-speed tradeoff", "The minimum-speed region may be too costly; line geometry or grip assumptions could also explain the modeled gap.", "Keep entry speed repeatable and test a smoother arc through minimum speed; preserve the exit before increasing entry speed.", "Compare minimum speed and its location, then verify exit speed and corner-plus-following time.")
+        ("minimum-speed", "Carry more speed mid-corner", "You may be losing too much speed mid-corner, though your line or grip could also explain the gap.", "Keep your entry speed the same and try a smoother line through the slowest point without hurting your exit.", "Compare minimum speed and its location, then verify exit speed and corner-plus-following time.")
     } else if exit_gain > entry_gain.max(0.) * 1.25 && exit > 0.5 {
-        ("exit-recovery", "Build speed after the minimum", "The exit arc may delay speed recovery; lower entry momentum could also explain the deficit.", "Hold approach speed repeatable and try opening the exit arc earlier, then build acceleration smoothly.", "Compare distance to recover speed after the minimum, exit speed, and corner-plus-following time.")
+        ("exit-recovery", "Get to full speed sooner on exit", "Your exit line may be slowing your recovery, or you may be entering with too little speed.", "Keep your approach the same, straighten the exit earlier and build speed smoothly.", "Compare distance to recover speed after the minimum, exit speed, and corner-plus-following time.")
     } else if entry_gain > 0.02
         && peak < apex
         && decel_start.zip(model_decel).is_some_and(|(a, b)| {
             (apex.saturating_sub(a)) as f64 * ds > (model_apex.saturating_sub(b)) as f64 * ds + 4.
         })
     {
-        ("deceleration-placement", "Reposition the entry slowdown", "The slowdown placement may cost entry time; a necessary line setup could also explain it.", "Use the same approach speed and test a smoother, more compact slowdown toward the minimum; keep approach speed unchanged.", "Compare slowdown onset and minimum-speed location; require a repeatable full-interval gain without an exit loss.")
+        ("deceleration-placement", "Tighten up your slowdown", "Where you slow down may be costing entry time, though your line setup could also explain it.", "Keep the same approach speed and try a smoother, shorter slowdown into the slowest point.", "Compare slowdown onset and minimum-speed location; require a repeatable full-interval gain without an exit loss.")
     } else if entry > 0.5 && peak < apex {
-        ("approach-carry", "Preserve speed into the approach", "The preceding exit may limit approach speed; the current slowdown placement is not established as a fault.", "Repeat the corner entry and try preserving speed from the preceding exit while holding the minimum-speed arc repeatable.", "Compare approach speed, minimum speed and the combined preceding-plus-current corner time.")
+        ("approach-carry", "Carry more speed into this corner", "The exit before this corner may be limiting your speed here.", "Try a cleaner exit from the corner before, and keep your line through this corner the same.", "Compare approach speed, minimum speed and the combined preceding-plus-current corner time.")
     } else {
-        ("profile-investigation", "Investigate the speed-profile gap", "Geometry, capability calibration or driving line may explain the profile gap; the mechanism is not established.", "Review the recorded line and speed at the largest model gap; repeat the same approach before changing a control.", "Check repeatable speed and section timing at the gap, then compare the following interval.")
+        ("profile-investigation", "Find the speed you're missing here", "Your line or the model may explain this gap, so the cause isn't clear yet.", "Drive this corner the same way for a few laps, then check your speed where the gap is biggest.", "Check repeatable speed and section timing at the gap, then compare the following interval.")
     };
     let mut facts = Vec::new();
     let mut fact = |name: &str, unit: &str, a: f64, b: Option<f64>, channels: Vec<String>| {
@@ -200,8 +200,8 @@ pub(super) fn extract(
         " RPM recovery is unavailable; no shift or engine diagnosis is supported."
     };
     let observation=format!("{label}: recorded minimum {:.1} m/s at {:.0} m; model {:.1} m/s at {:.0} m. Largest speed gap {:.1} m/s at {:.0} m; entry/exit time contributions {:+.2}/{:+.2} s.{}{}{}",actual[apex],apex as f64*ds,model[model_apex],model_apex as f64*ds,model[peak]-actual[peak],peak as f64*ds,entry_gain,exit_gain,if dip>0.6 {format!(" Recovery includes a {:.1} m/s speed dip.",dip)}else{String::new()},decel_shift.filter(|s|s.abs()>4.).map(|s|format!(" Modeled slowdown begins {:.0} m {} along the lap.",s.abs(),if s<0. {"earlier"}else{"later"})).unwrap_or_default(),rpm_note);
-    let action = format!("{label}: {experiment} Review the speed trace near {:.0} m, where the model-recorded gap is {:.1} m/s; this is a comparison point, not a commanded target.",peak as f64*ds,model[peak]-actual[peak]);
-    Coaching { details:CoachingEvidence {mechanism:mechanism.into(),title:format!("{label}: {title}"),validation:validation.into(),hypotheses:vec![CoachingHypothesis{id:mechanism.into(),title:title.into(),hypothesis:hypothesis.into(),experiment:experiment.into(),validation:validation.into()},CoachingHypothesis{id:"check-model-alignment".into(),title:"Check the modeled gap".into(),hypothesis:"GPS geometry or capability calibration may explain the gap rather than a driver technique fault.".into(),experiment:"Repeat the same line and approach; inspect speed alignment before changing technique.".into(),validation:"Check repeated section timing and speed alignment, including the following interval.".into()}]},observation,action,facts }
+    let action = format!("{label}: {experiment} Biggest gap: {:.1} m/s at {:.0} m, compared with the simulated lap.",model[peak]-actual[peak],peak as f64*ds);
+    Coaching { details:CoachingEvidence {mechanism:mechanism.into(),title:format!("{label}: {title}"),validation:validation.into(),hypotheses:vec![CoachingHypothesis{id:mechanism.into(),title:title.into(),hypothesis:hypothesis.into(),experiment:experiment.into(),validation:validation.into()},CoachingHypothesis{id:"check-model-alignment".into(),title:"Check the modeled gap".into(),hypothesis:"GPS or the model may explain this gap, rather than your driving.".into(),experiment:"Repeat the same line and approach, and check the speeds line up before changing anything.".into(),validation:"Check repeated section timing and speed alignment, including the following interval.".into()}]},observation,action,facts }
 }
 
 #[cfg(test)]
