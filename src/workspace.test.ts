@@ -6,6 +6,13 @@ describe('workspace recovery',()=>{
   it('restores coach reference and discards it after session content changes',()=>{const saved={contentVersion:'v1',view:'coach',coach:{referenceId:'b'}};expect(restoreWorkspace(session,saved,'v1')).toMatchObject({view:'coach',coach:{referenceId:'b'}});expect(restoreWorkspace(session,saved,'v2')).toMatchObject({view:'telemetry',coach:{referenceId:null}});expect(restoreWorkspace(session,{...saved,coach:{referenceId:'missing'}},'v1').coach?.referenceId).toBeNull();});
   it('discards selections and zoom from another source version',()=>{const w=restoreWorkspace(session,{primary:'b',axis:'time',contentVersion:'old',zoom:{primary:'b',comparison:null,axis:'time',min:1,max:2}},'new');expect(w.primary).toBe('a');expect(w.axis).toBe('distance');expect(compatibleZoom(w)).toBeNull();});
   it('restores valid selections and defaults invalid saved values',()=>{expect(restoreWorkspace(session,{primary:'lost',comparison:'b',channels:['rpm','lost','speed'],axis:'time',layout:'compact'})).toMatchObject({primary:'a',comparison:'b',channels:['rpm','speed'],axis:'time',layout:'compact'});});
+  it('drops deleted laps and signals when restoring a recording',()=>{
+    const saved={contentVersion:'v1',primary:'b',comparison:'a',channels:['speed','rpm'],zoom:{primary:'b',comparison:'a',axis:'distance',min:1,max:5}};
+    const changed={...session,laps:[session.laps[0]],channels:[session.channels[0]]};
+    const restored=restoreWorkspace(changed,saved,'v1');
+    expect(restored).toMatchObject({primary:'a',comparison:null,channels:['speed']});
+    expect(compatibleZoom(restored)).toBeNull();
+  });
   it('restores zoom only for matching laps and axis with finite bounds',()=>{const w=restoreWorkspace(session,null);const zoom={primary:'a',comparison:null,axis:'distance' as const,min:10,max:40};expect(compatibleZoom({...w,zoom})).toEqual({min:10,max:40});expect(compatibleZoom({...w,zoom,axis:'time'})).toBeNull();expect(compatibleZoom({...w,zoom:{...zoom,max:Infinity}})).toBeNull();});
   it('clamps track boundaries to ordered reference meters',()=>{expect(moveBoundary([100,200,300],1,400,400)).toEqual([100,298,300]);expect(moveBoundary([100,200,300],0,-10,400)).toEqual([2,200,300]);});
   it('converts speed channels from SI units to mph',()=>{const a={primary:{series:[{name:'Speed',unit:'m/s',values:[10],x:[1],channelId:'s'}]},comparison:null,segments:[],delta:null} as unknown as Analysis;const shown=displayAnalysis(a);expect(shown.primary.series[0].unit).toBe('mph');expect(shown.primary.series[0].values[0]).toBeCloseTo(22.36936);});

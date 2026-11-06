@@ -31,6 +31,23 @@ export function useVideoSync(options:Options){
   const duration=player.snapshot().duration;
   return validateSegments(segments,session.laps,duration!==null?duration:undefined).join(' ')||null;
  },[]);
+ const seek=useCallback(async(type:'telemetry'|'video',time:number,segmentId?:string):Promise<MappingResult>=>{
+  const sync=controller.current,token=generation.current,error=gate();
+  if(sync&&!ownsBinding())return {kind:'unavailable'};
+  requestedTelemetry.current=type==='telemetry'?time:null;
+  if(!sync){setClock(previous=>({...previous,telemetryTime:type==='telemetry'?time:previous.telemetryTime,result:{kind:'unavailable'},status:error?'error':'unavailable',error,sourceId:latest.current.session?.id??null,contentVersion:latest.current.contentVersion,player:latest.current.player}));return {kind:'unavailable'};}
+  controllerError.current=null;
+  setClock(previous=>({...previous,telemetryTime:type==='telemetry'?time:previous.telemetryTime,status:error?'error':'seeking',error}));
+  // Invalid mappings still use the controller's bounded pause/hold path with no seekable segments.
+  const session=latest.current.session;
+  const outside=type==='telemetry'? !inRecordedLap(session,time):(()=>{const mapped=videoToTelemetry(latest.current.segments,time);return mapped.kind==='mapped'&&!inRecordedLap(session,mapped.time);})();
+  // An invalid controller target follows its bounded pause/hold path without issuing a media seek.
+  const result=await(type==='telemetry'?sync.seekTelemetry(outside?NaN:time,segmentId):sync.seekVideo(outside?NaN:time));
+  if(token!==generation.current)return {kind:'unavailable'};
+  return result;
+ },[gate]);
+ const seekTelemetry=useCallback((time:number,segmentId?:string)=>seek('telemetry',time,segmentId),[seek]);
+ const seekVideo=useCallback((time:number)=>seek('video',time),[seek]);
  useEffect(()=>{
   const token=++generation.current;controllerError.current=null;requestedTelemetry.current=null;wantedLap.current=null;published.current=null;setClock(idle);
   const player=options.player;if(!player||!options.session)return;
@@ -51,9 +68,15 @@ export function useVideoSync(options:Options){
   controller.current=sync;binding.current={sourceId:options.session.id,contentVersion:options.contentVersion,player};
   const visibility=()=>sync.setVisible(document.visibilityState!=='hidden');visibility();
   document.addEventListener('visibilitychange',visibility);
-  const timer=setInterval(()=>sync.tick(),50);sync.tick();
+  const timer=setInterval(()=>sync.tick(),50);
+  // The shared lap selection owns a new binding. A retained paused frame may
+  // belong to a lap selected before leaving Video; reconcile before publishing it.
+  const lap=options.session.laps.find(lap=>lap.id===options.primaryId);
+  const mapped=videoToTelemetry(options.segments,player.snapshot().time);
+  if(lap&&(mapped.kind!=='mapped'||mapped.time<lap.start||mapped.time>=lap.end))void seekTelemetry(lap.start);
+  else sync.tick();
   return()=>{++generation.current;clearInterval(timer);document.removeEventListener('visibilitychange',visibility);sync.dispose();if(controller.current===sync){controller.current=null;binding.current=null;}};
- },[options.session?.id,options.contentVersion,options.player,gate]);
+ },[options.session?.id,options.contentVersion,options.player,gate,seekTelemetry]);
  useEffect(()=>{
   if(!options.player){latest.current.onCorner(null);published.current=null;return;}
   const projection=options.session&&clock.sourceId===options.session.id&&clock.contentVersion===options.contentVersion&&clock.player===options.player&&clock.telemetryTime!==null&&clock.status==='ready'?projectVideoTime(options.session,clock.telemetryTime,options.primaryId,options.analysis,options.axis):{lapId:null,cursor:null,cornerId:null};
@@ -63,23 +86,6 @@ export function useVideoSync(options:Options){
   if(!published.current||published.current.corner!==projection.cornerId){latest.current.onCorner(projection.cornerId);}
   published.current={cursor:projection.cursor,corner:projection.cornerId};
  },[clock,options.session,options.contentVersion,options.primaryId,options.analysis,options.axis,options.player]);
- const seek=useCallback(async(type:'telemetry'|'video',time:number,segmentId?:string):Promise<MappingResult>=>{
-  const sync=controller.current,token=generation.current,error=gate();
-  if(sync&&!ownsBinding())return {kind:'unavailable'};
-  requestedTelemetry.current=type==='telemetry'?time:null;
-  if(!sync){setClock(previous=>({...previous,telemetryTime:type==='telemetry'?time:previous.telemetryTime,result:{kind:'unavailable'},status:error?'error':'unavailable',error,sourceId:latest.current.session?.id??null,contentVersion:latest.current.contentVersion,player:latest.current.player}));return {kind:'unavailable'};}
-  controllerError.current=null;
-  setClock(previous=>({...previous,telemetryTime:type==='telemetry'?time:previous.telemetryTime,status:error?'error':'seeking',error}));
-  // Invalid mappings still use the controller's bounded pause/hold path with no seekable segments.
-  const session=latest.current.session;
-  const outside=type==='telemetry'? !inRecordedLap(session,time):(()=>{const mapped=videoToTelemetry(latest.current.segments,time);return mapped.kind==='mapped'&&!inRecordedLap(session,mapped.time);})();
-  // An invalid controller target follows its bounded pause/hold path without issuing a media seek.
-  const result=await(type==='telemetry'?sync.seekTelemetry(outside?NaN:time,segmentId):sync.seekVideo(outside?NaN:time));
-  if(token!==generation.current)return {kind:'unavailable'};
-  return result;
- },[gate]);
- const seekTelemetry=useCallback((time:number,segmentId?:string)=>seek('telemetry',time,segmentId),[seek]);
- const seekVideo=useCallback((time:number)=>seek('video',time),[seek]);
  const owned=clock.sourceId===options.session?.id&&clock.contentVersion===options.contentVersion&&clock.player===options.player;
  return {telemetryTime:owned?clock.telemetryTime:null,status:owned?clock.status:'unavailable' as const,error:owned?clock.error:null,seekTelemetry,seekVideo};
 }
