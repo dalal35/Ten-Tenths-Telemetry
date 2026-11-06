@@ -6,8 +6,8 @@ try {
  server=await createServer({plugins:[browserTestNoWatch],optimizeDeps:{entries:browserTestEntries},server:{host:'127.0.0.1',port:0,strictPort:false,hmr:false}});await server.listen();
  browser=await launchBrowser();
  const page=await browser.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.addInitScript(()=>{const originalMatchMedia=window.matchMedia.bind(window);window.densityQueries=[];window.matchMedia=media=>{const query=originalMatchMedia(media);window.densityQueries.push(query);return query;};window.bars=[];window.rings=[];window.currentRings=[];window.paintCount=0;const clear=CanvasRenderingContext2D.prototype.clearRect;CanvasRenderingContext2D.prototype.clearRect=function(...args){window.paintCount++;window.currentRings=[];return clear.apply(this,args);};const ellipse=CanvasRenderingContext2D.prototype.ellipse;CanvasRenderingContext2D.prototype.ellipse=function(...args){window.rings.push(args);window.currentRings.push(args);return ellipse.apply(this,args);};const original=CanvasRenderingContext2D.prototype.fillRect;CanvasRenderingContext2D.prototype.fillRect=function(...args){window.bars.push(args);window.lastBarColor=this.fillStyle;return original.apply(this,args);};});
- await page.goto(`${server.resolvedUrls.local[0]}tests/canvas.html`);const canvas=page.locator('canvas');await canvas.waitFor();
+ await page.addInitScript(()=>{const originalMatchMedia=window.matchMedia.bind(window);window.densityQueries=[];window.matchMedia=media=>{const query=originalMatchMedia(media);window.densityQueries.push(query);return query;};window.bars=[];window.rings=[];window.currentRings=[];window.paintCount=0;const clear=CanvasRenderingContext2D.prototype.clearRect;CanvasRenderingContext2D.prototype.clearRect=function(...args){if(this.canvas.getAttribute('role')==='img'){window.paintCount++;window.currentRings=[];}return clear.apply(this,args);};const ellipse=CanvasRenderingContext2D.prototype.ellipse;CanvasRenderingContext2D.prototype.ellipse=function(...args){window.rings.push(args);window.currentRings.push(args);return ellipse.apply(this,args);};const original=CanvasRenderingContext2D.prototype.fillRect;CanvasRenderingContext2D.prototype.fillRect=function(...args){window.bars.push(args);window.lastBarColor=this.fillStyle;return original.apply(this,args);};});
+ await page.goto(`${server.resolvedUrls.local[0]}tests/canvas.html`);const canvas=page.locator('canvas[role=img]');await canvas.waitFor();
  await page.waitForFunction(()=>window.bars.length>0);
  const bars=await page.evaluate(()=>window.bars);assert(bars.every(b=>b.every(Number.isFinite)),'all rendered histogram rectangle coordinates must be finite');
  assert(bars.some(([x,y,w,h])=>x>=62&&x<682&&y>=18&&y<356&&w>0&&h>0),'positive bin above ten remains visible with zero and nonpositive bins');
@@ -25,8 +25,14 @@ try {
  await canvas.click({position:{x:372,y:187}});assert.deepEqual(await page.evaluate(()=>window.cursors),[20],'scatter inspection retains source cursor propagation');
  // Real canvas drawing must preserve equal physical G scaling through live resizing and wheel zoom.
  await page.evaluate(()=>window.renderCanvas('traction'));
+ await page.waitForFunction(()=>window.currentRings.length>0);
  for(const viewport of [{width:600,height:500},{width:1600,height:1000},{width:2560,height:1440}]){
-  await page.evaluate(()=>window.rings=[]);await page.setViewportSize(viewport);await page.waitForTimeout(100);
+  // A width-capped panel need not repaint when a larger viewport leaves its
+  // dimensions unchanged. Keep its most recent real rings for that case.
+  const beforeResize={box:await canvas.boundingBox(),paint:await page.evaluate(()=>window.paintCount)};
+  await page.evaluate(()=>window.rings=window.currentRings.slice());await page.setViewportSize(viewport);await page.waitForTimeout(100);
+  const afterResize=await canvas.boundingBox();
+  if(afterResize.width!==beforeResize.box.width||afterResize.height!==beforeResize.box.height)await page.waitForFunction(paint=>window.paintCount>paint,beforeResize.paint);
   await page.waitForFunction(()=>window.rings.length>0);
   assert((await page.evaluate(()=>window.rings)).every(r=>Number.isFinite(r[2])&&Math.abs(r[2]-r[3])<1e-6),'Traction G reference rings remain circular');
   const measured=await canvas.boundingBox();assert(measured.height>=240&&measured.height<=viewport.height,'Canvas height fits short and wide windows');

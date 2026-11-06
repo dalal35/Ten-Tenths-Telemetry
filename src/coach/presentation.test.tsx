@@ -1,7 +1,7 @@
 import {describe,expect,it} from 'vitest';
 import {renderToStaticMarkup} from 'react-dom/server';
 import Coach from './Coach';
-import {cardCoaching,findingTitle,supportedGain,conciseCoaching,coachingObservation,visibleExplanations} from './presentation';
+import {cardCoaching,confidenceLabel,findingTitle,supportedGain,conciseCoaching,coachingObservation,visibleExplanations} from './presentation';
 import TimePotential from './TimePotential';
 import type {CoachResult,Opportunity} from './types';
 import type {Session} from '../types';
@@ -14,7 +14,7 @@ describe('fastest-lap coach presentation',()=>{
   expect(html).not.toContain('Target lap time');
   expect(html).toContain('RECORDED THEORETICAL BEST');
   expect(html).toContain('MODELED LAP-TIME RANGE');
-  expect(html).toContain('Deterministic physics');
+  expect(html).toContain('Simulated from your laps');
   expect(html.match(/>Analyze<\/button>/g)).toHaveLength(1);
   expect(html).toContain('AI inactive');
   expect(html).not.toContain('Regenerate explanations');
@@ -62,7 +62,7 @@ it('lets validated Gemma experiments contribute to modeled cards with explicit a
  expect(card.action).toBe(explanation.action);
  expect(card.observation).toBe(`${proven.observation} ${explanation.hypothesis}`);
  expect(card.validation).toBe(explanation.validation);
- expect(card.source).toBe('Gemma-selected experiment');
+ expect(card.source).toBe('Chosen by local AI (Gemma)');
  expect(visibleExplanations(result,false)).toEqual([]);
  expect(visibleExplanations({...result,mode:'deterministic'},true)).toEqual([]);
  expect(visibleExplanations({...result,explanations:[{...explanation,reasoningSource:undefined}]},true)).toEqual([]);
@@ -87,6 +87,12 @@ it('uses a disclosed scenario range when the recorded comparison only provides a
  const html=renderToStaticMarkup(<TimePotential finding={{...proven,modeledGain:modeled}}/>);
  expect(html).toContain('Scenario estimate');expect(html).toContain('0.012–0.048 s');expect(html).not.toContain('0.210 s');
 });
+it('labels an untested idea as something to try and keeps measured confidence tiers',()=>{
+ expect(confidenceLabel('low')).toBe('To test on track');
+ expect(confidenceLabel('medium')).toBe('Medium confidence');
+ expect(confidenceLabel('high')).toBe('High confidence');
+});
+
 it('shows a hypothetical range and its assumption without presenting a confidence interval',()=>{
  const html=renderToStaticMarkup(<TimePotential finding={{...proven,status:'suspected',modeledGain:modeled}}/>);
  expect(html).toContain('Scenario estimate');expect(html).toContain('0.012–0.048 s');expect(html).not.toContain(modeled.assumption);expect(html).toContain('Hypothetical');

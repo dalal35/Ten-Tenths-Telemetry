@@ -18,6 +18,7 @@ export function createSyncController(player: VideoPlayer, options: ControllerOpt
   let lastTick = -Infinity;
   let pending: { abort: AbortController; resume: boolean; pausedObserved: boolean } | undefined;
   let heldResult: MappingResult | null = null;
+  let pausedTarget: {videoTime:number;telemetry:MappingResult;segments:VideoSegment[]} | null = null;
   let pausedAfterHold = false;
   let observationFloor = -Infinity;
   let desiredPlaying = sample.state === 'playing';
@@ -27,6 +28,9 @@ export function createSyncController(player: VideoPlayer, options: ControllerOpt
     if (disposed || next.observedAtMs < sample.observedAtMs || next.observedAtMs < observationFloor) return;
     if (next.state === 'error') options.onError(next.error ?? 'Video playback failed. Check the source player for details.');
     if (pending) { if (next.state === 'paused') pending.pausedObserved = true; return; }
+    // Keep a verified paused seek while its observed media position is stable.
+    // Round-trip cancellation at a lap boundary must not select the prior lap.
+    if (pausedTarget && (next.state !== 'paused' || next.seeking || Math.abs(next.time-pausedTarget.videoTime)>.05)) pausedTarget = null;
     if (heldResult && next.state === 'paused') pausedAfterHold = true;
     if (heldResult && resumesInFlight === 0 && pausedAfterHold && next.state === 'playing' && sample.state !== 'playing') heldResult = null;
     if (!heldResult) desiredPlaying = next.state === 'playing';
@@ -35,7 +39,9 @@ export function createSyncController(player: VideoPlayer, options: ControllerOpt
   const runSeek = async (lookup: MappingResult, telemetry: MappingResult): Promise<MappingResult> => {
     if (disposed) return { kind: 'unavailable' };
     const resume = pending?.resume ?? sample.state === 'playing';
+    const seekSegments = options.segments();
     const request = ++generation;
+    pausedTarget = null;
     pending?.abort.abort();
     const abort = new AbortController();
     pending = { abort, resume, pausedObserved: sample.state === 'paused' };
@@ -61,10 +67,12 @@ export function createSyncController(player: VideoPlayer, options: ControllerOpt
         if (lookup.kind !== 'mapped') { hold(lookup); return; }
         await player.seek(lookup.time, abort.signal);
         if (!current() || abort.signal.aborted) return;
-        // Keep the verified target until a post-completion source sample arrives.
+        // Keep the verified target until playback, native seeking or mapping edits.
         observationFloor = options.nowMs();
-        sample = { ...player.snapshot(), time: lookup.time, state: 'paused', seeking: false, observedAtMs: observationFloor };
+        const observed = player.snapshot();
+        sample = { ...observed, time: lookup.time, state: 'paused', seeking: false, observedAtMs: observationFloor };
         predict = false; heldResult = null;
+        pausedTarget = {videoTime:observed.time,telemetry,segments:seekSegments};
         options.onTime(telemetry);
         if (resume) {
           desiredPlaying = true; resumesInFlight++;
@@ -97,10 +105,12 @@ export function createSyncController(player: VideoPlayer, options: ControllerOpt
       const now = options.nowMs();
       if (disposed || !visible || pending || sample.seeking || now - lastTick < 50) return;
       lastTick = now;
+      const segments = options.segments();
+      if (pausedTarget && pausedTarget.segments !== segments) pausedTarget = null;
       const elapsed = predict && sample.state === 'playing' ? Math.max(0, Math.min(100, now - sample.observedAtMs)) : 0;
       options.onTime(heldResult ?? (sample.state === 'error' || sample.state === 'loading'
         ? { kind: 'unavailable' }
-        : videoToTelemetry(options.segments(), sample.time + elapsed * sample.rate / 1000)));
+        : pausedTarget?.telemetry ?? videoToTelemetry(segments, sample.time + elapsed * sample.rate / 1000)));
     },
     setVisible(value: boolean) { visible = value; predict = false; lastTick = -Infinity; },
     seekTelemetry(time: number, segmentId?: string) {

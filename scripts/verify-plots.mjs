@@ -33,7 +33,7 @@ try {
  await page.getByRole('button',{name:'Reset',exact:true}).click();await page.waitForTimeout(100);const reset=await ranges();
  assert(Math.abs(reset[0].max-before[0].max)<1e-6&&reset[0].min===before[0].min,'Reset restores the full lap');
  await page.mouse.move(box.x+box.width*.4,box.y+50);await page.waitForTimeout(50);
- assert(Number(await page.locator('output').textContent())>0,'Cursor position updates');
+ assert(Number(await page.locator('#root > output').textContent())>0,'Cursor position updates');
  assert((await page.locator('.readout').first().innerText()).match(/\d/),'Live numerical readout updates');
  const segments=page.locator('.track-segment');
  assert(await segments.count()>0,'Real-session analysis must expose selectable GPS sections');
@@ -50,14 +50,14 @@ try {
  assert.equal(await page.locator('.segment-card.selected').count(),0,'Reset clears focused comparison');
  assert.equal(await page.locator('.track-segment.selected').count(),0,'Reset clears focused map section');
  await page.getByRole('button',{name:'Edit boundaries',exact:true}).click();
- const handles=page.getByRole('slider');assert.equal(await handles.count(),await segments.count()-1,'Every shared interior boundary has an editable handle');
+ const handles=page.locator('.boundary-handle[role="slider"]');assert.equal(await handles.count(),await segments.count()-1,'Every shared interior boundary has an editable handle');
  const handle=handles.first(),original=Number(await handle.getAttribute('aria-valuenow'));
  await handle.focus();await page.keyboard.press('ArrowRight');
  const edited=JSON.parse(await page.locator('[data-boundaries]').textContent());
  assert(Math.abs(edited[0]-original-5)<1,'Arrow keys edit in reference-lap meters');
  const hbox=await handle.boundingBox();await page.mouse.move(hbox.x+hbox.width/2,hbox.y+hbox.height/2);await page.mouse.down();await page.mouse.move(hbox.x+14,hbox.y+8,{steps:5});await page.mouse.up();
  const dragged=JSON.parse(await page.locator('[data-boundaries]').textContent());assert(dragged.every((v,i)=>i===0||v>dragged[i-1]),'Dragged boundaries stay ordered');
- await page.getByRole('button',{name:'Edit boundaries',exact:true}).click();assert.equal(await page.getByRole('slider').count(),0,'Done hides editing handles');
+ await page.getByRole('button',{name:'Edit boundaries',exact:true}).click();assert.equal(await page.locator('.boundary-handle[role="slider"]').count(),0,'Done hides editing handles');
  await page.mouse.move(box.x+box.width*.2,box.y+30);await page.mouse.down();await page.mouse.move(box.x+box.width*.6,box.y+30,{steps:8});await page.mouse.up();await page.waitForTimeout(50);
  const saved=await ranges();await page.getByRole('button',{name:'Density',exact:true}).click();await page.waitForTimeout(50);const restored=await ranges();assert.equal(restored[0].min,saved[0].min,'Density changes preserve zoom');assert.equal(restored[0].max,saved[0].max,'Density changes preserve zoom end');
  await page.getByRole('button',{name:'Delta only',exact:true}).click();await page.waitForTimeout(100);

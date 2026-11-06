@@ -11,7 +11,7 @@ const data=process.env.COACH_UI_DATA?JSON.parse(readFileSync(process.env.COACH_U
 let server,browser;
 try{
  console.log('Coach UI: creating test server');
- server=await createServer({plugins:[browserTestNoWatch],optimizeDeps:{entries:browserTestEntries},server:{host:'127.0.0.1',port:0,strictPort:false,hmr:false,watch:null}});await server.listen();console.log('Coach UI: launching browser');browser=await launchBrowser();console.log('Coach UI: browser ready');
+ server=await createServer({configLoader:'runner',plugins:[browserTestNoWatch],optimizeDeps:{entries:browserTestEntries},server:{host:'127.0.0.1',port:0,strictPort:false,hmr:false,watch:null}});await server.listen();console.log('Coach UI: launching browser');browser=await launchBrowser();console.log('Coach UI: browser ready');
  console.log('Coach UI: opening page');const page=await browser.newPage({viewport:{width:1600,height:1100}});page.setDefaultTimeout(15000);page.setDefaultNavigationTimeout(15000);const errors=[];page.on('pageerror',e=>errors.push(e.message));
  console.log('Coach UI: transferring recording fixture');
  await page.addInitScript(serialized=>{
@@ -105,7 +105,7 @@ try{
  for(const card of await page.locator('.coach-card').all()){
   const timeRow=card.locator('.coach-time-potential');
   await expect(timeRow).toBeVisible();
-  assert(/Demonstrated opportunity|Engineering hypothesis|Scenario estimate:|Gain not yet quantifiable/.test(await timeRow.innerText()),'Every suggestion identifies its estimate type or explains missing quantification');
+  assert(/Demonstrated opportunity|Simulated ·|Scenario estimate:|Gain not yet quantifiable/.test(await timeRow.innerText()),'Every suggestion identifies its estimate type or explains missing quantification');
   if((await timeRow.innerText()).includes('Scenario estimate:')){
    await expect(timeRow).toContainText('Hypothetical');
    assert(!/Scenario estimate: 0\.000(?:–0\.000)? s/.test(await timeRow.innerText()),'Small positive scenarios must remain visible');

@@ -86,7 +86,7 @@ button:disabled{opacity:.4}
 .lap-list .lap-row.selected{background:var(--raised)}
 .lap-list .lap-row.compared{box-shadow:none;background:color-mix(in srgb,var(--amber) 8%,transparent)}
 .lap-select{gap:12px;padding:7px 8px;min-height:39px}
-.lap-number{font-size:11px;color:var(--muted);width:22px}
+.lap-number{font-size:11px;color:var(--muted);width:42px;white-space:nowrap}
 .lap-time{font-size:13px;font-weight:400;line-height:1.45}
 .lap-time small{font-family:var(--font-ui);font-size:11px;letter-spacing:0;color:var(--cyan)}
 .compare-toggle{width:28px;height:28px;border-radius:var(--radius-control)}

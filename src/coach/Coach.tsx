@@ -2,14 +2,16 @@ import {useEffect,useMemo,useRef,useState} from 'react';
 import type {ReactNode} from 'react';
 import {motion,useReducedMotion} from 'motion/react';
 import {motionTokens} from '../motion';
-import type {Session} from '../types';
-import type {CoachEvidence,CoachResult,Opportunity} from './types';
+import type {Session,Analysis} from '../types';
+import CoachDebrief from './CoachDebrief';
+import type {CoachInspection} from './navigation';
+import type {CoachEvidence,CoachResult} from './types';
 import {analyzeCoach,cancelCoach,coachStatus,coachModelTerms} from '../bridge';
 import {displaySpeedUnit,speedFactor} from '../speedDisplay';
 import {formatTime} from '../telemetry';
 import {lapDisplayNumber} from '../merging';
 import {CoachQueue,CoachRequests} from './requests';
-import {cardCoaching,visibleExplanations,rangeSeconds,supportedGain,supportedModel,supportedRange} from './presentation';
+import {confidenceLabel,cardCoaching,visibleExplanations,rangeSeconds,supportedGain,supportedModel,supportedRange} from './presentation';
 import {distinctFindings,prioritizeFindings} from './target';
 import TimePotential from './TimePotential';
 import FullLapProfile from './FullLapProfile';
@@ -19,12 +21,13 @@ const coachQueue=new CoachQueue<CoachResult>();
 
 function EvidenceTable({evidence,modeled=false}:{evidence:CoachEvidence[];modeled?:boolean}){return <table><thead><tr><th>Evidence</th><th>{modeled?'Calculated / baseline':'Fastest lap'}</th><th>{modeled?'Scenario / timing reference':'Supporting example'}</th></tr></thead><tbody>{evidence.map(e=><tr key={e.id}><td>{e.metric.replace(/([A-Z])/g,' $1')}<small>{e.id}{e.channelIds.length?` · ${e.channelIds.join(', ')}`:''}</small></td><td className="mono">{(e.lapValue*speedFactor(e.unit)).toFixed(3)} {displaySpeedUnit(e.unit)}</td><td className="mono">{e.referenceValue==null?'—':`${(e.referenceValue*speedFactor(e.unit)).toFixed(3)} ${displaySpeedUnit(e.unit)}`}</td></tr>)}</tbody></table>;}
 
-interface Props {session:Session;contentVersion:string;revision:number;active:boolean;onInspect:(finding:Opportunity)=>void}
-export default function Coach({session,contentVersion,revision,active,onInspect}:Props){
+interface Props {premium?:boolean;analysis?:Analysis|null;session:Session;contentVersion:string;revision:number;active:boolean;onInspect:(finding:CoachInspection)=>void}
+export default function Coach({session,contentVersion,revision,active,onInspect,premium=false,analysis}:Props){
  const [result,setResult]=useState<CoachResult|null>(null),[running,setRunning]=useState(false),[phase,setPhase]=useState(''),[error,setError]=useState('');
  const requests=useRef(new CoachRequests());
  const inspect=useRef(onInspect);inspect.current=onInspect;
  const lastPresentation=useRef<ReactNode>(null);
+ const advancedDetails=useRef<HTMLDetailsElement>(null);
  const reducedMotion=useReducedMotion();
  const autoAnalysis=useRef(''),[termsReady,setTermsReady]=useState(false);
  const [terms,setTerms]=useState<{version:string;terms:string;policy:string}|null>(null),[accepted,setAccepted]=useState(false);
@@ -47,25 +50,25 @@ export default function Coach({session,contentVersion,revision,active,onInspect}
  const findings=report?.primaryOpportunityIds?ranked.slice(0,3):distinctFindings(ranked,explanations);
  const fastest=report?.bestLapSeconds;
  const source=running?'Analyzing locally':!accepted?'AI inactive · terms not accepted':!result?'Local model · not run':result.mode==='localModel'?`${result.cached?'Cached · ':''}Local model interpretation`:`${result.cached?'Cached · ':''}Computed fallback`;
- const presentation=useMemo(()=>{if(!active&&lastPresentation.current!==null)return lastPresentation.current;return <section className="coach-workspace" aria-label="AI Driving Coach">
-  <div className="coach-heading"><div><div className="eyebrow">AI DRIVING COACH · OFFLINE</div><h2>How to Improve Your Fastest Lap</h2></div><span className="local-badge">{source}</span></div>
+ const presentation=useMemo(()=>{if(!active&&lastPresentation.current!==null)return lastPresentation.current;return <section className={`coach-workspace${premium?' coach-premium':''}`} aria-label="AI Driving Coach">
+  <div className="coach-heading"><div><div className="eyebrow">AI DRIVING COACH · OFFLINE</div><h2>{premium?'Your driving debrief':'How to Improve Your Fastest Lap'}</h2>{premium&&<p className="coach-heading-note">Measured evidence. Considered experiments. A clearer next lap.</p>}</div><div className="coach-model-status"><div className={`coach-progress${running?' is-running':''}`} role="status" aria-live="polite">{running&&<span className="coach-signal" aria-hidden="true"><i/><i/><i/><i/></span>}<span>{phase}{result&&!running?` · ${result.cached?'Cached result':`${(result.elapsedMs/1000).toFixed(1)} s local analysis`}`:''}</span>{running&&<span className="coach-progress-rail" aria-hidden="true"><i/></span>}</div><span className="local-badge">{source}</span>{premium&&<button type="button" onClick={()=>{const details=advancedDetails.current;if(!details)return;details.open=true;const settings=details.querySelector<HTMLDetailsElement>('.coach-terms');if(settings)settings.open=true;(settings??details).querySelector('summary')?.focus();}}>Local model settings ↗</button>}</div></div>
   <form className="coach-overview" aria-busy={running} onSubmit={e=>{e.preventDefault();void run(!!result);}}>
    <div className="coach-stat"><small>FASTEST VALID LAP</small><strong className="mono">{fastest==null?'—':formatTime(fastest)}</strong>{report&&<small>{lapLabel(report.bestLapId)}</small>}</div>
-   <div className="coach-stat"><small>RECORDED THEORETICAL BEST</small><strong className="mono">{report?.theoreticalBestSeconds==null?'—':formatTime(report.theoreticalBestSeconds)}</strong><small>Compatible recorded sections</small></div>
-   <div className="coach-stat"><small>MODELED LAP-TIME RANGE</small><strong className="mono">{report?.fullLap?.modeledLapSeconds?`${formatTime(report.fullLap.modeledLapSeconds.lowerSeconds)}–${formatTime(report.fullLap.modeledLapSeconds.upperSeconds)}`:'Not yet quantifiable'}</strong><small>Deterministic physics · conditional estimate</small>{report?.improvementPotential&&<small>ESTIMATED IMPROVEMENT: {rangeSeconds(report.improvementPotential)} s</small>}{report?.fullLap?.modeledLapSeconds&&report.fullLap.modeledLapSeconds.upperSeconds>report.bestLapSeconds&&<small>Conservative scenario is slower · no minimum gain established</small>}</div>
+   <div className="coach-stat"><small>{premium?'RECORDED COMPOSITE':'RECORDED THEORETICAL BEST'}</small><strong className="mono">{report?.theoreticalBestSeconds==null?'—':formatTime(report.theoreticalBestSeconds)}</strong><small>Compatible recorded sections</small></div>
+   <div className="coach-stat"><small>MODELED LAP-TIME RANGE</small><strong className="mono">{report?.fullLap?.modeledLapSeconds?`${formatTime(report.fullLap.modeledLapSeconds.lowerSeconds)}–${formatTime(report.fullLap.modeledLapSeconds.upperSeconds)}`:'Not yet quantifiable'}</strong><small>Simulated from your laps</small>{report?.improvementPotential&&<small>{premium?'Estimated gain':'ESTIMATED IMPROVEMENT'}: {rangeSeconds(report.improvementPotential)} s</small>}{report?.fullLap?.modeledLapSeconds&&report.fullLap.modeledLapSeconds.upperSeconds>report.bestLapSeconds&&<small>Conservative scenario is slower · no minimum gain established</small>}</div>
    <button type="submit" className="import-button" disabled={!termsReady||running}>Analyze</button>
    {running&&<button type="button" onClick={cancel}>Cancel analysis</button>}
   </form>
-  <div className={`coach-progress${running?' is-running':''}`} role="status" aria-live="polite">{running&&<span className="coach-signal" aria-hidden="true"><i/><i/><i/><i/></span>}<span>{phase}{result&&!running?` · ${result.cached?'Cached result':`${(result.elapsedMs/1000).toFixed(1)} s local analysis`}`:''}</span>{running&&<span className="coach-progress-rail" aria-hidden="true"><i/></span>}</div>
   {error&&<div className="error-banner" role="alert">{error}</div>}
   {session.merge&&<p className="warnings">Unified session · {session.merge.sources.length} recordings. Assumes the same kart and track with approximately equivalent grip and conditions unless telemetry indicates otherwise.</p>}
   {!report&&!running&&<div className="coach-empty">Analyze your fastest valid lap for up to three supported driving experiments.</div>}
   {report&&<>
+   {premium?<CoachDebrief report={report} findings={findings} explanations={explanations} channels={session.channels} analysis={analysis} onInspect={interval=>inspect.current(interval)} lapLabel={lapLabel}/>:<>
    <div className="coach-section-title"><h3>Next session: try these</h3><span>{lapLabel(report.bestLapId)} · {report.validLapCount} valid laps reviewed</span></div>
    {!findings.length&&<p className="coach-empty">No supported opportunity or meaningful signal was identified in the available channels. Review advanced details for missing evidence.</p>}
    <div className="coach-findings">{findings.map((finding,index)=>{const gain=supportedGain(finding),range=supportedRange(finding),model=supportedModel(finding),explanation=explanations.find(e=>e.opportunityId===finding.id),coaching=cardCoaching(finding,explanation);return <motion.article className="coach-card" key={finding.id} initial={reducedMotion?false:{opacity:0,y:12,scale:.99}} animate={{opacity:1,y:0,scale:1}} transition={reducedMotion?{duration:0}:{...motionTokens.spring,delay:index*.06}}>
     <div className="coach-card-heading"><span className="coach-rank mono">{String(index+1).padStart(2,'0')}</span><div><small>{finding.label}</small><h3>{coaching.title}</h3></div></div>
-    <div className="coach-card-meta"><span className={`coach-confidence ${finding.confidence}`}>{finding.confidence} confidence</span><span>{range?.basis==='demonstrated'?'Demonstrated opportunity':range||model?'Engineering hypothesis · simulated':finding.status==='likely'?'Improvement hypothesis':'Investigation idea'}</span></div>
+    <div className="coach-card-meta"><span className={`coach-confidence ${finding.confidence}`}>{confidenceLabel(finding.confidence)}</span><span>{range?.basis==='demonstrated'?'Demonstrated opportunity':range||model?'Simulated':finding.status==='likely'?'Improvement hypothesis':'Investigation idea'}</span></div>
     <TimePotential finding={finding}/>
     <p className="coach-why">{coaching.observation}</p>
     <div className="coach-action"><small>TRY THIS</small><p>{coaching.action}</p></div>
@@ -74,9 +77,10 @@ export default function Coach({session,contentVersion,revision,active,onInspect}
     <details><summary>Evidence & validation</summary><p>{finding.observation}</p>{explanation?.hypothesis&&<p>Local model hypothesis: {explanation.hypothesis}</p>}<p>Full experiment: {finding.action}</p>{explanation?.action&&<p>Local model experiment: {explanation.action} The displayed range comes from deterministic physics, not Gemma.</p>}{explanation?.reasoningSource==='modelSelectedInterpretation'&&<p>Gemma selected this interpretation and experiment from bounded alternatives grounded in the telemetry. Rust validates the selected intervention, its evidence and sensor claims, and supplies all numerical estimates.</p>}<EvidenceTable evidence={finding.evidence} modeled={finding.kind==='physics-counterfactual'||finding.kind==='physics'}/>{gain&&<p>{gain.observed.toFixed(3)} s measured section difference vs {lapLabel(finding.referenceLapId)}; not a guaranteed gain.</p>}{range&&<><p>Gain method: {range.method}</p><p>Assumption: {range.assumption}</p><p>Scenario bounds are conditional estimates, not a confidence interval or a guaranteed minimum saving.</p></>}{!range&&model&&<><p>Scenario method: {model.method}</p><p>Assumption: {model.assumption}</p>{model.referenceLapId&&<p>Scenario reference: {lapLabel(model.referenceLapId)}.</p>}<p>This range describes hypothetical inputs, not a confidence interval or a guaranteed minimum saving. Validate full section and lap time after testing.</p></>}{explanation?.validation&&<p>{explanation.validation}</p>}<p>{finding.uncertainty}</p></details>
    </motion.article>;})}</div>
    {report.fullLap&&<FullLapProfile diagnostics={report.fullLap} profile={report.simulatedProfiles?.find(profile=>profile.strategy==='full-lap')}/>}
+   </>}
    {!!findings.length&&<p className="coach-estimate-note">The lap estimate counts each compatible section once; these cards show the top three experiments. Hypothetical gains remain conditional until verified on track.</p>}
   </>}
-  <details className="coach-advanced"><summary>Advanced details · evidence, methodology & model settings</summary>
+  <details ref={advancedDetails} className="coach-advanced"><summary>Advanced details · evidence, methodology & model settings</summary>
    {result?.notice&&<p>{result.notice}</p>}
    {result?.inferenceMetrics&&<p>Native inference: {result.inferenceMetrics.generatedTokens} tokens · {(result.inferenceMetrics.inferenceMs/1000).toFixed(1)} s · {result.inferenceMetrics.gpu?'GPU':'CPU'}. Model load {(result.inferenceMetrics.modelLoadMs/1000).toFixed(1)} s.</p>}
    {result&&<p>Result: {result.mode==='localModel'?'validated local model output':'deterministic measurements and fallback'} · {result.modelVersion} · {result.cached?'cached':'fresh'}.</p>}
@@ -94,7 +98,7 @@ export default function Coach({session,contentVersion,revision,active,onInspect}
     {report.notes.map((n,i)=><p key={i}>{n}</p>)}{report.excludedLaps.map(l=><p key={l.lapId}>{lapLabel(l.lapId)} excluded: {l.reason}</p>)}
    </>}
   </details>
- </section>;},[active,result,running,phase,error,accepted,terms,termsReady,session,contentVersion,revision,reducedMotion]);
+ </section>;},[active,result,running,phase,error,accepted,terms,termsReady,session,contentVersion,revision,reducedMotion,premium,analysis]);
  lastPresentation.current=presentation;
  return presentation;
 }

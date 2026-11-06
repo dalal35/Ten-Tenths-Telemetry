@@ -1,0 +1,811 @@
+{
+  "phase": "after",
+  "simulatedIPC": true,
+  "fixed": {
+    "primary": "lap-8",
+    "comparison": "lap-9",
+    "axis": "distance",
+    "channels": [
+      "gps-speed",
+      "channel-23"
+    ],
+    "zoom": {
+      "min": 30,
+      "max": 350
+    }
+  },
+  "captures": [
+    {
+      "workspace": "telemetry",
+      "w": 1440,
+      "h": 900,
+      "theme": "dark",
+      "path": "docs/ember/screenshots/after/telemetry-1440x900-dark.png",
+      "metrics": {
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "workspace": {
+          "x": 264,
+          "y": 274.28125,
+          "width": 1148,
+          "height": 597.71875
+        },
+        "mainWorkspace": {
+          "x": 236,
+          "y": 64,
+          "width": 1204,
+          "height": 808
+        },
+        "plots": [
+          {
+            "box": {
+              "x": 265,
+              "y": 331.28125,
+              "width": 816,
+              "height": 147
+            },
+            "visibleHeight": 147
+          },
+          {
+            "box": {
+              "x": 265,
+              "y": 478.28125,
+              "width": 816,
+              "height": 147
+            },
+            "visibleHeight": 147
+          },
+          {
+            "box": {
+              "x": 265,
+              "y": 625.28125,
+              "width": 816,
+              "height": 147
+            },
+            "visibleHeight": 147
+          }
+        ],
+        "mainUtilization": 0.5457920792079208,
+        "utilization": 0.7378051968421603,
+        "documentOverflow": false,
+        "bodyOverflow": false,
+        "fonts": {
+          "body": {
+            "size": "13px",
+            "family": "\"IBM Plex Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "color": "rgb(221, 231, 237)",
+            "background": "rgb(16, 17, 19)"
+          },
+          "label": {
+            "size": "12px",
+            "family": "\"IBM Plex Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "color": "rgb(221, 231, 237)",
+            "background": "rgba(0, 0, 0, 0)"
+          },
+          "legend": {
+            "size": "12px",
+            "family": "\"IBM Plex Mono\", ui-monospace, monospace",
+            "color": "rgb(121, 201, 242)",
+            "background": "rgba(0, 0, 0, 0)"
+          },
+          "secondary": {
+            "size": "11px",
+            "family": "\"IBM Plex Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "color": "rgb(180, 192, 202)",
+            "background": "rgba(0, 0, 0, 0)"
+          },
+          "axis": {
+            "size": "11px",
+            "family": "\"IBM Plex Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "color": "rgb(180, 192, 202)",
+            "background": "rgb(32, 35, 40)"
+          }
+        },
+        "canvasCount": 3,
+        "canvasFonts": [
+          "11px \"IBM Plex Mono\", ui-monospace, monospace"
+        ],
+        "canvasTextColors": [
+          "#b4c0ca"
+        ],
+        "reactCommitCounts": 47,
+        "reactComponentUpdates": {
+          "MotionConfig": 1,
+          "App": 47,
+          "Brand": 47,
+          "SessionExplorer": 47,
+          "AnimatePresence": 234,
+          "WorkspaceTabs": 46,
+          "LayoutGroup": 138,
+          "MeasureLayout": 230,
+          "MeasureLayoutWithContext": 230,
+          "WorkspaceIcon": 184,
+          "SelectionRail": 92,
+          "Coach": 46,
+          "VideoWorkspace": 46,
+          "VideoInstruments2": 2,
+          "VideoTimeline": 46,
+          "SegmentEditor": 46,
+          "AxisTabs": 46,
+          "SelectionHighlight": 46,
+          "Plots": 45,
+          "Track": 45,
+          "Segments": 45
+        },
+        "axe": [],
+        "cursorInteraction": {
+          "sameCanvas": true,
+          "reactCommits": 2,
+          "componentUpdates": {
+            "App": 2,
+            "Brand": 2,
+            "WorkspaceTabs": 2,
+            "LayoutGroup": 6,
+            "MeasureLayout": 10,
+            "MeasureLayoutWithContext": 10,
+            "WorkspaceIcon": 8,
+            "SessionExplorer": 2,
+            "SelectionRail": 4,
+            "AnimatePresence": 10,
+            "Coach": 2,
+            "VideoWorkspace": 2,
+            "VideoTimeline": 2,
+            "SegmentEditor": 2,
+            "AxisTabs": 2,
+            "SelectionHighlight": 2,
+            "Plots": 2,
+            "Track": 2,
+            "Segments": 2
+          }
+        },
+        "themeInteraction": {
+          "sameCanvas": true
+        }
+      },
+      "errors": []
+    },
+    {
+      "workspace": "telemetry",
+      "w": 1440,
+      "h": 900,
+      "theme": "light",
+      "path": "docs/ember/screenshots/after/telemetry-1440x900-light.png",
+      "metrics": {
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "workspace": {
+          "x": 264,
+          "y": 274.28125,
+          "width": 1148,
+          "height": 597.71875
+        },
+        "mainWorkspace": {
+          "x": 236,
+          "y": 64,
+          "width": 1204,
+          "height": 808
+        },
+        "plots": [
+          {
+            "box": {
+              "x": 265,
+              "y": 331.28125,
+              "width": 816,
+              "height": 147
+            },
+            "visibleHeight": 147
+          },
+          {
+            "box": {
+              "x": 265,
+              "y": 478.28125,
+              "width": 816,
+              "height": 147
+            },
+            "visibleHeight": 147
+          },
+          {
+            "box": {
+              "x": 265,
+              "y": 625.28125,
+              "width": 816,
+              "height": 147
+            },
+            "visibleHeight": 147
+          }
+        ],
+        "mainUtilization": 0.5457920792079208,
+        "utilization": 0.7378051968421603,
+        "documentOverflow": false,
+        "bodyOverflow": false,
+        "fonts": {
+          "body": {
+            "size": "13px",
+            "family": "\"IBM Plex Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "color": "rgb(25, 35, 44)",
+            "background": "rgb(237, 240, 243)"
+          },
+          "label": {
+            "size": "12px",
+            "family": "\"IBM Plex Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "color": "rgb(25, 35, 44)",
+            "background": "rgba(0, 0, 0, 0)"
+          },
+          "legend": {
+            "size": "12px",
+            "family": "\"IBM Plex Mono\", ui-monospace, monospace",
+            "color": "rgb(0, 99, 150)",
+            "background": "rgba(0, 0, 0, 0)"
+          },
+          "secondary": {
+            "size": "11px",
+            "family": "\"IBM Plex Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "color": "rgb(66, 79, 91)",
+            "background": "rgba(0, 0, 0, 0)"
+          },
+          "axis": {
+            "size": "11px",
+            "family": "\"IBM Plex Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "color": "rgb(66, 79, 91)",
+            "background": "rgb(246, 248, 250)"
+          }
+        },
+        "canvasCount": 3,
+        "canvasFonts": [
+          "11px \"IBM Plex Mono\", ui-monospace, monospace"
+        ],
+        "canvasTextColors": [
+          "#424f5b"
+        ],
+        "reactCommitCounts": 47,
+        "reactComponentUpdates": {
+          "MotionConfig": 1,
+          "App": 47,
+          "Brand": 47,
+          "SessionExplorer": 47,
+          "AnimatePresence": 234,
+          "WorkspaceTabs": 46,
+          "LayoutGroup": 138,
+          "MeasureLayout": 230,
+          "MeasureLayoutWithContext": 230,
+          "WorkspaceIcon": 184,
+          "SelectionRail": 92,
+          "Coach": 46,
+          "VideoWorkspace": 46,
+          "VideoInstruments2": 2,
+          "VideoTimeline": 46,
+          "SegmentEditor": 46,
+          "AxisTabs": 46,
+          "SelectionHighlight": 46,
+          "Plots": 45,
+          "Track": 45,
+          "Segments": 45
+        },
+        "axe": [],
+        "cursorInteraction": {
+          "sameCanvas": true,
+          "reactCommits": 2,
+          "componentUpdates": {
+            "App": 2,
+            "Brand": 2,
+            "WorkspaceTabs": 2,
+            "LayoutGroup": 6,
+            "MeasureLayout": 10,
+            "MeasureLayoutWithContext": 10,
+            "WorkspaceIcon": 8,
+            "SessionExplorer": 2,
+            "SelectionRail": 4,
+            "AnimatePresence": 10,
+            "Coach": 2,
+            "VideoWorkspace": 2,
+            "VideoTimeline": 2,
+            "SegmentEditor": 2,
+            "AxisTabs": 2,
+            "SelectionHighlight": 2,
+            "Plots": 2,
+            "Track": 2,
+            "Segments": 2
+          }
+        },
+        "themeInteraction": {
+          "sameCanvas": true
+        }
+      },
+      "errors": []
+    },
+    {
+      "workspace": "telemetry",
+      "w": 1920,
+      "h": 1080,
+      "theme": "dark",
+      "path": "docs/ember/screenshots/after/telemetry-1920x1080-dark.png",
+      "metrics": {
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "workspace": {
+          "x": 264,
+          "y": 274.28125,
+          "width": 1628,
+          "height": 777.71875
+        },
+        "mainWorkspace": {
+          "x": 236,
+          "y": 64,
+          "width": 1684,
+          "height": 988
+        },
+        "plots": [
+          {
+            "box": {
+              "x": 265,
+              "y": 331.28125,
+              "width": 1296,
+              "height": 186.640625
+            },
+            "visibleHeight": 186.640625
+          },
+          {
+            "box": {
+              "x": 265,
+              "y": 517.921875,
+              "width": 1296,
+              "height": 186.640625
+            },
+            "visibleHeight": 186.640625
+          },
+          {
+            "box": {
+              "x": 265,
+              "y": 704.5625,
+              "width": 1296,
+              "height": 186.640625
+            },
+            "visibleHeight": 186.640625
+          }
+        ],
+        "mainUtilization": 0.5667225455465587,
+        "utilization": 0.7199541929521437,
+        "documentOverflow": false,
+        "bodyOverflow": false,
+        "fonts": {
+          "body": {
+            "size": "13px",
+            "family": "\"IBM Plex Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "color": "rgb(221, 231, 237)",
+            "background": "rgb(16, 17, 19)"
+          },
+          "label": {
+            "size": "12px",
+            "family": "\"IBM Plex Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "color": "rgb(221, 231, 237)",
+            "background": "rgba(0, 0, 0, 0)"
+          },
+          "legend": {
+            "size": "12px",
+            "family": "\"IBM Plex Mono\", ui-monospace, monospace",
+            "color": "rgb(121, 201, 242)",
+            "background": "rgba(0, 0, 0, 0)"
+          },
+          "secondary": {
+            "size": "11px",
+            "family": "\"IBM Plex Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "color": "rgb(180, 192, 202)",
+            "background": "rgba(0, 0, 0, 0)"
+          },
+          "axis": {
+            "size": "11px",
+            "family": "\"IBM Plex Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "color": "rgb(180, 192, 202)",
+            "background": "rgb(32, 35, 40)"
+          }
+        },
+        "canvasCount": 3,
+        "canvasFonts": [
+          "11px \"IBM Plex Mono\", ui-monospace, monospace"
+        ],
+        "canvasTextColors": [
+          "#b4c0ca"
+        ],
+        "reactCommitCounts": 47,
+        "reactComponentUpdates": {
+          "MotionConfig": 1,
+          "App": 47,
+          "Brand": 47,
+          "SessionExplorer": 47,
+          "AnimatePresence": 234,
+          "WorkspaceTabs": 46,
+          "LayoutGroup": 138,
+          "MeasureLayout": 230,
+          "MeasureLayoutWithContext": 230,
+          "WorkspaceIcon": 184,
+          "SelectionRail": 92,
+          "Coach": 46,
+          "VideoWorkspace": 46,
+          "VideoInstruments2": 2,
+          "VideoTimeline": 46,
+          "SegmentEditor": 46,
+          "AxisTabs": 46,
+          "SelectionHighlight": 46,
+          "Plots": 45,
+          "Track": 45,
+          "Segments": 45
+        }
+      },
+      "errors": []
+    },
+    {
+      "workspace": "telemetry",
+      "w": 1920,
+      "h": 1080,
+      "theme": "light",
+      "path": "docs/ember/screenshots/after/telemetry-1920x1080-light.png",
+      "metrics": {
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "workspace": {
+          "x": 264,
+          "y": 274.28125,
+          "width": 1628,
+          "height": 777.71875
+        },
+        "mainWorkspace": {
+          "x": 236,
+          "y": 64,
+          "width": 1684,
+          "height": 988
+        },
+        "plots": [
+          {
+            "box": {
+              "x": 265,
+              "y": 331.28125,
+              "width": 1296,
+              "height": 186.640625
+            },
+            "visibleHeight": 186.640625
+          },
+          {
+            "box": {
+              "x": 265,
+              "y": 517.921875,
+              "width": 1296,
+              "height": 186.640625
+            },
+            "visibleHeight": 186.640625
+          },
+          {
+            "box": {
+              "x": 265,
+              "y": 704.5625,
+              "width": 1296,
+              "height": 186.640625
+            },
+            "visibleHeight": 186.640625
+          }
+        ],
+        "mainUtilization": 0.5667225455465587,
+        "utilization": 0.7199541929521437,
+        "documentOverflow": false,
+        "bodyOverflow": false,
+        "fonts": {
+          "body": {
+            "size": "13px",
+            "family": "\"IBM Plex Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "color": "rgb(25, 35, 44)",
+            "background": "rgb(237, 240, 243)"
+          },
+          "label": {
+            "size": "12px",
+            "family": "\"IBM Plex Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "color": "rgb(25, 35, 44)",
+            "background": "rgba(0, 0, 0, 0)"
+          },
+          "legend": {
+            "size": "12px",
+            "family": "\"IBM Plex Mono\", ui-monospace, monospace",
+            "color": "rgb(0, 99, 150)",
+            "background": "rgba(0, 0, 0, 0)"
+          },
+          "secondary": {
+            "size": "11px",
+            "family": "\"IBM Plex Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "color": "rgb(66, 79, 91)",
+            "background": "rgba(0, 0, 0, 0)"
+          },
+          "axis": {
+            "size": "11px",
+            "family": "\"IBM Plex Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "color": "rgb(66, 79, 91)",
+            "background": "rgb(246, 248, 250)"
+          }
+        },
+        "canvasCount": 3,
+        "canvasFonts": [
+          "11px \"IBM Plex Mono\", ui-monospace, monospace"
+        ],
+        "canvasTextColors": [
+          "#424f5b"
+        ],
+        "reactCommitCounts": 47,
+        "reactComponentUpdates": {
+          "MotionConfig": 1,
+          "App": 47,
+          "Brand": 47,
+          "SessionExplorer": 47,
+          "AnimatePresence": 234,
+          "WorkspaceTabs": 46,
+          "LayoutGroup": 138,
+          "MeasureLayout": 230,
+          "MeasureLayoutWithContext": 230,
+          "WorkspaceIcon": 184,
+          "SelectionRail": 92,
+          "Coach": 46,
+          "VideoWorkspace": 46,
+          "VideoInstruments2": 2,
+          "VideoTimeline": 46,
+          "SegmentEditor": 46,
+          "AxisTabs": 46,
+          "SelectionHighlight": 46,
+          "Plots": 45,
+          "Track": 45,
+          "Segments": 45
+        }
+      },
+      "errors": []
+    },
+    {
+      "workspace": "telemetry",
+      "w": 600,
+      "h": 500,
+      "theme": "dark",
+      "path": "docs/ember/screenshots/after/telemetry-600x500-dark.png",
+      "metrics": {
+        "viewport": {
+          "width": 600,
+          "height": 500
+        },
+        "workspace": {
+          "x": 54,
+          "y": 240.21875,
+          "width": 532,
+          "height": 231.78125
+        },
+        "mainWorkspace": {
+          "x": 40,
+          "y": 52,
+          "width": 560,
+          "height": 420
+        },
+        "plots": [
+          {
+            "box": {
+              "x": 55,
+              "y": 297.21875,
+              "width": 520,
+              "height": 147
+            },
+            "visibleHeight": 147
+          },
+          {
+            "box": {
+              "x": 55,
+              "y": 444.21875,
+              "width": 520,
+              "height": 147
+            },
+            "visibleHeight": 27.78125
+          },
+          {
+            "box": {
+              "x": 55,
+              "y": 591.21875,
+              "width": 520,
+              "height": 147
+            },
+            "visibleHeight": 0
+          }
+        ],
+        "mainUtilization": 0.4161458333333333,
+        "utilization": 0.7540784683834434,
+        "documentOverflow": false,
+        "bodyOverflow": false,
+        "fonts": {
+          "body": {
+            "size": "13px",
+            "family": "\"IBM Plex Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "color": "rgb(221, 231, 237)",
+            "background": "rgb(16, 17, 19)"
+          },
+          "label": {
+            "size": "12px",
+            "family": "\"IBM Plex Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "color": "rgb(221, 231, 237)",
+            "background": "rgba(0, 0, 0, 0)"
+          },
+          "legend": {
+            "size": "12px",
+            "family": "\"IBM Plex Mono\", ui-monospace, monospace",
+            "color": "rgb(121, 201, 242)",
+            "background": "rgba(0, 0, 0, 0)"
+          },
+          "secondary": {
+            "size": "11px",
+            "family": "\"IBM Plex Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "color": "rgb(180, 192, 202)",
+            "background": "rgba(0, 0, 0, 0)"
+          },
+          "axis": {
+            "size": "11px",
+            "family": "\"IBM Plex Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "color": "rgb(180, 192, 202)",
+            "background": "rgb(32, 35, 40)"
+          }
+        },
+        "canvasCount": 3,
+        "canvasFonts": [
+          "11px \"IBM Plex Mono\", ui-monospace, monospace"
+        ],
+        "canvasTextColors": [
+          "#b4c0ca"
+        ],
+        "reactCommitCounts": 47,
+        "reactComponentUpdates": {
+          "MotionConfig": 1,
+          "App": 47,
+          "Brand": 47,
+          "SessionExplorer": 47,
+          "AnimatePresence": 234,
+          "WorkspaceTabs": 46,
+          "LayoutGroup": 138,
+          "MeasureLayout": 230,
+          "MeasureLayoutWithContext": 230,
+          "WorkspaceIcon": 184,
+          "SelectionRail": 92,
+          "Coach": 46,
+          "VideoWorkspace": 46,
+          "VideoInstruments2": 2,
+          "VideoTimeline": 46,
+          "SegmentEditor": 46,
+          "AxisTabs": 46,
+          "SelectionHighlight": 46,
+          "Plots": 45,
+          "Track": 45,
+          "Segments": 45
+        }
+      },
+      "errors": []
+    },
+    {
+      "workspace": "telemetry",
+      "w": 600,
+      "h": 500,
+      "theme": "light",
+      "path": "docs/ember/screenshots/after/telemetry-600x500-light.png",
+      "metrics": {
+        "viewport": {
+          "width": 600,
+          "height": 500
+        },
+        "workspace": {
+          "x": 54,
+          "y": 240.21875,
+          "width": 532,
+          "height": 231.78125
+        },
+        "mainWorkspace": {
+          "x": 40,
+          "y": 52,
+          "width": 560,
+          "height": 420
+        },
+        "plots": [
+          {
+            "box": {
+              "x": 55,
+              "y": 297.21875,
+              "width": 520,
+              "height": 147
+            },
+            "visibleHeight": 147
+          },
+          {
+            "box": {
+              "x": 55,
+              "y": 444.21875,
+              "width": 520,
+              "height": 147
+            },
+            "visibleHeight": 27.78125
+          },
+          {
+            "box": {
+              "x": 55,
+              "y": 591.21875,
+              "width": 520,
+              "height": 147
+            },
+            "visibleHeight": 0
+          }
+        ],
+        "mainUtilization": 0.4161458333333333,
+        "utilization": 0.7540784683834434,
+        "documentOverflow": false,
+        "bodyOverflow": false,
+        "fonts": {
+          "body": {
+            "size": "13px",
+            "family": "\"IBM Plex Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "color": "rgb(25, 35, 44)",
+            "background": "rgb(237, 240, 243)"
+          },
+          "label": {
+            "size": "12px",
+            "family": "\"IBM Plex Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "color": "rgb(25, 35, 44)",
+            "background": "rgba(0, 0, 0, 0)"
+          },
+          "legend": {
+            "size": "12px",
+            "family": "\"IBM Plex Mono\", ui-monospace, monospace",
+            "color": "rgb(0, 99, 150)",
+            "background": "rgba(0, 0, 0, 0)"
+          },
+          "secondary": {
+            "size": "11px",
+            "family": "\"IBM Plex Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "color": "rgb(66, 79, 91)",
+            "background": "rgba(0, 0, 0, 0)"
+          },
+          "axis": {
+            "size": "11px",
+            "family": "\"IBM Plex Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "color": "rgb(66, 79, 91)",
+            "background": "rgb(246, 248, 250)"
+          }
+        },
+        "canvasCount": 3,
+        "canvasFonts": [
+          "11px \"IBM Plex Mono\", ui-monospace, monospace"
+        ],
+        "canvasTextColors": [
+          "#424f5b"
+        ],
+        "reactCommitCounts": 47,
+        "reactComponentUpdates": {
+          "MotionConfig": 1,
+          "App": 47,
+          "Brand": 47,
+          "SessionExplorer": 47,
+          "AnimatePresence": 234,
+          "WorkspaceTabs": 46,
+          "LayoutGroup": 138,
+          "MeasureLayout": 230,
+          "MeasureLayoutWithContext": 230,
+          "WorkspaceIcon": 184,
+          "SelectionRail": 92,
+          "Coach": 46,
+          "VideoWorkspace": 46,
+          "VideoInstruments2": 2,
+          "VideoTimeline": 46,
+          "SegmentEditor": 46,
+          "AxisTabs": 46,
+          "SelectionHighlight": 46,
+          "Plots": 45,
+          "Track": 45,
+          "Segments": 45
+        }
+      },
+      "errors": []
+    }
+  ],
+  "renderCounts": "React development DevTools hook commit traversal, counting changed props/state; approximate component updates, not React Profiler timings",
+  "weaknesses": []
+}

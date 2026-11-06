@@ -1,0 +1,57 @@
+/* Ember motion layer. Loaded last so it owns how selection and feedback move.
+   Selection is a single glass plate (Motion layoutId) that glides between
+   items; items never repaint their own selected fill. Only transform and
+   opacity animate. Springs are critically damped (motion.tsx motionTokens). */
+
+/* ---------- Shared selection plate ---------- */
+.selection-plate{display:none}
+.app.premium .selection-plate{display:block;position:absolute;inset:-1px;z-index:-1;pointer-events:none;border:1px solid var(--glass-raised-border);background:var(--glass-focused);box-shadow:var(--glass-edge),0 5px 12px #0002}
+.app.premium .selection-plate.session{border-color:var(--glass-interactive-border);background:var(--glass-interactive-fill);box-shadow:var(--glass-interactive-shadow)}
+.app.premium .selection-plate.reference{border-color:color-mix(in srgb,var(--trace-comparison) 25%,transparent);background:color-mix(in srgb,var(--trace-comparison) 11%,var(--surface-2));box-shadow:var(--glass-edge)}
+.app.premium .selection-plate.step{border-color:var(--cyan);background:var(--raised);box-shadow:none}
+.app.premium :is(.library-entry,.lap-row,.coach-opportunity-list button){isolation:isolate}
+
+/* Rows hand their selected fill to the plate so the change is one continuous move. */
+.app.premium .library-entry.active,
+.app.premium .shell .library-entry.active{background:transparent!important;border-color:transparent!important;box-shadow:none!important}
+.app.premium .lap-list .lap-row.selected,
+.app.premium .shell .lap-list .lap-row.selected,
+.app.premium .shell .lap-list .lap-row.compared{background:transparent!important;border-color:transparent!important;box-shadow:none!important}
+.app.premium .coach-opportunity-list button.selected{background:var(--panel)!important;border-color:var(--border)!important;box-shadow:none!important}
+
+/* Reference badge: the amber ring is the moving element, the button only hosts it. */
+.app.premium .shell .compare-toggle.on{position:relative;background:transparent!important;border-color:transparent!important}
+.app.premium .reference-mark{position:absolute;inset:-1px;display:grid;place-items:center;border:1px solid var(--amber);color:var(--amber);font:12px var(--font-data);line-height:1}
+
+/* ---------- Workspace tabs: the glass pill is the layoutId element ---------- */
+.app.premium .titlebar .workspace-switch.segmented button.active,
+.app.premium .axis-switch.segmented button.active,
+.app.premium .video-view-switch button[aria-pressed=true]{background:transparent!important;border-color:transparent!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+.app.premium .titlebar .workspace-switch .workspace-selection{display:block;position:absolute;inset:0;height:auto;z-index:-1;border:1px solid var(--glass-interactive-border);border-radius:var(--radius-control);background:var(--glass-interactive-fill);box-shadow:var(--glass-interactive-shadow)}
+.app.premium .axis-switch .control-selection,.app.premium .video-view-selection{border:1px solid var(--glass-interactive-border)}
+/* Diffusion stays on the moving leaf only. Refraction is skipped: an SVG filter
+   re-evaluated every frame of a glide costs more than it shows. */
+@supports ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  :root[data-glass-quality=full] .app.premium :is(.titlebar .workspace-selection,.axis-switch .control-selection,.video-view-selection,.selection-plate.session){backdrop-filter:blur(var(--glass-control-blur)) saturate(120%);-webkit-backdrop-filter:blur(var(--glass-control-blur)) saturate(120%)}
+}
+:root[data-glass-quality=static] .app.premium :is(.titlebar .workspace-selection,.axis-switch .control-selection,.video-view-selection,.selection-plate),
+:root[data-glass-quality] .app.premium:has(:is(.explorer-resizer,.panel-resizer,.video-resize):active) :is(.titlebar .workspace-selection,.axis-switch .control-selection,.video-view-selection,.selection-plate){backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+@media(prefers-reduced-transparency:reduce),(forced-colors:active){
+  :root[data-glass-quality] .app.premium :is(.titlebar .workspace-selection,.axis-switch .control-selection,.video-view-selection,.selection-plate){backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+}
+.tool-tabs button svg,.workspace-icon{transition:color var(--motion-fast) ease,opacity var(--motion-fast) ease}
+
+/* ---------- Tactile feedback: lift on hover, settle on press ----------
+   Standalone controls only. Tabs and segmented items stay put because their
+   selection plate is measured against them. Transforms use the individual
+   translate/scale properties so they compose with Motion's own transform. */
+.app.premium :where(.channel-control>button,.titlebar .import-button,.titlebar .icon-button,.setup-toggle,.analysis-setup button,.video-marker-list button,.coach-overview>.import-button,.corner-controls button,.import-receipt footer button,.explorer-icon,.compare-toggle,.coach-opportunity-list button:not(.selected)):not(:disabled){
+  transition:background-color var(--motion-fast) ease,color var(--motion-fast) ease,border-color var(--motion-fast) ease,translate var(--motion-settle) var(--motion-spring),scale var(--motion-settle) var(--motion-spring)}
+.app.premium :where(.channel-control>button,.titlebar .import-button,.setup-toggle,.analysis-setup button,.video-marker-list button,.coach-overview>.import-button,.corner-controls button,.import-receipt footer button,.coach-opportunity-list button:not(.selected)):hover:not(:disabled){translate:0 -1px}
+.app.premium :where(.channel-control>button,.titlebar .import-button,.titlebar .icon-button,.setup-toggle,.analysis-setup button,.video-marker-list button,.coach-overview>.import-button,.corner-controls button,.import-receipt footer button,.explorer-icon,.compare-toggle,.coach-opportunity-list button):active:not(:disabled){translate:0 0;scale:.97;transition-duration:70ms}
+/* Floating surfaces arrive from the control that opened them. */
+.app.premium :is(.channel-menu,.telemetry-options-panel){transform-origin:top right}
+
+@media(prefers-reduced-motion:reduce){
+  .app.premium :where(button):hover,.app.premium :where(button):active{translate:none!important;scale:none!important}
+}

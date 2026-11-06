@@ -7,6 +7,11 @@ export function supportedGain(finding:Opportunity):{observed:number;estimated:nu
  return {observed,estimated:estimated!=null&&Number.isFinite(estimated)&&estimated>0&&estimated<=observed?estimated:null};
 }
 
+/** Physics experiments are always low confidence: an untested idea, labeled as what to do next. */
+export function confidenceLabel(confidence:string){
+ return confidence==='low'?'To test on track':`${confidence.charAt(0).toUpperCase()}${confidence.slice(1)} confidence`;
+}
+
 export function findingTitle(finding:Opportunity){
  if(finding.coaching?.title.trim())return finding.coaching.title;
  const kind=finding.kind.toLowerCase();
@@ -34,7 +39,7 @@ export function cardCoaching(finding:Opportunity,explanation?:CoachResult['expla
   observation:explanation?.hypothesis?`${measured} ${conciseCoaching(explanation.hypothesis)}`:coachingObservation(finding),
   action:explanation?.action?conciseCoaching(explanation.action,true):conciseCoaching(finding.action),
   validation:conciseCoaching(explanation?.validation||finding.coaching?.validation||'Compare repeated clean laps through the highlighted section and the following straight. Keep the change only if full section and lap time improve without losing exit speed.'),
-  source:explanation?.reasoningSource==='modelSelectedInterpretation'?'Gemma-selected experiment':explanation?.reasoningSource==='modelGeneratedProse'?'Gemma coaching':'Deterministic telemetry',
+  source:explanation?.reasoningSource==='modelSelectedInterpretation'?'Chosen by local AI (Gemma)':explanation?.reasoningSource==='modelGeneratedProse'?'Gemma coaching':'Deterministic telemetry',
  };
 }
 

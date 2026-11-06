@@ -31,4 +31,30 @@ describe('full-lap physics diagnostics',()=>{
   expect(html).toContain('Speed overlay unavailable');
   expect(html).not.toContain('NaN');
  });
+ it('exposes sampled speeds and highlights only a valid intersecting selection',()=>{
+  const html=renderToStaticMarkup(<FullLapProfile interactive diagnostics={diagnostics} profile={profile} selectedRange={{startMeters:100,endMeters:180,label:'Corner 2'}}/>);
+  expect(html).toContain('type="range"');
+  expect(html).toContain('aria-label="Inspect speed by track distance"');
+  expect(html).toContain('22.4 mph');
+  expect(html).toContain('coach-profile-selection');
+  expect(html).toContain('coach-profile-selection-label');
+  expect(html).toContain('100–180 m');
+  expect(html).toContain('viewBox="0 0 900 194"');
+  expect(html).toContain('Corner 2');
+  for(const range of [{startMeters:NaN,endMeters:180,label:'Invalid'},{startMeters:200,endMeters:100,label:'Invalid'},{startMeters:1100,endMeters:1200,label:'Outside'}]){
+   const invalid=renderToStaticMarkup(<FullLapProfile interactive diagnostics={diagnostics} profile={profile} selectedRange={range}/>);
+   expect(invalid).not.toContain('coach-profile-selection');
+  }
+ });
+ it('does not offer scrubbing when no valid profile exists',()=>{
+  const html=renderToStaticMarkup(<FullLapProfile interactive diagnostics={diagnostics}/>);
+  expect(html).toContain('Speed overlay unavailable');
+  expect(html).not.toContain('type="range"');
+ });
+ it('preserves the legacy profile without premium controls',()=>{
+  const html=renderToStaticMarkup(<FullLapProfile diagnostics={diagnostics} profile={profile}/>);
+  expect(html).not.toContain('type="range"');
+  expect(html).not.toContain('coach-profile-cursor');
+  expect(html).toContain('viewBox="0 0 900 194"');
+ });
 });

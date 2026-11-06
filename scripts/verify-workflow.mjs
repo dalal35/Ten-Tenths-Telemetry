@@ -46,8 +46,10 @@ try{
  await page.goto(server.resolvedUrls.local[0]);await page.getByRole('heading',{name:'Track one'}).waitFor();
  assert.equal(await page.locator('.import-button kbd').innerText(),'Ctrl O','Windows import hint uses the working Control shortcut');
  await page.getByRole('button',{name:'Collapse sidebar',exact:true}).waitFor({timeout:2000});
- assert.equal(await page.locator('.library-entry.active .session-track').innerText(),'one','Explorer displays the actual session name');
- await page.locator('.segment-speeds').first().waitFor();assert.match(await page.locator('.segment-speeds').first().innerText(),/22\.4/,'Section speed converts 10 m/s to 22.4 mph');
+ assert.equal(await page.locator('.library-entry.active .session-track').innerText(),'One','Explorer displays the actual session name');
+ await page.locator('.segment-card').first().click();
+ await page.locator('.segment-speeds').first().waitFor();assert.match(await page.locator('.segment-speeds').first().innerText(),/22\.4/,'Selected section evidence converts 10 m/s to 22.4 mph');
+ await page.getByLabel('Track options and data notes',{exact:true}).click();
  await page.getByRole('button',{name:'Edit boundaries',exact:true}).click();
  const handle=page.getByRole('slider',{name:'Section boundary 1'});await handle.click();await page.waitForTimeout(150);assert.equal(await handle.evaluate(el=>document.activeElement===el),true,'Clicking a boundary enables keyboard adjustment');await page.keyboard.press('ArrowRight');await page.keyboard.press('ArrowRight');
  await page.waitForFunction(()=>JSON.parse(localStorage.getItem('test-corners')||'null')?.[0]===60);await page.waitForTimeout(150);
@@ -56,13 +58,13 @@ try{
  await page.keyboard.press('ArrowRight');await page.waitForTimeout(120);await page.keyboard.press('ArrowRight');await page.waitForTimeout(400);
  assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('test-corners'))[0]),75,'Older analysis cannot reset a newer boundary draft');
  await page.getByRole('button',{name:'Done editing',exact:true}).click();
- await page.getByRole('button',{name:'Time',exact:true}).click();await page.getByRole('button',{name:'Compact',exact:true}).click();
- await page.getByRole('button',{name:/two Test/}).click();await page.getByRole('heading',{name:'Track two'}).waitFor();await page.getByText('Saved on this computer').waitFor();
+ await page.getByRole('button',{name:'Time',exact:true}).click();await page.getByLabel('Chart options',{exact:true}).click();await page.getByRole('button',{name:'Compact',exact:true}).click();
+ await page.getByRole('button',{name:/Two Test/}).click();await page.getByRole('heading',{name:'Track two'}).waitFor();await page.locator('.statusbar').getByText('Saved on this computer').waitFor({state:'attached'});
  await page.locator('.plot-label').filter({hasText:'mph'}).waitFor();assert.equal(await page.locator('.plot-label').filter({hasText:'mph'}).count(),1,'Another session displays mph');
- await page.getByRole('button',{name:/one Test/}).click();await page.getByRole('heading',{name:'Track one'}).waitFor();await page.getByText('Saved on this computer').waitFor();
+ await page.getByRole('button',{name:/One Test/}).click();await page.getByRole('heading',{name:'Track one'}).waitFor();await page.locator('.statusbar').getByText('Saved on this computer').waitFor({state:'attached'});
  await page.locator('.plot-label').filter({hasText:'mph'}).waitFor();assert.equal(await page.locator('.plot-label').filter({hasText:'mph'}).count(),1,'Switching retains mph');assert.equal(await page.locator('.segmented[aria-label="Horizontal axis"] button.active').innerText(),'Time','Switching restores axis');
- await page.reload();await page.getByRole('heading',{name:'Track one'}).waitFor();await page.locator('.plot-label').filter({hasText:'mph'}).waitFor();assert.equal(await page.locator('.plot-label').filter({hasText:'mph'}).count(),1,'Reload retains mph');assert.equal(await page.locator('.segmented[aria-label="Horizontal axis"] button.active').innerText(),'Time');assert.equal(await page.getByRole('button',{name:'Comfortable',exact:true}).count(),1,'Reload restores graph density');
- await page.locator('.library-entry').filter({hasText:/^one/}).getByRole('button',{name:'Session actions',exact:true}).click();
+ await page.reload();await page.getByRole('heading',{name:'Track one'}).waitFor();await page.locator('.plot-label').filter({hasText:'mph'}).waitFor();assert.equal(await page.locator('.plot-label').filter({hasText:'mph'}).count(),1,'Reload retains mph');assert.equal(await page.locator('.segmented[aria-label="Horizontal axis"] button.active').innerText(),'Time');await page.getByLabel('Chart options',{exact:true}).click();assert.equal(await page.getByRole('button',{name:'Comfortable',exact:true}).count(),1,'Reload restores graph density');
+ await page.locator('.library-entry').filter({hasText:/^One/}).getByRole('button',{name:'Session actions',exact:true}).click();
  await page.getByRole('menuitem',{name:'Refresh',exact:true}).click();
  await page.waitForFunction(()=>document.querySelector('main').inert);
  assert.equal(await page.locator('main').getAttribute('inert'),'','Workspace is frozen during explicit refresh');
@@ -91,7 +93,7 @@ try{
  await page.getByRole('heading',{name:'Merged · Track one'}).waitFor();await page.screenshot({path:'.tools/session-merge-workspace.png'});assert.equal(await page.locator('.library-entry').count(),1,'Merged recordings appear as one combined session');assert.equal(await page.locator('.lap-row').count(),4);assert(await page.locator('.session-region').evaluate(el=>el.getBoundingClientRect().height<240),'Small session libraries do not reserve empty navigation space');assert.equal(await page.evaluate(()=>window.mergeCalls),1);
  await page.getByRole('button',{name:'Compare lap 3',exact:true}).click();await page.waitForTimeout(200);
  assert.doesNotMatch(await page.locator('.lap-list').innerText(),/one\.xrk|two\.xrk/,'Lap rows omit source filenames');
- await page.reload();await page.getByRole('heading',{name:'Merged · Track one'}).waitFor();await page.getByText('Saved on this computer').waitFor();
+ await page.reload();await page.getByRole('heading',{name:'Merged · Track one'}).waitFor();await page.locator('.statusbar').getByText('Saved on this computer').waitFor({state:'attached'});
  await page.getByRole('button',{name:'Session explorer actions',exact:true}).click();await page.getByRole('menuitem',{name:'Merge sessions',exact:true}).click();
  assert.equal(await page.getByRole('checkbox',{name:'Select Merged recordings for merging'}).count(),1,'Existing merged sessions can be selected for another merge');
  assert.equal(await page.getByRole('checkbox',{name:'Select one for merging'}).count(),0,'Original recordings are contained in the combined session');
@@ -100,7 +102,7 @@ try{
  await page.getByRole('button',{name:'Time',exact:true}).click();await page.locator('.library-entry.active').getByRole('button',{name:'Session actions',exact:true}).click();await page.getByRole('menuitem',{name:'Unmerge',exact:true}).click();
  await page.getByRole('heading',{name:'Track one',exact:true}).waitFor();await page.waitForTimeout(250);assert.equal(await page.locator('.library-entry').count(),2);
  assert.deepEqual(normalizeOriginals(await page.evaluate(()=>JSON.parse(localStorage.getItem('test-library')).entries.map(e=>({id:e.id,workspace:e.workspace})))),normalizeOriginals(originals),'Unmerge preserves original workspaces through existing default normalization, including queued saves');
- await page.locator('.library-entry').filter({hasText:/^two/}).getByRole('button',{name:'Session actions',exact:true}).click();await page.getByRole('menuitem',{name:'Remove',exact:true}).click();await page.waitForFunction(()=>JSON.parse(localStorage.getItem('test-library')).entries.length===1);assert.equal(await page.locator('.library-entry').count(),1);
+ await page.locator('.library-entry').filter({hasText:/^Two/}).getByRole('button',{name:'Session actions',exact:true}).click();await page.getByRole('menuitem',{name:'Remove',exact:true}).click();await page.waitForFunction(()=>JSON.parse(localStorage.getItem('test-library')).entries.length===1);assert.equal(await page.locator('.library-entry').count(),1);
  await page.keyboard.press('Control+o');await page.waitForFunction(()=>window.openCalls===1);
  await page.evaluate(()=>localStorage.setItem('test-platform','MacIntel'));await page.reload();await page.getByRole('heading',{name:'Track one'}).waitFor();
  assert.equal(await page.locator('.import-button kbd').innerText(),'⌘ O','macOS keeps the Command shortcut hint');
@@ -109,10 +111,10 @@ try{
  await page.addInitScript(()=>{const db=JSON.parse(localStorage.getItem('test-library')),template=db.entries[0];for(let i=0;i<8;i++)db.entries.push({...template,id:`memory-${i}`,name:`memory-${i}`,track:`Track memory-${i}`,source:`/tmp/memory-${i}.xrk`});localStorage.setItem('test-library',JSON.stringify(db));});
  await page.reload();await page.getByRole('heading',{name:'Track one'}).waitFor();
  for(let i=0;i<8;i++){
-  await page.getByRole('button',{name:new RegExp(`^memory-${i} Test`)}).click();
+  await page.getByRole('button',{name:new RegExp(`^Memory-${i} Test`)}).click();
   await page.getByRole('heading',{name:`Track memory-${i}`,exact:true}).waitFor();
   await page.locator('.plot-label').filter({hasText:'mph'}).waitFor();
-  await page.getByText('Saved on this computer').waitFor();
+  await page.locator('.statusbar').getByText('Saved on this computer').waitFor({state:'attached'});
  }
  await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
  await cdp.send('HeapProfiler.collectGarbage');

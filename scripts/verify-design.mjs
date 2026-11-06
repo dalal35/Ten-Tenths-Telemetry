@@ -39,7 +39,7 @@ try{
   assert.equal(rapid.selected,'AI Driving Coach','Latest burst navigation commits synchronously');
   await page.getByRole('button',{name:'Telemetry',exact:true}).click();
   await page.waitForTimeout(300);
-  const organize=page.getByRole('button',{name:'Sort and group sessions',exact:true});
+  const organize=page.getByRole('button',{name:'Sort & group sessions',exact:true});
   await organize.click();
   await expect(page.getByRole('dialog',{name:'Organize sessions'})).toBeVisible();
   await page.keyboard.press('Escape');

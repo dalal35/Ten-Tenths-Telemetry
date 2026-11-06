@@ -1,5 +1,5 @@
 import {describe,it,expect} from 'vitest';
-import {speedFactor,displaySpeedUnit,displayAdvancedResult} from './speedDisplay';
+import {speedFactor,displaySpeedUnit,displayAdvancedResult,displaySpeedText} from './speedDisplay';
 import type {AdvancedResult} from './types';
 describe('speed presentation',()=>{
  it('converts verified units without altering other measurements or mph',()=>{
@@ -21,4 +21,8 @@ describe('speed presentation',()=>{
   expect(JSON.stringify(raw)).toBe(original);
   expect(displayAdvancedResult(shown)).toEqual(shown);
  });
+});
+
+it('coaching text shows speeds in the display unit and leaves accelerations alone',()=>{
+ expect(displaySpeedText('minimum 10.0 m/s at 213 m; 2.0 m/s² peak')).toBe('minimum 22.4 mph at 213 m; 2.0 m/s² peak');
 });

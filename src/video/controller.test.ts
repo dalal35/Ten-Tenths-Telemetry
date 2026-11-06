@@ -27,6 +27,41 @@ function fixture(initial: Partial<PlayerSnapshot> = {}) {
 const flush = async () => { for (let i = 0; i < 6; i++) await Promise.resolve(); };
 
 describe('source clock controller', () => {
+  it('keeps a paused telemetry seek at its exact lap boundary despite round-trip and media-clock error', async () => {
+    const f=fixture({state:'paused'});
+    f.segments([{id:'boundary',videoStart:1211.45,videoEnd:1600,anchorVideoTime:1211.45,anchorTelemetryTime:0,correctionSeconds:0}]);
+    const seek=f.controller.seekTelemetry(206.53);await flush();f.observe({time:1417.98,state:'paused'});f.requests[0].resolve();await seek;
+    f.now(50);f.controller.tick();
+    expect(f.onTime).toHaveBeenLastCalledWith({kind:'mapped',segmentId:'boundary',time:206.53});
+    f.observe({time:1417.96,state:'paused'});f.now(100);f.controller.tick();
+    expect(f.onTime).toHaveBeenLastCalledWith({kind:'mapped',segmentId:'boundary',time:206.53});
+    // Native scrubbing and playback still take ownership of the clock.
+    f.observe({time:1417,state:'paused',seeking:true});f.observe({seeking:false});f.now(150);f.controller.tick();
+    expect(f.onTime.mock.lastCall?.[0]).toMatchObject({kind:'mapped',segmentId:'boundary'});
+    expect(f.onTime.mock.lastCall?.[0].time).toBeCloseTo(205.55,10);
+    f.observe({time:1418,state:'playing'});f.now(200);f.controller.tick();
+    expect(f.onTime.mock.lastCall?.[0].time).toBeGreaterThan(206.53);
+    f.controller.dispose();
+  });
+  it('releases a paused target when mappings are edited or become unavailable', async () => {
+    const f=fixture({state:'paused'}),seek=f.controller.seekTelemetry(110);await flush();f.requests[0].resolve();await seek;
+    f.segments([{...segment,correctionSeconds:2}]);f.now(50);f.controller.tick();
+    expect(f.onTime).toHaveBeenLastCalledWith({kind:'mapped',segmentId:'one',time:112});
+    f.segments([]);f.now(100);f.controller.tick();
+    expect(f.onTime).toHaveBeenLastCalledWith({kind:'unavailable'});f.controller.dispose();
+  });
+  it('does not retain old telemetry when mappings change during a pending seek', async () => {
+    const f=fixture({state:'paused'}),seek=f.controller.seekTelemetry(110);await flush();
+    f.segments([{...segment,correctionSeconds:2}]);f.requests[0].resolve();await seek;f.now(50);f.controller.tick();
+    expect(f.onTime).toHaveBeenLastCalledWith({kind:'mapped',segmentId:'one',time:112});f.controller.dispose();
+  });
+  it('retains a verified approximate seek at its observed paused position', async () => {
+    const f=fixture({state:'paused'}),seek=f.controller.seekTelemetry(120);await flush();
+    // The YouTube adapter verifies approximate seek completion within 0.25 s.
+    f.observe({time:19.9,state:'paused'});f.requests[0].resolve();await seek;
+    f.now(50);f.observe({time:19.9,state:'paused'});f.controller.tick();
+    expect(f.onTime).toHaveBeenLastCalledWith({kind:'mapped',segmentId:'one',time:120});f.controller.dispose();
+  });
   it('predicts briefly at source rate, reconciles fresh samples, bounds cadence and horizon without seeking', () => {
     const f = fixture();
     f.controller.tick(); f.now(50); f.controller.tick();

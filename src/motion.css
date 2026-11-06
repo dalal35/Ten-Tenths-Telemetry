@@ -20,15 +20,6 @@
 /* A sticky player must fit inside the workspace, not the full desktop window. */
 .workspace-viewport .video-player-space{min-height:100px;max-height:max(100px,calc(100cqh - 180px))}
 @container workspace-view (height < 420px){.video-sticky-player{position:static}}
-/* Fade an opaque outgoing snapshot over the interactive, untransformed incoming scene. */
-:root{view-transition-name:none}
-::view-transition{pointer-events:none}
-::view-transition-group(workspace-content){animation:none;pointer-events:none}
-::view-transition-image-pair(workspace-content){isolation:isolate;pointer-events:none}
-::view-transition-old(workspace-content){height:100%;width:100%;object-fit:fill;mix-blend-mode:normal;transform-origin:50% 50%;pointer-events:none;animation-duration:220ms;animation-timing-function:cubic-bezier(.2,0,.2,1);animation-fill-mode:both}
-::view-transition-old(workspace-content){animation-name:workspace-out}
-@keyframes workspace-out{from{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(.996)}}
-@media(prefers-reduced-motion:reduce){::view-transition-old(workspace-content),::view-transition-new(workspace-content){animation:none!important}}
 .library-entry,.lap-row{position:relative}
 .selection-rail{position:absolute;left:-2px;top:0;bottom:0;width:2px;background:var(--cyan);pointer-events:none;z-index:1}
 .lap-row>.selection-rail{left:0}

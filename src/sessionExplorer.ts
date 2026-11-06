@@ -28,7 +28,8 @@ export function writeExplorerPreferences(storage: Pick<Storage, 'setItem'>, pref
 
 interface RecordingDate { day: string; stamp: number; time?: { hour: number; minute: number } }
 function recordingDate(value: string): RecordingDate | undefined {
-  // Keep the logger's recording day; Date.parse would shift zoned dates and guess ambiguous slash dates.
+  // Keep the logger's recording day; Date.parse would shift zoned dates. AiM loggers write MM/DD/YYYY
+  // (for example 05/23/2026), so a slash date is month-first unless only day-first is possible.
   const match = value.trim().match(/^(\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2}\/\d{4})(?:[T\s]+(\d{2}):(\d{2}):(\d{2})(?:\.(\d{1,3}))?(Z|[+-]\d{2}:\d{2})?)?$/);
   if (!match) return undefined;
   let year: number, month: number, day: number;
@@ -36,7 +37,7 @@ function recordingDate(value: string): RecordingDate | undefined {
   else {
     const [a, b, y] = match[1].split('/').map(Number);
     if (a > 12 && b <= 12) [year, month, day] = [y, b, a];
-    else if (b > 12 && a <= 12) [year, month, day] = [y, a, b];
+    else if (a <= 12) [year, month, day] = [y, a, b];
     else return undefined;
   }
   const hour = Number(match[2] ?? 0), minute = Number(match[3] ?? 0), second = Number(match[4] ?? 0);
@@ -88,6 +89,17 @@ export function organizeSessions(entries: readonly LibraryEntry[], sort: Session
     const descending = grouping === 'date' ? sort !== 'date-asc' : sort === `${grouping}-desc`;
     return compareKnown(aKey, bKey, descending);
   });
+}
+
+/** Full date and time for a session heading; empty when the value cannot be read as a date. */
+export function formatRecordingDateTime(value: string): string {
+  const recording = recordingDate(value);
+  if (!recording) return '';
+  const [year, month, day] = recording.day.split('-').map(Number);
+  const date = `${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][month - 1]} ${day}, ${year}`;
+  if (!recording.time) return date;
+  const { hour, minute } = recording.time;
+  return `${date} · ${hour % 12 || 12}:${String(minute).padStart(2, '0')} ${hour < 12 ? 'AM' : 'PM'}`;
 }
 
 export function formatRecordingDate(value: string): string {

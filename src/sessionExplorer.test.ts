@@ -31,12 +31,12 @@ describe('session organization', () => {
   it('orders grouped metadata in its selected descending direction', () => {
     expect(organizeSessions(entries, 'driver-desc', 'driver').map(group => group.label)).toEqual(['Zoe', 'Ada', 'Unknown driver']);
   });
-  it('groups local recording days without timezone shifts and validates impossible or ambiguous dates', () => {
+  it('groups local recording days without timezone shifts and validates impossible dates and reads slash dates month-first', () => {
     const entries = [entry('midnight', { recordedAt: '2026-10-14' }), entry('late', { recordedAt: '2026-10-14T23:30:00-07:00' }), entry('slash', { recordedAt: '15/10/2026 00:00:01' }), entry('ambiguous', { recordedAt: '10/11/2026 12:00:00' }), entry('bad-day', { recordedAt: '2026-02-30 12:00:00' }), entry('bad-time', { recordedAt: '2026-10-14 25:00:00' }), entry('bad', { recordedAt: 'yesterday' })];
     const groups = organizeSessions(entries, 'date-desc', 'date');
-    expect(groups.map(group => group.label)).toEqual(['2026-10-15', '2026-10-14', 'Unknown date']);
+    expect(groups.map(group => group.label)).toEqual(['2026-10-15', '2026-10-14', '2026-10-11', 'Unknown date']);
     expect(groups[1].entries.map(item => item.id)).toEqual(['late', 'midnight']);
-    expect(organizeSessions(entries, 'date-asc', 'date').map(group => group.label)).toEqual(['2026-10-14', '2026-10-15', 'Unknown date']);
+    expect(organizeSessions(entries, 'date-asc', 'date').map(group => group.label)).toEqual(['2026-10-11', '2026-10-14', '2026-10-15', 'Unknown date']);
   });
   it('uses no inferred filename metadata and never modifies or clones source entries', () => {
     const original = entry('2026-10-14 Driver Circuit.xrk');
@@ -87,7 +87,8 @@ describe('compact recording date display', () => {
     ['  ', 'Unknown date'],
     ['2026-02-29', 'Unknown date'],
     ['2026-10-07 25:00:00', 'Unknown date'],
-    ['10/07/2026 18:33:00', 'Unknown date'],
+    ['10/07/2026 18:33:00', 'Oct 7, 6:33 PM'],
+    ['13/13/2026 18:33:00', 'Unknown date'],
     ['2026-10-07T23:00:00+25:00', 'Unknown date'],
     ['October 7 2026', 'Unknown date'],
   ])('formats %s as %s', (input, expected) => expect(formatRecordingDate(input)).toBe(expected));

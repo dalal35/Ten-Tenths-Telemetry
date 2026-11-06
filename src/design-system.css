@@ -1,0 +1,137 @@
+/* Production foundation. Loaded only by the desktop entry, never the website. */
+@font-face{font-family:'Geist';src:url('/fonts/geist-latin-variable.woff2') format('woff2');font-style:normal;font-weight:100 900;font-display:swap}
+@font-face{font-family:'IBM Plex Sans';src:url('/fonts/IBMPlexSans-Regular.woff2') format('woff2');font-style:normal;font-weight:400;font-display:swap}
+@font-face{font-family:'IBM Plex Sans';src:url('/fonts/IBMPlexSans-Medium.woff2') format('woff2');font-style:normal;font-weight:500;font-display:swap}
+@font-face{font-family:'IBM Plex Sans';src:url('/fonts/IBMPlexSans-SemiBold.woff2') format('woff2');font-style:normal;font-weight:600 700;font-display:swap}
+@font-face{font-family:'IBM Plex Mono';src:url('/fonts/ibm-plex-mono-latin.woff2') format('woff2');font-style:normal;font-weight:400 700;font-display:swap}
+@font-face{font-family:'Barlow Condensed';src:url('/fonts/BarlowCondensed-Medium.ttf') format('truetype');font-style:normal;font-weight:500;font-display:swap}
+
+:root{
+  --font-sans:-apple-system,BlinkMacSystemFont,'Segoe UI','Geist',sans-serif;
+  --font-code:'IBM Plex Mono',ui-monospace,monospace;
+  --font-mono:var(--font-sans);
+  --font-display:var(--font-sans);--font-ui:var(--font-sans);--font-data:var(--font-sans);
+  --font-chart:var(--font-sans);
+  /* Ember is authoritative here; legacy role names are compatibility aliases. */
+  --surface-0:#101216;--surface-1:#22262c;--surface-2:#292d35;--surface-3:#30343e;--surface-4:#3a3f49;
+  --bg:var(--surface-0);--chrome:var(--surface-0);--panel:var(--surface-1);--surface:var(--surface-2);--raised:var(--surface-3);
+  --border:#474c57;--divider:var(--border);--line:var(--divider);--control:#7c8492;--grid:#373c45;--hover:#FFFFFF0A;
+  --text-primary:#f4f5f8;--text-secondary:#c5c8d0;--text-tertiary:#b3b7c2;
+  --ink:var(--text-primary);--text:var(--ink);--muted:var(--text-secondary);--subtle:var(--text-tertiary);
+  --accent:#FF6049;--accent-hover:#FF806B;--accent-pressed:#F45B45;--accent-focus:#FF9B89;--accent-ink:#101113;
+  --trace-primary:#6ee2f5;--trace-comparison:#ffc064;--delta-ahead:#69e6c6;--delta-behind:#f398da;--delta-trace:#d5a2f6;
+  --cyan:var(--trace-primary);--amber:var(--trace-comparison);--positive:var(--delta-ahead);--negative:var(--delta-behind);--soft:var(--surface-3);
+  --space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:20px;--space-6:24px;--space-8:32px;--space-10:40px;
+  --text-body:12px;--text-label:11px;--text-data:12px;--text-title:28px;
+  --radius-control:10px;--radius-surface:16px;--radius-floating:20px;--radius-pill:999px;
+  --radius-tab:14px;--radius-chart:16px;--radius-instrument:16px;
+  --radius-panel:var(--radius-surface);--radius-sheet:var(--radius-floating);
+  --layer-base:var(--surface-0);--layer-raised:var(--surface-2);--layer-focused:var(--surface-3);
+  --edge-raised:#FFFFFF12;--edge-focused:#FFFFFF20;
+  --depth-raised:inset 0 1px var(--edge-raised),0 2px 5px #0002;
+  --depth-focused:inset 0 1px var(--edge-focused),0 3px 9px #0003;
+  --feedback-duration:140ms;--surface-duration:220ms;--exit-duration:120ms;
+  --ease-settle:cubic-bezier(.22,1,.36,1);
+  --shadow-surface:0 1px 2px #0003;--shadow-floating:0 16px 48px #0008;--shadow-float:var(--shadow-floating);
+  font-family:var(--font-sans);font-size:13px;line-height:1.45;color:var(--ink);background:var(--bg);color-scheme:dark;
+}
+:root[data-theme=light]{
+  --surface-0:#edf0f3;--surface-1:#fff;--surface-2:#f3f5f8;--surface-3:#e2e6ee;--surface-4:#d6dce5;
+  --border:#b7bfcd;--control:#65717c;--grid:#d9dee6;--hover:#10111308;
+  --text-primary:#19232c;--text-secondary:#414b59;--text-tertiary:#505c6b;
+  --accent:#B72E1D;--accent-hover:#9F2517;--accent-pressed:#892013;--accent-focus:#B72E1D;--accent-ink:#FFFFFF;
+  --trace-primary:#006396;--trace-comparison:#805000;--delta-ahead:#00695C;--delta-behind:#9F2577;--delta-trace:#74419C;
+  --shadow-surface:0 1px 2px #19232C10;--shadow-floating:0 16px 48px #19232C24;
+  --edge-raised:#FFFFFF;--edge-focused:#FFFFFF;
+  --depth-raised:inset 0 1px var(--edge-raised),0 3px 10px #19232C0C;
+  --depth-focused:inset 0 1px var(--edge-focused),0 4px 14px #19232C16;
+  color-scheme:light;
+}
+html,body,#root{min-width:600px;background:var(--bg)}
+body{font-family:var(--font-sans);color:var(--ink)}
+button,input,select,textarea{font-family:inherit;font-size:inherit}
+button{touch-action:manipulation}
+button,input,select,textarea{transition:background-color var(--feedback-duration) var(--ease-settle),color var(--feedback-duration) var(--ease-settle),border-color var(--feedback-duration) var(--ease-settle)}
+button:disabled{opacity:.46;cursor:default}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent-focus);outline-offset:3px}
+::selection{background:color-mix(in srgb,var(--accent) 30%,transparent)}
+*{scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+.app.premium .section-heading{font-size:12px;font-weight:500;letter-spacing:0;color:var(--muted);text-transform:none;align-items:center;gap:8px}
+.app.premium .section-heading>span:last-child{font-size:11px;color:var(--subtle)}
+.app.premium .alignment-note,.app.premium .segment-note{font-size:11px;line-height:1.55;color:var(--muted)}
+.app.premium .chart-help{font-size:11px;letter-spacing:0;gap:20px;margin:12px 0 16px}
+.app.premium .chart-help>span{text-transform:lowercase}
+.app.premium .chart-help>span::first-letter{text-transform:uppercase}
+.app.premium .chart-empty{background:var(--panel);font-size:13px;border-radius:var(--radius-surface);min-height:160px;line-height:1.6;text-align:center;padding:24px}
+.app.premium .chart-toolbar{padding:12px 0;gap:12px;min-height:58px}
+.app.premium .chart-tools{gap:8px}
+.app.premium .chart-tools>button,.app.premium .channel-control>button{font-size:12px;min-height:32px;padding:6px 8px;border-radius:var(--radius-control);white-space:nowrap}
+.app.premium .chart-tools button:hover:not(:disabled){background:var(--raised);color:var(--ink)}
+.app.premium .chart-tools button span{font-size:11px;margin-inline:4px}
+.app.premium .segmented{background:var(--panel);border-color:var(--border)}
+.app.premium .segmented button{font-size:12px;min-height:28px;padding:5px 10px;isolation:isolate}
+.app.premium .channel-menu{width:min(330px,calc(100vw - 40px));padding:16px;background:var(--surface);border-radius:var(--radius-floating);box-shadow:var(--shadow-floating)}
+.app.premium .channel-menu label{font-size:12px;min-height:38px;gap:10px;line-height:1.4}
+.app.premium .channel-menu input{width:15px;height:15px;flex-shrink:0}
+.app.premium .channel-menu label>span{flex:1;min-width:0}
+.app.premium .channel-menu label small{font-size:11px}
+.app.premium .channel-menu label button{width:28px;height:28px;flex-shrink:0}
+.app.premium .error-banner{background:color-mix(in srgb,var(--amber) 8%,var(--panel));border-color:color-mix(in srgb,var(--amber) 30%,var(--border));border-radius:4px;font-size:12px;margin-bottom:16px}
+.app.premium .merge-dialog,.app.premium .session-details{background:var(--surface);border-color:var(--border);border-radius:var(--radius-floating);box-shadow:var(--shadow-floating)}
+.app.premium .session-details input,.app.premium .merge-dialog input{font-size:13px}
+.app.premium .session-details input{color-scheme:inherit}
+.app.premium .merge-actions button{min-height:34px;border-radius:var(--radius-control)}
+.app.premium .data-note strong{font-size:12px;font-weight:500;line-height:1.5}
+.app.premium .data-note p,.app.premium .warnings p{font-size:12px;line-height:1.6;color:var(--muted)}
+.app.premium .data-note.warning strong{color:var(--amber)}
+.app.premium .reading-guide{margin-top:16px;padding-top:16px}
+.app.premium .reading-guide>div:not(.section-heading),.app.premium .reading-guide>p{font-size:12px;line-height:1.6}
+.app.premium .reading-guide>p{margin-top:12px}
+.app.premium .line-key{width:20px}
+.app.premium .line-key.amber{background:none;border-top:2px dashed var(--amber);height:0}
+.app.premium .loading-line{animation-duration:800ms}
+.app.premium .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+@media(max-width:740px){
+  .app.premium .chart-toolbar{gap:8px;flex-wrap:wrap}
+  .app.premium .chart-tools{margin-left:auto;gap:4px}
+  .app.premium .chart-tools>button,.app.premium .channel-control>button{font-size:11px;padding-inline:6px}
+  .app.premium .chart-help{gap:12px;flex-wrap:wrap}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:0s!important;scroll-behavior:auto!important}
+}
+/* Shared Ember primitives; workspace composition stays in its owning stylesheets. */
+.app.premium{color:var(--ink);font-size:13px}
+.app.premium .titlebar .ttt-mark{color:var(--accent)}
+.app.premium .workspace-selection,.app.premium .selection-rail{background:var(--accent)}
+.app.premium .titlebar .import-button{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-size:12px}
+.app.premium .titlebar .import-button:hover:not(:disabled){background:var(--accent-hover);border-color:var(--accent-hover);color:var(--accent-ink)}
+.app.premium .titlebar .import-button:active:not(:disabled){background:var(--accent-pressed)}
+.app.premium .titlebar .import-button kbd{font-size:11px;opacity:1}
+.app.premium :is(button,input,select,textarea,[tabindex]):focus-visible{outline-color:var(--accent-focus)}
+.app.premium .titlebar .workspace-switch.segmented button{font-size:12px}
+.app.premium .titlebar .ttt-wordmark>small,.app.premium .header-actions .local-badge,.app.premium .explorer-section-toggle span,.app.premium .laps-heading>span,.app.premium .lap-table-head,.app.premium .lap-time small,.app.premium .sidebar-footer,.app.premium>.statusbar,.app.premium .best-stat>span,.app.premium .lap-chip small,.app.premium .overall-delta small,.app.premium .compact-lap-selectors label{font-size:var(--text-label)}
+.app.premium .workspace-heading p{font-size:var(--text-body)}
+.app.premium .session-group-heading small,.app.premium .row-actions{opacity:1}
+.app.premium .session-group-heading,.app.premium .explorer-tools>button:first-child span,.app.premium .library-entry :is(.session-meta,.session-facts,.session-source){font-size:var(--text-label)}
+.app.premium input:not([type=checkbox]),.app.premium select{border-color:var(--control)}
+.app.premium input[type=range]{accent-color:var(--trace-primary)}
+.app.premium .uplot{font:var(--text-data) var(--font-mono)}
+.app.premium .plots .reading-key{font-size:var(--text-label);font-family:var(--font-sans)}
+.app.premium .u-select{background:color-mix(in srgb,var(--accent) 16%,transparent)!important}
+.app.premium .u-cursor-x{border-color:var(--muted)!important}
+.app.premium .plots [data-plot]:focus-visible{outline-color:var(--accent-focus)}
+
+/* Shared chart controls inherit the approved Telemetry instrument dimensions. */
+.app.premium .axis-switch {padding:2px;background:var(--glass-raised-fill);border:1px solid var(--grid);border-radius:var(--radius-control);box-shadow:var(--glass-panel-edge)}
+.app.premium .axis-switch.segmented button {font-size:14px;min-height:34px;width:100px;border-radius:var(--radius-tab);padding:6px 15px}
+.app.premium .axis-switch.segmented button.active {background:var(--glass-interactive-fill);box-shadow:var(--glass-interactive-shadow)}
+.app.premium .chart-tools .channel-control>button {min-height:40px;padding:8px 16px;font-size:14px;border:1px solid var(--glass-interactive-border)}
+.app.premium .channel-control>button span {background:transparent;font:inherit;margin-inline:10px;padding:0}
+.app.premium .workspace-heading p>span {color:var(--muted)}
+.app.premium .titlebar .import-button kbd {font-family:var(--font-code)}
+@media(max-width:700px) {
+  .app.premium .axis-switch.segmented button {width:76px;font-size:12px}
+  .app.premium .chart-tools .channel-control>button {font-size:12px;padding-inline:10px;min-height:36px}
+}

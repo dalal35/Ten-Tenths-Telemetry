@@ -1,0 +1,297 @@
+/* Race Control shell: steady workspace navigation, timing sheet, and local context. */
+.app.premium,.app.premium .shell,.app.premium .main:has(.workspace-viewport){overflow:clip}
+.app>.titlebar{height:64px;min-height:64px;padding:0 20px;gap:20px;background:var(--bg);border-bottom:1px solid var(--border)}
+.titlebar .ttt-brand{width:210px;flex:0 0 210px;gap:10px}
+.titlebar .ttt-mark{width:34px;height:28px;flex-basis:34px}
+.titlebar .ttt-wordmark>span{font-size:15px;letter-spacing:0}
+.titlebar .ttt-wordmark>small{font-size:10px;letter-spacing:1px}
+.titlebar .workspace-switch.segmented{align-self:stretch;flex:1;min-width:0;width:auto;gap:5px;margin:0;padding:0;border:0;background:none;overflow:visible}
+.titlebar .workspace-switch.segmented button{height:100%;min-height:0;padding:0 13px;border-radius:0;white-space:nowrap;font-size:12px;gap:8px;background:transparent;box-shadow:none}
+.titlebar .workspace-switch.segmented button:first-child{padding-left:13px}
+.titlebar .workspace-switch.segmented button:hover:not(:disabled){background:var(--raised);color:var(--ink)}
+.titlebar .workspace-selection{height:2px;bottom:0;border-radius:0;background:var(--cyan)}
+.titlebar .workspace-switch button.active{color:var(--ink)}
+.header-actions{flex-shrink:0;gap:12px}
+.header-actions .local-badge{font-size:10px;color:var(--muted);text-transform:none}
+.titlebar .import-button{background:transparent;color:var(--ink);border:1px solid var(--border);font-size:11px;min-height:34px;padding:7px 10px;box-shadow:none}
+.titlebar .import-button:hover:not(:disabled){background:var(--raised);color:var(--ink)}
+.titlebar .import-button kbd{font-size:10px}
+.shell>.explorer-slot{width:var(--explorer-width,236px);background:var(--panel);border-right:1px solid var(--border)}
+.shell>.explorer-slot:not([data-drawer=true]){position:relative}
+.shell[data-sidebar-state=collapsed]>.explorer-slot,.shell>.explorer-slot[data-drawer=true]{width:40px}
+.explorer-slot>.sidebar{background:var(--panel)}
+.explorer-heading{padding:9px 10px;min-height:52px;border-bottom:1px solid var(--border)}
+.explorer-section-toggle{font-size:12px;letter-spacing:0;color:var(--ink)}
+.explorer-section-toggle span{font-size:10px;color:var(--muted)}
+.explorer-current{padding:17px 16px 16px;display:flex;flex-direction:column;gap:5px;border-bottom:1px solid var(--border);min-width:0}
+.explorer-current span,.explorer-current small{font-size:11px;color:var(--muted)}
+.explorer-current strong{font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.explorer-current small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.explorer-tools{padding:7px 14px 4px}
+.session-list{padding:0 10px 10px}
+.session-list .library-entry{border-radius:0;margin:0;border-bottom:1px solid var(--border)}
+.session-list .library-entry.active{background:var(--raised)}
+.library-entry .selection-rail{display:block;left:0}
+.sidebar-label.laps-heading{padding:15px 15px 11px;font-size:12px;letter-spacing:0;color:var(--ink)}
+.laps-heading>span{font-size:10px;color:var(--muted)}
+.lap-table-head{padding:0 15px 9px;grid-template-columns:34px 1fr 42px;font-size:10px;letter-spacing:0;border-bottom:1px solid var(--border)}
+.lap-list{padding:0 10px 8px}
+.lap-list .lap-row{min-height:46px;border:0;border-bottom:1px solid var(--border);border-radius:0;margin:0;padding-right:4px}
+.lap-list .lap-row.selected{background:var(--raised)}
+.lap-select{min-height:45px;padding-left:6px;gap:11px}
+.lap-time{font-size:12px}
+.lap-time small{font-size:10px}
+.compare-toggle.on{border:1px solid var(--amber);border-radius:3px;font:11px var(--font-data);color:var(--amber)}
+.sidebar-footer{border-top:1px solid var(--border);font-size:10px;min-height:34px}
+.explorer-resizer{position:absolute;z-index:4;right:-4px;top:0;bottom:0;width:8px;cursor:col-resize;touch-action:none;outline-offset:-2px}
+.explorer-resizer:hover,.explorer-resizer:focus-visible{background:color-mix(in srgb,var(--cyan) 38%,transparent)}
+.shell>.main{margin:0;padding:25px 28px 0;border:0;border-radius:0;background:var(--bg)}
+.workspace-heading{align-items:flex-start}
+.workspace-heading h1{font-family:var(--font-ui);font-size:26px;line-height:1.2;letter-spacing:-.6px}
+.workspace-heading .active-recording{font-size:11px;margin:0 0 7px}
+.workspace-heading p{margin-top:7px;font-size:11px}
+.best-stat>span{font-size:10px;letter-spacing:.04em}
+.best-stat strong{font-size:24px;line-height:1.2}
+.main>.lap-summary{margin:20px 0 12px;padding:14px 0;min-height:66px;gap:32px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);border-radius:0;background:transparent}
+.lap-chip small,.overall-delta small{font-size:10px;letter-spacing:.025em}
+.lap-chip strong,.overall-delta strong{font-size:20px}
+.compact-lap-selectors{display:none}
+.app>.statusbar{height:28px;min-height:28px;padding:0 18px;border-top:1px solid var(--border);background:var(--bg);font-size:10px;letter-spacing:.01em}
+@media(max-width:1200px){
+ .titlebar .ttt-brand{width:155px;flex-basis:155px}
+ .header-actions .local-badge,.titlebar .import-button kbd{display:none}
+ .titlebar .workspace-switch.segmented button{padding:0 10px}
+}
+@media(max-width:900px){
+ .titlebar .ttt-brand{width:135px;flex-basis:135px}
+ .titlebar .workspace-switch.segmented{gap:1px}
+ .titlebar .workspace-switch.segmented button{padding:0 8px;font-size:11px;gap:6px}
+ .titlebar .workspace-switch.segmented button:first-child{padding-left:8px}
+ .shell>.main{padding:20px 20px 0}
+ .shell[data-narrow=true] .compact-lap-selectors{display:flex;gap:12px;flex:1;min-width:0}
+ .shell[data-narrow=true] .compact-lap-selectors label{display:flex;flex-direction:column;gap:5px;flex:1;min-width:0;font-size:10px;color:var(--muted)}
+ .compact-lap-selectors select{width:100%;min-width:0;min-height:34px;padding:6px 8px;color:var(--ink);background:var(--panel);border:1px solid var(--border);border-radius:4px;font:11px var(--font-ui)}
+ .shell[data-narrow=true] .lap-summary>.lap-chip{display:none}
+ .shell[data-narrow=true] .overall-delta{margin-left:0;align-self:end;min-width:90px;text-align:right}
+}
+@media(max-width:700px){
+ .app>.titlebar{height:52px;min-height:52px;padding:0 10px;gap:7px}
+ .titlebar .ttt-brand{width:30px;flex-basis:30px}
+ .titlebar .ttt-wordmark{display:none}
+ .titlebar .ttt-mark{width:27px;height:24px;flex-basis:27px}
+ .titlebar .workspace-switch.segmented button{padding:0 5px;font-size:10px;gap:4px}
+ .titlebar .workspace-switch.segmented button:first-child{padding-left:5px}
+ .titlebar .workspace-icon{width:13px;height:13px}
+ .header-actions{gap:4px}
+ .header-actions .icon-button{width:28px;height:28px}
+ .titlebar .import-button{font-size:10px;gap:4px;padding:6px 7px;min-height:30px}
+ .shell>.main{padding:16px 14px 0}
+ .workspace-heading h1{font-size:22px}
+ .main>.lap-summary{margin:13px 0 10px;padding:10px 0;gap:10px;min-height:62px}
+}
+/* Keep the player in document flow when sticky chrome would fill the workspace. */
+@container workspace-view (height < 560px){.video-sticky-player{position:static}}
+
+/* Shared approved Ember chrome. No workspace-dependent shell geometry. */
+/* Approved Telemetry composition; shared chrome lives in shell.css and root tokens. */
+.app.premium>.titlebar {
+  height:60px; min-height:60px; gap:24px; padding-inline:24px 18px;
+  background:var(--glass-panel); border-color:var(--border); box-shadow:var(--glass-edge);
+}
+.app.premium .titlebar .ttt-brand {flex-basis:230px;width:230px}
+.app.premium .titlebar .ttt-wordmark>span {font-size:17px;font-weight:600}
+.app.premium .titlebar .ttt-wordmark>small {font-size:13px;color:var(--muted)}
+.app.premium .titlebar .workspace-switch {justify-content:center;align-items:center;gap:12px}
+.app.premium .titlebar .workspace-switch.segmented button {height:36px;padding:0 16px;font-size:14px;font-weight:450;border-radius:var(--radius-control)}
+.app.premium .titlebar .workspace-switch.segmented button.active {background:var(--glass-focused);box-shadow:var(--glass-edge),0 2px 5px #0002}
+.app.premium .workspace-selection {display:none}
+.app.premium .titlebar .import-button {background:var(--glass-focused);border-color:var(--border);color:var(--ink);border-radius:14px;padding:7px 12px;font-size:14px;min-height:36px;box-shadow:var(--glass-edge)}
+.app.premium .titlebar .import-button:hover {background:var(--surface-4)}
+.app.premium .titlebar .import-button kbd {font-size:12px}
+.app.premium .header-actions {gap:20px}
+.app.premium .header-actions .icon-button {background:var(--glass-raised);border-radius:50%;width:34px;height:34px}
+.app.premium>.statusbar {display:none}
+.app.premium .shell {background:transparent}
+.app.premium .shell>.explorer-slot {background:var(--glass-panel);border-radius:0 20px 20px 0;box-shadow:var(--glass-edge);border-color:var(--border)}
+.app.premium .shell .sidebar {background:transparent}
+.app.premium .shell .explorer-heading {position:relative;min-height:52px;padding:10px 16px;gap:10px}
+.app.premium .shell .explorer-section-toggle {font-size:13px;gap:10px;white-space:nowrap;padding:0}
+.app.premium .shell .explorer-section-toggle>span {font-size:12px}
+.app.premium .shell .explorer-section-toggle>span:first-child,
+.app.premium .shell .laps-heading>span {background:var(--surface-4);border-radius:10px;min-width:26px;text-align:center;padding:2px 5px;margin-left:auto}
+.app.premium .shell .explorer-section-toggle>span:last-child {display:none}
+.app.premium .shell .explorer-heading>.explorer-icon {width:20px;min-width:20px}
+.app.premium .shell .explorer-heading>.explorer-icon:last-child {position:absolute;right:2px;top:13px;opacity:0}
+.app.premium .shell .explorer-heading:hover>.explorer-icon:last-child,
+.app.premium .shell .explorer-heading:focus-within>.explorer-icon:last-child {opacity:1}
+.app.premium .shell .explorer-tools {padding:8px 16px;min-height:40px}
+.app.premium .shell .explorer-tools>button:first-child {font-size:13px}
+.app.premium .shell .session-list {padding:0 12px 12px}
+.app.premium .shell .session-group-heading {min-height:30px;font-size:12px;padding:4px}
+.app.premium .shell .library-entry.active {background:var(--glass-focused);border:1px solid var(--control);border-radius:var(--radius-control);box-shadow:var(--glass-edge),0 4px 10px #0002}
+.app.premium .shell .session-button {padding:7px 10px;gap:2px}
+.app.premium .shell .session-track {font-size:13px;line-height:1.5}
+.app.premium .shell .session-source {font-size:12px;color:var(--muted)}
+.app.premium .shell .selection-rail {top:5px;bottom:5px;width:3px;background:var(--trace-primary)}
+.app.premium .shell .laps-heading {display:flex;align-items:center;gap:12px;min-height:48px;padding:10px 14px 10px 24px;font-size:14px;border-top:1px solid var(--grid)}
+.app.premium .shell .laps-heading>span {font-size:12px}
+.app.premium .shell .lap-list {padding:0 8px 12px 12px}
+.app.premium .shell .lap-list .lap-row {min-height:38px;border-radius:var(--radius-control)}
+.app.premium .shell .lap-region .lap-row:first-child:not(.selected) .lap-time small {position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.app.premium .shell .lap-select {min-height:36px;padding:5px 10px;gap:22px}
+.app.premium .shell .lap-number {font-size:13px;width:22px;color:var(--muted)}
+.app.premium .shell .lap-time {font-size:14px;letter-spacing:0;font-weight:450}
+.app.premium .shell .lap-time small {font-size:12px;color:var(--trace-primary);margin-top:2px}
+.app.premium .shell .lap-list .lap-row.selected {background:var(--glass-focused);border:1px solid var(--glass-raised-border);box-shadow:var(--glass-edge),0 5px 12px #0002;min-height:48px}
+.app.premium .shell .lap-list .lap-row.selected .selection-rail {background:var(--trace-primary)}
+.app.premium .shell .lap-list .lap-row.compared {background:color-mix(in srgb,var(--trace-comparison) 11%,var(--surface-2));border:1px solid color-mix(in srgb,var(--trace-comparison) 25%,transparent);box-shadow:var(--glass-edge);min-height:38px;margin-top:2px}
+.app.premium .shell .compare-toggle:not(.on) {opacity:0}
+.app.premium .shell .lap-row:is(:hover,:focus-within) .compare-toggle {opacity:1}
+.app.premium .shell .compare-toggle.on {width:24px;height:24px;min-height:24px;flex-shrink:0;font-size:12px;border-radius:50%}
+.app.premium .shell .sidebar-footer {min-height:26px;padding:4px 16px;font-size:11px;background:transparent;border:0;color:var(--muted)}
+.app.premium .shell .sidebar-footer:is(:hover,:focus-visible) {opacity:1}
+.app.premium .shell>.main {padding:16px 24px 20px;background:transparent}
+.app.premium .main>.workspace-heading {padding:0;min-height:84px}
+.app.premium .main>.workspace-heading .active-recording {font-size:13px;margin:0 0 4px;color:var(--muted)}
+.app.premium .main>.workspace-heading h1 {font-size:32px;font-weight:600;letter-spacing:-.6px;margin:0 0 3px;line-height:1.2}
+.app.premium .main>.workspace-heading p {font-size:13px;margin-top:2px}
+.app.premium .main>.lap-summary {width:100%;height:72px;min-height:72px;margin:0 0 10px;padding:0 0 6px;gap:32px;border:0;flex-wrap:nowrap}
+.app.premium .main .lap-chip {align-items:flex-start;gap:14px;position:relative;min-width:200px}
+.app.premium .main .lap-chip>div {gap:4px}
+.app.premium .main .lap-chip .dot {width:26px;border-top-width:3px;border-radius:3px;margin-top:8px}
+.app.premium .main .lap-chip .dot.amber {border-top-style:solid}
+.app.premium .main .lap-chip small {font-size:13px;letter-spacing:0;text-transform:none}
+.app.premium .main .lap-chip strong {font:400 34px/1.15 var(--font-sans);letter-spacing:-.6px}
+.app.premium .main .lap-chip+.lap-chip {padding-left:26px;border-left:1px solid var(--border)}
+.app.premium .main .lap-chip>button {position:absolute;right:-26px;top:20px;width:24px;height:28px;opacity:0}
+.app.premium .main .lap-chip:is(:hover,:focus-within)>button {opacity:1}
+.app.premium .main .overall-delta {padding:9px 16px;min-width:150px;gap:3px;text-align:center;background:var(--glass-raised);border:1px solid var(--grid);border-radius:18px;box-shadow:var(--glass-edge),var(--glass-shadow)}
+.app.premium .main .overall-delta small {font-size:13px;letter-spacing:0;text-transform:none}
+.app.premium .main .overall-delta strong {font:450 28px/1.2 var(--font-sans);letter-spacing:-.5px}
+.app.premium .main .overall-delta strong span {font-size:16px}
+@media(hover:none) {
+  .app.premium .shell .compare-toggle:not(.on),
+  .app.premium .shell .explorer-heading>.explorer-icon:last-child,
+  .app.premium .shell .sidebar-footer,
+  .app.premium .main .lap-chip>button {opacity:1}
+  .app.premium .shell .compare-toggle {min-height:32px;width:32px}}
+@media(max-width:1400px) {
+  .app.premium .titlebar .ttt-brand {flex-basis:200px;width:200px}
+  .app.premium .titlebar .workspace-switch {gap:7px}
+  .app.premium .titlebar .workspace-switch.segmented button {padding-inline:12px}
+  .app.premium .main>.lap-summary {gap:20px;padding-left:0}
+  .app.premium .main .lap-chip+.lap-chip {padding-left:20px}
+  .app.premium .main .lap-chip {gap:10px}
+  .app.premium .main .lap-chip small {font-size:12px}
+  .app.premium .main .lap-chip strong {font-size:34px}
+  .app.premium .main .overall-delta {min-width:135px;padding-inline:12px}}
+@media(max-width:1100px) {
+  .app.premium .titlebar .ttt-brand {flex-basis:145px;width:145px}
+  .app.premium .titlebar .workspace-switch {gap:2px}
+  .app.premium .titlebar .workspace-switch.segmented button {font-size:12px;padding-inline:8px;gap:5px}
+  .app.premium .header-actions {gap:8px}
+  .app.premium .main>.workspace-heading {padding-inline:8px}
+  .app.premium .main>.lap-summary {width:100%}}
+@media(max-width:700px) {
+  .app.premium>.titlebar {height:52px;min-height:52px;gap:6px;padding:0 8px}
+  .app.premium .titlebar .ttt-brand {flex-basis:28px;width:28px}
+  .app.premium .titlebar .workspace-switch {gap:1px}
+  .app.premium .titlebar .workspace-switch.segmented button {font-size:11px;padding-inline:5px;height:34px;gap:4px}
+  .app.premium .header-actions {gap:4px}
+  .app.premium .header-actions .icon-button {width:28px;height:28px}
+  .app.premium .titlebar .import-button {font-size:11px;min-height:32px;padding-inline:7px}
+  .app.premium .shell>.main {padding:14px 12px 20px}
+  .app.premium .main>.workspace-heading {min-height:82px;padding:0}
+  .app.premium .main>.workspace-heading h1 {font-size:26px}
+  .app.premium .main>.workspace-heading p {font-size:12px}
+  .app.premium .main>.lap-summary {min-height:78px;height:auto;padding:0 0 10px;gap:10px}
+  .app.premium .main .overall-delta {min-width:120px;padding:8px 10px}
+  .app.premium .main .overall-delta strong {font-size:23px}
+  .app.premium .main .overall-delta small {font-size:12px}}
+.app.premium {font-size:14px}
+.app.premium .titlebar .local-badge,.app.premium .workspace-selection {display:none}
+
+.app.premium .shell[data-narrow=true] .compact-lap-selectors label {font-size:var(--text-label)}
+
+/* Studio tools share the heading baseline; supporting telemetry remains below. */
+.app.premium .chart-workspace.advanced-tab{position:relative}
+.app.premium .advanced-tab .chart-toolbar{position:absolute;right:0;top:0;z-index:20;height:40px;min-height:40px;padding:0;gap:8px;align-items:center}
+.app.premium .advanced-tab .chart-toolbar>.axis-switch{display:none}
+.app.premium .advanced-tab .chart-toolbar .chart-tools{gap:8px}
+.app.premium .advanced-tab .chart-toolbar .channel-control>button{min-height:36px;font-size:13px;padding:6px 12px}
+.app.premium .main .lap-chip.unselected strong{font:400 13px/1.4 var(--font-sans);letter-spacing:0}
+.app.premium .main .overall-delta[data-delta=ahead] strong{color:var(--delta-ahead)}
+.app.premium .main .overall-delta[data-delta=behind] strong{color:var(--delta-behind)}
+.app.premium [data-workspace=advanced] .advanced-context{margin-top:20px}
+.app.premium .main>.workspace-heading p>span{margin-inline:5px}
+.app.premium .main .lap-chip .dot{height:0;background:none;display:block;border-top:3px solid var(--trace-primary)}
+.app.premium .main .lap-chip .dot.cyan{border-top-color:var(--trace-primary)}
+.app.premium .main .lap-chip .dot.amber{border-top-color:var(--trace-comparison)}
+.app.premium .shell .lap-table-head{display:none}
+.app.premium .shell .library-entry.active :is(.session-meta,.session-facts){display:none}
+.app.premium .titlebar .ttt-wordmark>small{letter-spacing:0;text-transform:none}
+
+.app.premium .shell .lap-list .lap-row{border:1px solid transparent}
+.app.premium .shell .lap-time small{text-transform:none;letter-spacing:0}
+.app.premium .shell .library-entry.active .session-track{color:var(--ink)}
+.app.premium .shell .session-group-heading{letter-spacing:0}
+.app.premium .workspace-viewport[data-workspace=video]{--video-rail:250px;--video-head:50px}
+.app.premium .workspace-viewport[data-workspace=video]>.workspace-body{grid-template-columns:minmax(0,1fr) var(--video-rail);gap:14px;align-items:start}
+.app.premium .workspace-viewport[data-workspace=video] .workspace-body>.inspector{position:relative;display:flex;flex-direction:column;width:100%;min-width:0;top:0;height:calc(100cqh - var(--video-head));min-height:320px;max-height:none;margin-top:var(--video-head);padding:12px;align-self:start;overflow:hidden;border:1px solid var(--border);border-radius:var(--radius-surface);background:var(--glass-panel)}
+.app.premium [data-workspace=video] .track-instruments{display:none}
+.app.premium [data-workspace=video] .track-section{flex:none}
+.app.premium [data-workspace=video] .track-section>.section-heading{display:flex;font-size:13px;padding:0 0 8px}
+.app.premium [data-workspace=video] .track-section>.section-heading .track-source{display:none}
+.app.premium [data-workspace=video] .track{height:clamp(96px,calc(100cqh - 460px),170px);max-height:none;padding:8px 14px 0}
+.app.premium [data-workspace=video] .track-map-frame{background:var(--glass-raised);border:1px solid var(--grid);border-radius:12px 12px 0 0}
+.app.premium [data-workspace=video] .track-map-meta{padding:6px 10px;background:var(--glass-raised);border:1px solid var(--grid);border-top:0;border-radius:0 0 12px 12px;font-size:11px}
+.app.premium [data-workspace=video] .track-position-control{padding:10px 2px 4px}
+.app.premium [data-workspace=video] .track-position-control small,.app.premium [data-workspace=video] .map-caption-hint{display:none}
+.app.premium [data-workspace=video] .segment-section{display:flex;flex:1;flex-direction:column;min-height:0;padding-top:10px;margin-top:2px}
+.app.premium [data-workspace=video] .segment-section>.section-heading{flex:none;font-size:12px}
+.app.premium [data-workspace=video] .segment-list{display:block;flex:1;min-height:0;max-height:none;margin-top:6px;overflow:auto;overscroll-behavior:contain}
+.app.premium [data-workspace=video] .segment-index,.app.premium [data-workspace=video] .segment-note,.app.premium [data-workspace=video] .section-finding{display:none}
+.app.premium [data-workspace=video] .segment-identity b,.app.premium [data-workspace=video] .segment-delta{font-size:13px}
+.app.premium [data-workspace=video] .segment-identity small{font-size:12px}
+.app.premium [data-workspace=video] .segment-card{padding:7px 8px;border-radius:var(--radius-control)}
+.app.premium [data-workspace=video] .segment-details>:not(:nth-child(3)){display:none}
+.app.premium [data-workspace=video] .track-options{position:absolute;right:8px;top:8px}
+.app.premium [data-workspace=video] .track-options>summary{width:24px;height:24px;font-size:16px}
+@media(max-width:1360px){
+ .app.premium .workspace-viewport[data-workspace=video]{--video-rail:220px}
+}
+@media(max-width:1100px){
+ .app.premium .workspace-viewport[data-workspace=video]>.workspace-body{grid-template-columns:minmax(0,1fr)}
+ .app.premium .workspace-viewport[data-workspace=video] .workspace-body>.inspector{display:grid;grid-template-columns:1fr 1fr;gap:20px;height:auto;min-height:0;margin-top:0;overflow:visible}
+ .app.premium [data-workspace=video] .segment-section{display:block;margin-top:0;padding-top:0}
+ .app.premium [data-workspace=video] .segment-list{max-height:220px}
+}
+
+/* Workspace headings share one scale; full section evidence stays in Telemetry. */
+.app.premium{--workspace-title:28px}
+
+/* Shared short-window chrome: the header yields height before workspaces do. */
+@media(min-width:901px) and (max-height:860px){
+ .app.premium{--workspace-title:24px}
+ .app.premium .shell>.main{padding-top:10px;padding-bottom:14px}
+ .app.premium [data-workspace=telemetry] .inspector{max-height:calc(100vh - 126px)}
+ .app.premium [data-workspace=telemetry] .plots [data-plot]{height:clamp(84px,calc((100vh - 490px) / var(--plot-count)),220px)}
+ .app.premium [data-workspace=telemetry] .plots .plot-row:first-child [data-plot]{height:clamp(96px,calc((100vh - 490px) / var(--plot-count) + 12px),236px)}
+ .app.premium .main>.workspace-heading{min-height:72px}
+ .app.premium .main>.workspace-heading .active-recording{margin-bottom:1px;font-size:12px}
+ .app.premium .main>.workspace-heading h1{font-size:26px;margin-bottom:1px}
+ .app.premium .main>.workspace-heading p{font-size:12px;margin-top:0}
+ .app.premium .main>.lap-summary{height:58px;min-height:58px;margin-bottom:6px;padding-bottom:2px}
+ .app.premium .main .lap-chip>div{gap:1px}
+ .app.premium .main .lap-chip small{font-size:12px}
+ .app.premium .main .lap-chip strong{font-size:28px}
+ .app.premium .main .overall-delta{padding-block:5px;border-radius:14px}
+ .app.premium .main .overall-delta small{font-size:12px}
+ .app.premium .main .overall-delta strong{font-size:23px}
+ .app.premium .main .overall-delta strong span{font-size:13px}
+ .app.premium .shell .lap-list .lap-row{min-height:34px}
+ .app.premium .shell .lap-select{min-height:32px;padding-block:3px}
+ .app.premium .shell .lap-list .lap-row.selected{min-height:44px}
+ .app.premium .shell .lap-list .lap-row.compared{min-height:34px}
+ .app.premium .shell .laps-heading{min-height:42px;padding-block:6px}
+}

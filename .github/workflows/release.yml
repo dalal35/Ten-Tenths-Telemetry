@@ -35,17 +35,19 @@ jobs:
     name: Apple Silicon build and tests
     runs-on: macos-15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: '22'
           cache: npm
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable
         with:
+          toolchain: stable
           targets: aarch64-apple-darwin
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }} # Published builds never reuse a cache.
         with:
           workspaces: src-tauri -> target
           cache-on-failure: true
@@ -83,7 +85,7 @@ jobs:
           npm run build:mac
       - name: Inspect and stage native artifacts
         run: node scripts/stage-release-artifacts.mjs macos "${{ runner.temp }}/ttt-release"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: ttt-macos
           path: ${{ runner.temp }}/ttt-release/macos/
@@ -95,23 +97,24 @@ jobs:
     name: Windows x64 MSVC build and tests
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: '22'
           cache: npm
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable
         with:
           toolchain: stable-x86_64-pc-windows-msvc
           targets: x86_64-pc-windows-msvc
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }} # Published builds never reuse a cache.
         with:
           workspaces: src-tauri -> target
           cache-on-failure: true
           key: windows-x64-msvc-v2
-      - uses: msys2/setup-msys2@v2
+      - uses: msys2/setup-msys2@ec48f7c5447b3140e2b088413ae3a55687bccb6e # v2.33.0
         with:
           msystem: UCRT64
           path-type: inherit
@@ -154,7 +157,7 @@ jobs:
         run: node scripts/verify-windows-runtime.mjs
       - name: Smoke install, update and uninstall with disposable runner data
         run: pwsh -NoProfile -NonInteractive -File scripts/verify-windows-install.ps1
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: ttt-windows
           path: ${{ runner.temp }}/ttt-release/windows/
@@ -170,20 +173,21 @@ jobs:
       (((inputs.platforms || vars.RELEASE_PLATFORMS || 'macos') == 'macos' && needs.windows.result == 'skipped') ||
        ((inputs.platforms || vars.RELEASE_PLATFORMS || 'macos') == 'all' && needs.windows.result == 'success'))
     runs-on: ubuntu-latest
+    environment: release # Add required reviewers to this environment in repository settings.
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: '22'
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: ttt-macos
           path: release-artifacts/macos
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         if: env.RELEASE_PLATFORMS == 'all'
         with:
           name: ttt-windows

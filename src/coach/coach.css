@@ -38,7 +38,7 @@
 .coach-card h3{font-weight:550;line-height:1.4;letter-spacing:-.2px;margin:4px 0 0;overflow-wrap:anywhere}
 .coach-card-heading small{letter-spacing:.055em;line-height:1.5}
 .coach-card-meta{align-items:flex-start;line-height:1.65;margin-top:16px}
-.coach-confidence{white-space:nowrap;padding:2px 6px;border-radius:4px;text-transform:capitalize;background:var(--bg)}
+.coach-confidence{white-space:nowrap;padding:2px 6px;border-radius:4px;background:var(--bg)}
 .coach-card-meta>span:last-child{flex:1;min-width:110px}
 .coach-time-potential{padding:15px 0 0;margin-top:15px;gap:3px}
 .coach-time-potential strong{font-weight:500}

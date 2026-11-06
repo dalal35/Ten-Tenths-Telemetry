@@ -81,6 +81,30 @@ describe('Windows native file boundary', () => {
     await expect(importPaths(paths)).rejects.toThrow('Unreadable XRK');
     expect(native.invoke).toHaveBeenCalledTimes(3);
   });
+  it('observes sequential per-file completion without changing partial-success results', async () => {
+    const events: unknown[] = [];
+    native.invoke.mockImplementation(async (_command, args) => {
+      if(args.path===paths[1]) throw new Error('Unreadable XRK');
+      return session(args.path);
+    });
+    const results=await importPaths(paths,event=>events.push(event));
+    expect(events).toEqual([
+      {index:0,total:3,path:paths[0],status:'reading'},
+      {index:0,total:3,path:paths[0],status:'ready',session:results[0]},
+      {index:1,total:3,path:paths[1],status:'reading'},
+      {index:1,total:3,path:paths[1],status:'error',error:'Error: Unreadable XRK'},
+      {index:2,total:3,path:paths[2],status:'reading'},
+      {index:2,total:3,path:paths[2],status:'ready',session:results[1]},
+    ]);
+    expect(results).toHaveLength(2);
+    expect(results[0].warnings).toEqual(['Import failed: 走行.xrk: Error: Unreadable XRK']);
+  });
+  it('does not report progress when the file picker is cancelled', async()=>{
+    native.open.mockResolvedValue(null);
+    const observe=vi.fn();
+    expect(await importFiles(observe)).toEqual([]);
+    expect(observe).not.toHaveBeenCalled();
+  });
   it('forwards actual drop payloads intact and returns the native unsubscribe function', async () => {
     const unsubscribe = vi.fn();
     native.onDragDropEvent.mockResolvedValue(unsubscribe);
@@ -91,5 +115,14 @@ describe('Windows native file boundary', () => {
     expect(callback).not.toHaveBeenCalled();
     listener({payload: {type: 'drop', paths}});
     expect(callback).toHaveBeenCalledExactlyOnceWith(paths);
+  });
+  it('reports native drag presence without passing hover paths to the importer', async()=>{
+    native.onDragDropEvent.mockResolvedValue(()=>{});
+    const drop=vi.fn(),hover=vi.fn();
+    await subscribeFileDrop(drop,hover);
+    const listener=native.onDragDropEvent.mock.calls[0][0];
+    for(const type of ['enter','over','leave','drop'])listener({payload:{type,paths}});
+    expect(hover.mock.calls).toEqual([[true],[true],[false],[false]]);
+    expect(drop).toHaveBeenCalledExactlyOnceWith(paths);
   });
 });

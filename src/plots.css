@@ -1,0 +1,89 @@
+/* The same quiet instrument frame holds every real uPlot channel. */
+.plot-legend{display:none}
+.app.premium .plots .plot-row{padding:12px 14px 3px;border-bottom:1px solid var(--border);background:var(--panel);min-width:0}
+.app.premium .plots .plot-row:first-child{border-radius:4px 4px 0 0}
+.app.premium .plots .plot-label{display:flex;align-items:baseline;justify-content:space-between;gap:8px 16px;min-height:20px;margin:0;padding:0;font-size:12px;line-height:1.35}
+.app.premium .plots .plot-title{min-width:0;color:var(--ink);font-weight:600;overflow-wrap:anywhere}
+.app.premium .plots .plot-title small{font-size:11px;font-weight:400;color:var(--muted)}
+.app.premium .plots .plot-unit{margin-left:5px}
+.app.premium .plots .readout{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px 13px;font-size:12px;line-height:1.35;white-space:nowrap}
+.app.premium .plots .plot-reading{display:inline-flex;align-items:baseline;gap:5px;color:var(--cyan);font-variant-numeric:tabular-nums}
+.app.premium .plots .comparison-reading{color:var(--amber)}
+.app.premium .plots .reading-key{color:var(--muted);font-family:var(--font-ui);font-size:10px;line-height:1}
+.plots .plot-sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.app.premium .plots [data-plot]{min-width:0;outline-offset:-2px}
+.app.premium .plots [data-plot]:focus-visible{outline:2px solid var(--cyan)}
+.app.premium .plots .u-cursor-x{border-left:1px dashed var(--muted);opacity:.8}
+.app.premium .plots .u-cursor-y{border-top:1px solid var(--muted);opacity:.3}
+.app.premium .plots .u-select{background:color-mix(in srgb,var(--cyan) 14%,transparent)}
+.app.premium .plots .axis-label{margin:0;padding:10px 14px;color:var(--muted);font-size:11px;text-align:right;background:var(--panel);border-radius:0 0 4px 4px}
+@media(max-width:700px){
+  .app.premium .plots .plot-row{padding:10px 8px 2px}
+  .app.premium .plots .plot-label{gap:4px 10px}
+  .app.premium .plots .readout{gap:5px 10px}
+}
+
+/* Container-relative sizing changes only Telemetry, and is consumed by uPlot's ResizeObserver. */
+.app.premium [data-workspace=telemetry] .plots [data-plot]{height:clamp(120px,calc(72cqh / var(--plot-count) - 27px),260px)}
+.app.premium.compact [data-workspace=telemetry] .plots [data-plot]{height:120px}
+.app.premium [data-workspace=telemetry] .plots{border:1px solid var(--border);border-radius:var(--radius-surface);overflow:clip}
+.app.premium [data-workspace=telemetry] .plots .plot-row{padding:6px 14px 0;border-bottom-color:var(--grid);background:var(--panel)}
+.app.premium [data-workspace=telemetry] .plots .plot-label{font-size:12px;min-height:20px;line-height:1.35}
+.app.premium [data-workspace=telemetry] .plots .plot-title{font-weight:600}
+.app.premium [data-workspace=telemetry] .plots .plot-title small{font-size:11px;margin-left:6px}
+.app.premium [data-workspace=telemetry] .plots .readout{font-size:12px;gap:16px;letter-spacing:-.2px}
+.app.premium [data-workspace=telemetry] .plots .reading-key{font-size:12px;color:var(--muted)}
+.app.premium [data-workspace=telemetry] .plots .primary-reading::before,.app.premium [data-workspace=telemetry] .plots .comparison-reading::before{content:'';width:16px;align-self:center;border-top:2px solid var(--trace-primary)}
+.app.premium [data-workspace=telemetry] .plots .comparison-reading::before{border-color:var(--trace-comparison);border-top-style:dashed}
+.app.premium [data-workspace=telemetry] .plots .plot-delta .primary-reading::before{border-color:var(--delta-trace)}
+.app.premium .plots .plot-delta .plot-reading{color:var(--delta-trace)}
+.app.premium .plots .plot-delta .plot-reading[data-delta=ahead]{color:var(--delta-ahead)}
+.app.premium .plots .plot-delta .plot-reading[data-delta=behind]{color:var(--delta-behind)}
+.app.premium [data-workspace=telemetry] .plots .axis-label{border-radius:0;margin:0;padding:8px 14px;font-size:11px;background:var(--surface-2)}
+.app.premium [data-workspace=telemetry] .chart-toolbar{min-height:54px;padding:10px 0;gap:12px}
+.app.premium [data-workspace=telemetry] .chart-tools>button,.app.premium [data-workspace=telemetry] .channel-control>button{color:var(--muted);border:1px solid transparent}
+.app.premium [data-workspace=telemetry] .channel-control>button{background:var(--surface-2);border-color:var(--control)}
+.app.premium [data-workspace=telemetry] .axis-switch button.active{box-shadow:inset 0 -2px var(--accent);font-weight:600}
+.app.premium [data-workspace=telemetry] .channel-control>button[aria-expanded=true]{border-color:var(--accent);color:var(--ink)}
+.app.premium [data-workspace=telemetry] .channel-menu{max-height:max(80px,min(400px,calc(100cqh - 64px)))}
+.app.premium [data-workspace=telemetry] .chart-help{margin:10px 0 14px;gap:16px}
+.app.premium [data-workspace=telemetry] .alignment-note{margin-top:10px}
+/* B.1: one legend serves the stack; the canvas remains rectangular and unshadowed. */
+.app.premium [data-workspace=telemetry] .plots{overflow:visible;border-color:var(--grid);background:var(--panel)}
+.app.premium [data-workspace=telemetry] .plots .plot-row:first-child{border-radius:var(--radius-surface) var(--radius-surface) 0 0}
+.app.premium [data-workspace=telemetry] .plots .axis-label{display:flex;justify-content:space-between;align-items:center;gap:12px;border-radius:0 0 var(--radius-surface) var(--radius-surface)}
+.app.premium [data-workspace=telemetry] .plots .plot-legend{display:flex;gap:16px;font-size:12px}
+.app.premium [data-workspace=telemetry] .plot-legend>span{display:flex;align-items:center;gap:6px}
+.app.premium [data-workspace=telemetry] .plot-legend>span::before{content:'';width:16px;border-top:2px solid var(--trace-primary)}
+.app.premium [data-workspace=telemetry] .plot-legend>span+span::before{border-color:var(--trace-comparison);border-top-style:dashed}
+.app.premium [data-workspace=telemetry] .reading-key{display:none}
+.app.premium [data-workspace=telemetry] .plot-title{font-size:13px}
+.app.premium [data-workspace=telemetry] .axis-switch{border-radius:var(--radius-control)}
+.app.premium [data-workspace=telemetry] .axis-switch button{border-radius:8px;min-height:28px}
+.app.premium [data-workspace=telemetry] .axis-switch button.active{background:var(--layer-focused);box-shadow:inset 0 -2px var(--accent),var(--depth-focused)}
+.app.premium [data-workspace=telemetry] .channel-control>button{box-shadow:var(--depth-raised)}
+.app.premium [data-workspace=telemetry] .channel-menu{box-shadow:var(--depth-focused),var(--shadow-floating)}
+.chart-help-control{position:relative;flex-shrink:0}
+.app.premium .chart-help-control>button{width:32px;min-height:32px;border:1px solid var(--control);border-radius:var(--radius-pill);font-size:12px;color:var(--muted)}
+.chart-help-tooltip{display:none;position:absolute;z-index:40;right:0;top:100%;width:290px;max-width:calc(100vw - 64px);padding:12px 16px;border-radius:var(--radius-floating);background:var(--layer-focused);color:var(--ink);box-shadow:var(--shadow-floating);font:12px/1.6 var(--font-sans)}
+.chart-help-control:not(.help-dismissed):is(:hover,:focus-within) .chart-help-tooltip{display:block}
+@media(max-width:700px){
+ .app.premium [data-workspace=telemetry] .plots .plot-row{padding-inline:8px}
+ .app.premium [data-workspace=telemetry] .plots .plot-label{flex-wrap:wrap;gap:6px;align-items:center}
+ .app.premium [data-workspace=telemetry] .plots .readout{gap:10px}
+ .app.premium [data-workspace=telemetry] .plots .primary-reading::before,.app.premium [data-workspace=telemetry] .plots .comparison-reading::before{width:12px}
+ .app.premium [data-workspace=telemetry] .chart-tools{gap:4px}
+ .app.premium [data-workspace=telemetry] .plots .axis-label{flex-wrap:wrap}
+}
+
+/* Synchronized evidence uses the same instruments in every workbench. */
+.app.premium [data-workspace]:not([data-workspace=telemetry]) .plots {border:0;background:transparent}
+.app.premium [data-workspace]:not([data-workspace=telemetry]) .plots .plot-row {margin:0 0 8px;padding:10px 16px 0;border:1px solid var(--grid);border-radius:var(--radius-instrument);box-shadow:var(--glass-panel-edge)}
+.app.premium [data-workspace]:not([data-workspace=telemetry]) .plots .plot-title {font-size:16px;font-weight:650}
+.app.premium [data-workspace]:not([data-workspace=telemetry]) .plots .plot-title small {font-size:13px}
+.app.premium [data-workspace]:not([data-workspace=telemetry]) .plots .readout {font-size:14px;font-weight:500;font-variant-numeric:tabular-nums;gap:20px}
+@media(max-width:700px) {
+  .app.premium [data-workspace]:not([data-workspace=telemetry]) .plots .plot-row {padding-inline:8px}
+  .app.premium [data-workspace]:not([data-workspace=telemetry]) .plots .plot-title {font-size:14px}
+  .app.premium [data-workspace]:not([data-workspace=telemetry]) .plots .readout {font-size:12px;gap:10px}
+}

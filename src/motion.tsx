@@ -1,4 +1,4 @@
-import {useCallback,useLayoutEffect,useRef} from 'react';
+import {useCallback,useId,useLayoutEffect,useRef} from 'react';
 import {flushSync} from 'react-dom';
 import {createWorkspaceNavigator} from './workspaceNavigation';
 import {LayoutGroup,motion,useIsPresent,useReducedMotion} from 'motion/react';
@@ -8,6 +8,8 @@ import type {RefObject} from 'react';
 // Motion owns spatial continuity; CSS owns control feedback. Chart cursors stay immediate.
 export const motionTokens={
   spring:{type:'spring' as const,stiffness:520,damping:42,mass:.85},
+  // Press feedback: a touch faster than layout glides, still critically damped (no bounce).
+  press:{type:'spring' as const,stiffness:700,damping:40,mass:.6},
   settle:{duration:.22,ease:[.22,1,.36,1] as const},
   quick:{duration:.14,ease:[.22,1,.36,1] as const},
 };
@@ -37,91 +39,55 @@ export function SelectionHighlight({group}:{group:string}){
   return <motion.span aria-hidden="true" className="control-selection" layoutId={group} transition={motionTokens.spring}/>;
 }
 
+// Matches --radius-control. Motion corrects border radius during layout animation only from inline styles.
+const plateRadius=10;
+
+/** One glass plate glides between the selected rows of a list; the row keeps its own state and DOM. */
+export function SelectionPlate({group,tone='primary'}:{group:string;tone?:'primary'|'reference'|'session'|'step'}){
+  return <motion.span aria-hidden="true" className={`selection-plate ${tone}`} layoutId={group} transition={motionTokens.spring} style={{borderRadius:plateRadius}}/>;
+}
+
+/** The reference badge travels from lap to lap instead of vanishing and reappearing. */
+export function ReferenceMark(){
+  return <motion.span aria-hidden="true" className="reference-mark" layoutId="lap-reference-mark" transition={motionTokens.spring} style={{borderRadius:'50%'}}>R</motion.span>;
+}
+
 export function AxisTabs({value,onChange}:{value:'distance'|'time';onChange:(axis:'distance'|'time')=>void}){
-  return <LayoutGroup id="horizontal-axis"><div className="segmented axis-switch" aria-label="Horizontal axis">
+  // Each toolbar owns its pill; two mounted copies must never trade a shared layoutId.
+  const scope=useId();
+  return <LayoutGroup id={`horizontal-axis-${scope}`}><div className="segmented axis-switch" aria-label="Horizontal axis">
     {(['distance','time'] as const).map(axis=><button key={axis} className={value===axis?'active':''} aria-pressed={value===axis} onClick={()=>onChange(axis)}>
       {value===axis&&<SelectionHighlight group="axis-selection"/>}{axis==='distance'?'Distance':'Time'}
     </button>)}
   </div></LayoutGroup>;
 }
 
-export function WorkspaceTabs({value,onChange}:{value:WorkspaceView;onChange:(view:WorkspaceView)=>void}){
-  return <LayoutGroup id="workspaces"><div className="workspace-switch segmented" aria-label="Workspace">
-    {workspaces.map(([view,label])=><motion.button key={view} className={view===value?'active':''} aria-pressed={view===value} whileTap={{scale:.98}} onClick={()=>onChange(view)}>
+export function WorkspaceTabs({value,onChange,inert=false}:{value:WorkspaceView;onChange:(view:WorkspaceView)=>void;inert?:boolean}){
+  return <LayoutGroup id="workspaces"><nav className="workspace-switch segmented" aria-label="Workspace" inert={inert}>
+    {workspaces.map(([view,label])=><motion.button key={view} className={view===value?'active':''} aria-pressed={view===value} whileTap={{scale:.97}} transition={motionTokens.press} onClick={()=>onChange(view)}>
       {view===value&&<motion.span className="workspace-selection" layoutId="workspace-selection" transition={motionTokens.spring}/>}
       <WorkspaceIcon view={view}/><span className="workspace-tab-label">{label}</span>
     </motion.button>)}
-  </div></LayoutGroup>;
+  </nav></LayoutGroup>;
 }
 
-// Only the viewport is captured. The shell and live chart coordinate space never move.
+// Navigation changes application state immediately; only the selected tab moves.
 export function useWorkspaceMotion(viewport:RefObject<HTMLElement|null>,view:WorkspaceView,sessionId:string,available=true){
-  const reduced=useReducedMotion();
-  const preference=useRef(reduced);preference.current=reduced;
   const requested=useRef(view);
   const navigator=useRef<ReturnType<typeof createWorkspaceNavigator>|null>(null);
-  const fallback=useRef<Animation|null>(null);
   const positions=useRef(new Map<string,number>());
   useLayoutEffect(()=>{
-    if(!available)return;requested.current=view;
-    const host=viewport.current;
-    let capture=0;
-    let lastNavigation=-Infinity,rapid=false;
+    if(!available)return;
+    requested.current=view;
     const controller=createWorkspaceNavigator({
       commit:update=>flushSync(update),
-      start:()=>{
-        const now=performance.now();
-        rapid=now-lastNavigation<180;lastNavigation=now;
-        // Snapshot capture suspends rendering. A burst follows the latest intent
-        // immediately instead of repeatedly freezing video and the chart cursor.
-        if(rapid||typeof document.startViewTransition!=='function'||!host)return undefined;
-        return update=>{
-          const ticket=++capture;
-          host.style.viewTransitionName='workspace-content';
-          const transition=document.startViewTransition(()=>{
-            // Capture only the outgoing scene; a captured incoming tree loses hit-testing.
-            if(ticket===capture)host.style.removeProperty('view-transition-name');
-            update();
-          });
-          return transition;
-        };
-      },
-      reduced:()=>preference.current===true||window.matchMedia('(prefers-reduced-motion: reduce)').matches,
-      fallback:()=>{
-        fallback.current?.cancel();
-        if(rapid){fallback.current=null;return;}
-        // Legacy WebKit swaps immediately. Avoid cloning canvas/video/large Coach trees.
-        fallback.current=viewport.current?.animate([{opacity:.88},{opacity:1}],{duration:160,easing:'ease-out'})??null;
-      },
+      start:()=>undefined,
+      reduced:()=>true,
+      fallback:()=>{},
     });
     navigator.current=controller;
-    const interrupt=()=>{controller.skip();fallback.current?.cancel();fallback.current=null;};
-    const inputHost=host?.parentElement;
-    // Captured elements temporarily leave hit-testing. Listen on the stationary
-    // parent and include their rectangle, even when the event targets that parent.
-    const input=(event:Event)=>{
-      if(!host||!controller.animating()&&!fallback.current)return;
-      if(host.contains(event.target as Node)){interrupt();return;}
-      const point=event instanceof MouseEvent?event:'touches' in event?(event as TouchEvent).touches[0]:null;
-      if(!point)return;
-      const rect=host.getBoundingClientRect();
-      if(point.clientX>=rect.left&&point.clientX<=rect.right&&point.clientY>=rect.top&&point.clientY<=rect.bottom)interrupt();
-    };
-    inputHost?.addEventListener('pointerdown',input,true);
-    inputHost?.addEventListener('pointermove',input,true);
-    inputHost?.addEventListener('wheel',input,{passive:true,capture:true});
-    inputHost?.addEventListener('keydown',input,true);
-    inputHost?.addEventListener('touchstart',input,{passive:true,capture:true});
-    window.addEventListener('resize',interrupt);
-    const resize=new ResizeObserver(interrupt);if(host)resize.observe(host);
-    return()=>{
-      controller.dispose();++capture;host?.style.removeProperty('view-transition-name');fallback.current?.cancel();resize.disconnect();
-      inputHost?.removeEventListener('pointerdown',input,true);inputHost?.removeEventListener('pointermove',input,true);inputHost?.removeEventListener('wheel',input,true);
-      inputHost?.removeEventListener('keydown',input,true);inputHost?.removeEventListener('touchstart',input,true);
-      window.removeEventListener('resize',interrupt);navigator.current=null;
-    };
+    return()=>{controller.dispose();navigator.current=null;};
   },[viewport,sessionId,available]);
-  useLayoutEffect(()=>{if(reduced){navigator.current?.skip();fallback.current?.cancel();}},[reduced]);
   useLayoutEffect(()=>{
     if(!navigator.current?.pending())requested.current=view;
     const host=viewport.current;if(!host||!available)return;
@@ -150,7 +116,7 @@ export function useWorkspaceMotion(viewport:RefObject<HTMLElement|null>,view:Wor
   },[viewport,view,sessionId,available]);
   return useCallback((next:WorkspaceView,update:()=>void,semantic=false)=>{
     if(next===requested.current&&!semantic)return;
-    requested.current=next;fallback.current?.cancel();
+    requested.current=next;
     if(navigator.current)navigator.current.navigate(update);else update();
   },[]);
 }

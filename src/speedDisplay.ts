@@ -22,3 +22,8 @@ export function displayAdvancedResult(result:AdvancedResult):AdvancedResult {
   histogram:lap.histogram.map(bin=>({...bin,low:bin.low*x,high:bin.high*x})),
  }))};
 }
+
+/** Shows speeds written in m/s inside generated coaching text in the app's display unit. Calculations keep original units. */
+export function displaySpeedText(text:string){
+ return text.replace(/(-?\d+(?:\.\d+)?)\s*m\/s(?![²\w^])/g,(_,value:string)=>`${(Number(value)*speedFactor('m/s')).toFixed(1)} ${displaySpeedUnit('m/s')}`);
+}

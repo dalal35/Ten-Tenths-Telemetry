@@ -1,0 +1,123 @@
+/* Approved Telemetry composition. Shared shell and tokens have shared owners. */
+.app.premium .main:has([data-workspace=telemetry])>.lap-summary {width:calc(100% - clamp(290px,25%,350px) - 16px)}
+.app.premium [data-workspace=telemetry] {overflow:visible;container-type:normal;background:transparent}
+.app.premium [data-workspace=telemetry]>.workspace-body {display:grid;grid-template-columns:minmax(0,1fr) clamp(290px,25%,350px);gap:16px;min-height:100%}
+.app.premium [data-workspace=telemetry] .chart-workspace {background:var(--glass-panel);border:1px solid var(--border);border-radius:22px;padding:16px 15px 12px;box-shadow:var(--glass-edge),var(--glass-shadow);align-self:start;max-height:calc(100vh - 276px);overflow:auto}
+.app.premium [data-workspace=telemetry] .chart-toolbar {min-height:59px;padding:0 2px 19px 14px}
+.app.premium [data-workspace=telemetry] .axis-switch {padding:2px;background:var(--glass-raised);border:1px solid var(--grid);border-radius:17px;box-shadow:var(--glass-edge)}
+.app.premium [data-workspace=telemetry] .axis-switch button {font-size:14px;min-height:34px;width:100px;border-radius:14px;padding:6px 15px}
+.app.premium [data-workspace=telemetry] .axis-switch.segmented button {border-radius:14px}
+.app.premium [data-workspace=telemetry] .axis-switch.segmented button.active {background:var(--glass-focused)}
+.app.premium [data-workspace=telemetry] .axis-switch button.active {background:var(--glass-focused);box-shadow:var(--glass-edge),0 2px 5px #0002}
+.app.premium [data-workspace=telemetry] .channel-control>button {background:var(--glass-raised);border:1px solid var(--border);border-radius:17px;min-height:40px;padding:8px 16px;font-size:14px;box-shadow:var(--glass-edge)}
+.app.premium [data-workspace=telemetry] .channel-control>button span {background:transparent;font:inherit;margin-inline:10px;padding:0}
+.app.premium [data-workspace=telemetry] .plots {border:0;background:transparent}
+.app.premium [data-workspace=telemetry] .plots .plot-row {margin:0 0 7px;padding:10px 16px 0;background:linear-gradient(125deg,#ffffff04,transparent 60%),var(--surface-1);border:1px solid var(--grid);border-radius:20px;box-shadow:var(--glass-edge)}
+.app.premium [data-workspace=telemetry] .plots .plot-row:first-child {border-radius:20px}
+.app.premium [data-workspace=telemetry] .plots .plot-label {min-height:26px;font-size:16px;align-items:center}
+.app.premium [data-workspace=telemetry] .plots .plot-title {font-size:16px;font-weight:650}
+.app.premium [data-workspace=telemetry] .plots .plot-title small {font-size:13px}
+.app.premium [data-workspace=telemetry] .plots .readout {font-size:14px;gap:24px;letter-spacing:0;font-weight:500}
+.app.premium [data-workspace=telemetry] .plots .primary-reading::before,
+.app.premium [data-workspace=telemetry] .plots .comparison-reading::before {width:19px;border-top-width:3px;border-radius:3px}
+.app.premium [data-workspace=telemetry] .plots .plot-delta .plot-reading[data-delta] {color:var(--delta-trace)}
+.app.premium [data-workspace=telemetry] .plots [data-plot] {height:clamp(84px,calc((100vh - 542px) / var(--plot-count)),220px)}
+.app.premium [data-workspace=telemetry] .plots .plot-row:first-child [data-plot] {height:clamp(96px,calc((100vh - 542px) / var(--plot-count) + 12px),236px)}
+.app.premium.compact [data-workspace=telemetry] .plots [data-plot] {height:120px}
+.app.premium.compact [data-workspace=telemetry] .plots .plot-row:first-child [data-plot] {height:120px}
+.app.premium [data-workspace=telemetry] .plots .axis-label {background:transparent;border:0;padding:5px 18px 2px;font-size:13px}
+.app.premium [data-workspace=telemetry] .plots .axis-label>span:last-child {display:none}
+.app.premium [data-workspace=telemetry] .plots .plot-legend {font-size:13px;gap:30px}
+.app.premium [data-workspace=telemetry] .inspector {position:relative;display:block;align-self:start;width:auto;min-width:0;margin-top:-94px;padding:17px 15px 14px;border:1px solid var(--border);border-radius:20px;background:var(--glass-panel);box-shadow:var(--glass-edge),var(--glass-shadow);max-height:calc(100vh - 180px);overflow:auto}
+.app.premium [data-workspace=telemetry] .track-section>.section-heading {display:none}
+.app.premium [data-workspace=telemetry] .track-instruments {padding:5px 10px 18px;gap:16px;grid-template-columns:1fr 1fr;align-items:start}
+.app.premium [data-workspace=telemetry] .track-instruments span {font-size:13px;line-height:18px;color:var(--muted);white-space:nowrap}
+.app.premium [data-workspace=telemetry] .speed-instrument strong {font:450 38px/1.15 var(--font-sans);letter-spacing:-1px}
+.app.premium [data-workspace=telemetry] .speed-instrument strong small {font-size:16px;color:var(--ink)}
+.app.premium [data-workspace=telemetry] .delta-instrument {padding-left:16px;gap:4px}
+.app.premium [data-workspace=telemetry] .delta-instrument strong {font:500 29px/1.15 var(--font-sans);letter-spacing:-.5px}
+.app.premium [data-workspace=telemetry] .delta-instrument strong small {font-size:16px}
+.app.premium [data-workspace=telemetry] .delta-instrument>span:last-child {display:none}
+.app.premium [data-workspace=telemetry] .track-map-frame {border-radius:19px 19px 0 0;background:var(--glass-raised);border:1px solid var(--border);border-bottom:0;box-shadow:var(--glass-edge)}
+.app.premium [data-workspace=telemetry] .track {height:clamp(120px,calc(100vh - 650px),206px);max-height:none;padding:12px 30px 0;overflow:visible}
+.app.premium [data-workspace=telemetry] .track-underlay {stroke:var(--trace-primary);stroke-opacity:.07;stroke-width:9}
+.app.premium [data-workspace=telemetry] .primary-line {stroke-width:2.7}
+.app.premium [data-workspace=telemetry] .map-section-labels circle {r:12px;fill:var(--surface-1);stroke:var(--muted)}
+.app.premium [data-workspace=telemetry] .map-section-labels text {font-size:18px;transform:translateY(2px)}
+.app.premium [data-workspace=telemetry] .track-map-meta {padding:7px 16px 10px;background:var(--glass-raised);border:1px solid var(--border);border-top:1px solid var(--grid);border-radius:0 0 19px 19px;font-size:12px;color:var(--ink)}
+.app.premium [data-workspace=telemetry] .track-position-control {padding:14px 6px 8px}
+.app.premium [data-workspace=telemetry] .track-position-control input {appearance:none;-webkit-appearance:none;display:block;height:8px;min-height:8px;margin:14px 0 10px;border:0;border-radius:8px;background:linear-gradient(to right,var(--trace-primary) 0 var(--track-progress),var(--control) var(--track-progress) 100%)}
+.app.premium [data-workspace=telemetry] .track-position-control input::-webkit-slider-thumb {appearance:none;-webkit-appearance:none;width:20px;height:20px;background:var(--ink);border:1px solid var(--border);border-radius:50%;box-shadow:0 2px 4px #0003}
+.app.premium [data-workspace=telemetry] .track-position-control input::-moz-range-thumb {width:20px;height:20px;background:var(--ink);border:1px solid var(--border);border-radius:50%;box-shadow:0 2px 4px #0003}
+.app.premium [data-workspace=telemetry] .track-position-control>div {font-size:14px;color:var(--muted);margin-bottom:8px}
+.app.premium [data-workspace=telemetry] .track-position-control output {font-size:14px;font-weight:500}
+.app.premium [data-workspace=telemetry] .segment-section {padding:16px 22px 12px;margin:6px -15px -14px;border:1px solid var(--grid);border-radius:20px;background:linear-gradient(130deg,#ffffff05,transparent 65%),var(--surface-1)}
+.app.premium [data-workspace=telemetry] .segment-section>.section-heading {font-size:14px;color:var(--ink)}
+.app.premium [data-workspace=telemetry] .segment-section>.section-heading>span {font-size:12px;color:var(--muted)}
+.app.premium [data-workspace=telemetry] .segment-list {max-height:232px;margin-top:9px}
+.app.premium [data-workspace=telemetry] .segment-card {padding:9px 0;border-radius:0;border-bottom:1px solid var(--grid)}
+.app.premium [data-workspace=telemetry] .segment-overview {min-height:38px;gap:14px}
+.app.premium [data-workspace=telemetry] .segment-identity b {font-size:14px;font-weight:550}
+.app.premium [data-workspace=telemetry] .segment-identity small {font-size:13px}
+.app.premium [data-workspace=telemetry] .segment-delta {font-size:14px;font-weight:500}
+.app.premium [data-workspace=telemetry] .segment-delta small {font-size:13px;color:inherit}
+.app.premium [data-workspace=telemetry] .segment-note,
+.app.premium [data-workspace=telemetry] .section-finding {display:none}
+.app.premium [data-workspace=telemetry] .segment-card.selected {border-radius:10px;padding-inline:10px}
+.telemetry-options {position:relative;z-index:21}
+.telemetry-options summary {display:flex;align-items:center;justify-content:center;list-style:none;cursor:pointer;width:28px;height:32px;color:var(--muted);border-radius:10px;font-size:20px}
+.telemetry-options summary::-webkit-details-marker {display:none}
+.telemetry-options summary:focus-visible {outline:2px solid var(--accent-focus);outline-offset:2px}
+.data-warning-indicator {display:flex;align-items:center;justify-content:center;width:18px;height:18px;border:1px solid var(--trace-comparison);border-radius:50%;font-size:13px;font-weight:650;color:var(--trace-comparison)}
+.telemetry-options summary:is(:hover,:focus-visible),.telemetry-options[open]>summary {background:var(--surface-3);color:var(--ink)}
+.telemetry-options-panel {position:absolute;z-index:40;right:0;top:calc(100% + 6px);width:280px;max-width:calc(100vw - 84px);max-height:360px;overflow:auto;padding:14px;border:1px solid var(--border);border-radius:16px;background:var(--surface-2);box-shadow:var(--shadow-floating);font-size:13px;line-height:1.6}
+.app.premium .telemetry-options-panel>button {display:block;min-height:36px;width:100%;text-align:left;font-size:13px;padding:7px 10px;border-radius:8px}
+.app.premium .telemetry-options-panel>button:hover {background:var(--surface-3)}
+.telemetry-options-panel p {margin:10px 0;color:var(--muted)}
+.app.premium .telemetry-options-panel .alignment-note {margin:10px 0;font-size:12px}
+.app.premium [data-workspace=telemetry] .track-options {position:absolute;right:8px;top:-2px}
+.app.premium [data-workspace=telemetry] .track-options>summary {width:24px;height:24px;font-size:16px}
+.app.premium [data-workspace=telemetry] .telemetry-options-panel .corner-controls {margin:0;display:flex;flex-direction:column;align-items:stretch}
+@media(hover:none) {
+  .telemetry-options summary {min-width:32px;min-height:32px}
+}
+@media(max-width:1100px) {
+  .app.premium .main:has([data-workspace=telemetry])>.lap-summary {width:100%}
+  .app.premium [data-workspace=telemetry]>.workspace-body {grid-template-columns:minmax(0,1fr)}
+  .app.premium [data-workspace=telemetry] {overflow:auto}
+  .app.premium [data-workspace=telemetry] .chart-workspace {max-height:none;overflow:visible}
+  .app.premium [data-workspace=telemetry] .plots [data-plot] {height:160px}
+  .app.premium [data-workspace=telemetry] .plots .plot-row:first-child [data-plot] {height:176px}
+  .app.premium [data-workspace=telemetry] .inspector {margin-top:0;display:grid;grid-template-columns:1fr 1fr;gap:20px;padding:16px;align-self:start;max-height:none;overflow:visible}
+  .app.premium [data-workspace=telemetry] .segment-section {margin:0;padding:12px;border-radius:16px;grid-column:2;grid-row:1}
+  .app.premium [data-workspace=telemetry] .segment-list {max-height:360px}
+}
+@media(max-width:700px) {
+  .app.premium [data-workspace=telemetry] .chart-workspace {padding:12px 8px;border-radius:18px}
+  .app.premium [data-workspace=telemetry] .chart-toolbar {padding:0 2px 12px;min-height:48px;flex-wrap:nowrap;gap:5px}
+  .app.premium [data-workspace=telemetry] .axis-switch button {width:76px;font-size:12px}
+  .app.premium [data-workspace=telemetry] .channel-control>button {font-size:12px;padding-inline:10px;min-height:36px}
+  .app.premium [data-workspace=telemetry] .plots .plot-row {padding-inline:8px;border-radius:14px}
+  .app.premium [data-workspace=telemetry] .plots .plot-title {font-size:14px}
+  .app.premium [data-workspace=telemetry] .plots .plot-label {flex-wrap:nowrap}
+  .app.premium [data-workspace=telemetry] .plots .readout {font-size:12px;gap:10px}
+  .app.premium [data-workspace=telemetry] .plots .plot-title small {font-size:12px}
+  .app.premium [data-workspace=telemetry] .plots [data-plot] {height:130px}
+  .app.premium [data-workspace=telemetry] .plots .plot-row:first-child [data-plot] {height:146px}
+  .app.premium [data-workspace=telemetry] .inspector {gap:12px;padding:12px}
+  .app.premium [data-workspace=telemetry] .track-instruments {padding:4px 0 16px;gap:8px}
+  .app.premium [data-workspace=telemetry] .track-instruments span {font-size:12px}
+  .app.premium [data-workspace=telemetry] .speed-instrument strong {font-size:28px}
+  .app.premium [data-workspace=telemetry] .speed-instrument strong small {font-size:12px}
+  .app.premium [data-workspace=telemetry] .delta-instrument {padding-left:8px}
+  .app.premium [data-workspace=telemetry] .delta-instrument strong {font-size:20px}
+  .app.premium [data-workspace=telemetry] .track {padding-inline:10px;height:180px}
+}
+.app.premium [data-workspace=telemetry] .track-instruments strong[data-empty]{font-size:24px;line-height:33px;color:var(--muted)}
+@media(min-width:1101px){
+  .app.premium [data-workspace=telemetry] .inspector{display:flex;flex-direction:column;overflow:hidden}
+  .app.premium [data-workspace=telemetry] .track-section{flex:none}
+  .app.premium [data-workspace=telemetry] .segment-section{display:flex;flex:0 1 auto;flex-direction:column;min-height:0}
+  .app.premium [data-workspace=telemetry] .segment-section>.section-heading{flex:none}
+  .app.premium [data-workspace=telemetry] .segment-list{flex:0 1 auto;min-height:0;max-height:300px;overflow:auto;overscroll-behavior:contain}
+}

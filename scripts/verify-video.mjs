@@ -4,7 +4,7 @@ import {createServer} from 'vite';
 import assert from 'node:assert/strict';
 let server,browser;
 try {
-  server=await createServer({plugins:[browserTestNoWatch],optimizeDeps:{entries:browserTestEntries},server:{host:'127.0.0.1',port:0,strictPort:false,hmr:false}});await server.listen();
+  server=await createServer({configLoader:'runner',plugins:[browserTestNoWatch],optimizeDeps:{entries:browserTestEntries},server:{host:'127.0.0.1',port:0,strictPort:false,hmr:false}});await server.listen();
   browser=await launchBrowser();
   const page=await browser.newPage({viewport:{width:1360,height:1000}});const errors=[];page.on('pageerror',e=>errors.push(e.message));
   // Simulated Tauri picker/authorization and media clock; native decode is checked separately.
@@ -56,7 +56,7 @@ try {
   await expect(page.getByLabel('Video anchor (s)')).toHaveValue('35');await page.getByLabel('Segment start (s)').fill('20');await page.getByRole('button',{name:'Apply segment edits'}).click();await expect(page.getByRole('alert')).toContainText('overlap');assert.deepEqual((await state()).segments,saved.segments,'invalid edits retain valid mappings');
   await page.getByLabel('Segment start (s)').fill('30');await page.getByRole('button',{name:'Apply segment edits'}).click();
   const markers=await page.locator('[data-marker-segment]').evaluateAll(nodes=>nodes.map(n=>[n.dataset.markerSegment,Number(n.dataset.videoTime)]));
-  await page.getByRole('button',{name:'Correction +0.1 s',exact:true}).click();
+  await page.getByRole('button',{name:'Nudge +0.10 s correction',exact:true}).click();
   const corrected=await page.locator('[data-marker-segment]').evaluateAll(nodes=>nodes.map(n=>[n.dataset.markerSegment,Number(n.dataset.videoTime)]));
   const first=saved.segments[0].id,second=saved.segments[1].id;
   assert.deepEqual(corrected.filter(([id])=>id===first),markers.filter(([id])=>id===first),'nudge leaves other markers fixed');
@@ -121,7 +121,7 @@ try {
   await page.getByRole('button',{name:'Remove cached YouTube copy',exact:true}).click();await expect(page.getByRole('button',{name:'Download saved URL',exact:true})).toBeVisible();
   await page.evaluate(()=>{window.holdYoutubeDownload=true;window.youtubeStatus.phase='downloading';});
   await page.getByRole('button',{name:'Download saved URL',exact:true}).click();await expect(page.getByText(/Downloading/)).toBeVisible();
-  await page.getByRole('button',{name:'Correction +0.1 s',exact:true}).click();
+  await page.getByRole('button',{name:'Nudge +0.10 s correction',exact:true}).click();
   await page.getByLabel('Segment start (s)').fill('1');await page.getByLabel('Video anchor (s)').fill('1');await page.getByLabel('Segment end (s)').fill('49');await page.getByLabel('Correction (s)').fill('0.35');await page.getByRole('button',{name:'Apply segment edits'}).click();
   await page.getByRole('separator',{name:'Resize video panel'}).focus();await page.keyboard.press('ArrowDown');
   await page.evaluate(()=>window.finishYoutubeDownload());await expect(page.getByRole('button',{name:'Play',exact:true})).toBeEnabled();

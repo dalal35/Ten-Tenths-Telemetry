@@ -22,8 +22,8 @@ describe('combined session explorer',()=>{
  it('shows one combined row and simple lap numbers without source filename sublines',()=>{
   const html=render([a,b,combined]);
   expect(html.match(/class="library-entry /g)).toHaveLength(1);
-  expect(html).toContain('SESSIONS <span>1</span>');
-  expect(html).toContain('LAPS <span>2</span>');
+  expect(html).toContain('Session library <span>1</span>');
+  expect(html).toContain('Laps <span>2 total</span>');
   expect(html).toContain('Compare lap 2');
   expect(html).not.toContain('lap-source');
   expect(html).not.toContain('Long recording filename');
@@ -31,7 +31,19 @@ describe('combined session explorer',()=>{
  it('restores both source rows after unmerge',()=>{
   const html=render([a,b],source(a));
   expect(html.match(/class="library-entry /g)).toHaveLength(2);
-  expect(html).toContain('SESSIONS <span>2</span>');
+  expect(html).toContain('Session library <span>2</span>');
+ });
+ it('surfaces recording size alongside its existing identity',()=>{
+  const html=render([{...a,lapCount:12,channelCount:8}],source(a));
+  expect(html).toMatch(/class="session-facts"[^>]*>[^<]*12 laps[^<]*8 channels/);
+  expect(html).toContain('Driver');
+ });
+ it('distinguishes similarly named originals by the end of their file name',()=>{
+  const entries=[{...a,name:'Warm-up',source:'/recordings/example_0361.xrk'},{...b,name:'Warm-up',source:'C:\\recordings\\example_0362.xrk'}];
+  const html=render(entries,source(a));
+  expect(html).toMatch(/class="session-source"[^>]*>[^<]* · 0361</);
+  expect(html).toMatch(/class="session-source"[^>]*>[^<]* · 0362</);
+  expect(render([a,b,combined])).toMatch(/class="session-source"[^>]*>2 source recordings/);
  });
  it('keeps unavailable original recordings and their repair actions reachable',()=>{
   const html=render([{...a,status:'missing'},b,{...combined,status:'missing'}],undefined);
