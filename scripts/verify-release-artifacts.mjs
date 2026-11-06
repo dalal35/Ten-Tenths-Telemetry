@@ -14,8 +14,8 @@ export function verifyWindowsBinary(bytes){
  assert.equal(bytes.readUInt16LE(pe+24+68),2,'Release binary must use GUI subsystem (no console)');
 }
 export function releasePlatforms(mode='all'){
- assert(['macos','all'].includes(mode),'Unknown release platform selection');
- return mode==='macos'?['macos']:['macos','windows'];
+ assert(['windows','macos','all'].includes(mode),'Unknown release platform selection');
+ return mode==='all'?['macos','windows']:[mode];
 }
 export function releaseAssetNames(platform,version){
  assert(['macos','windows'].includes(platform),'Unknown release platform');

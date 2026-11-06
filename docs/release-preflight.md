@@ -2,7 +2,7 @@
 
 Release owner checks this list against the exact commit to be tagged. A branch
 build is validation only; publication requires a matching `v<version>` tag and
-successful selected-platform jobs from that tag's workflow run. The default release scope is macOS only; set `RELEASE_PLATFORMS=all` for future cross-platform releases.
+successful selected-platform jobs from that tag's workflow run. The default release scope is Windows only; set `RELEASE_PLATFORMS` to `macos` or `all` to resume those releases.
 
 ## Preflight checklist
 
@@ -17,17 +17,17 @@ successful selected-platform jobs from that tag's workflow run. The default rele
   retaining the existing bundle identifier, executable and library identity.
 - [ ] Run relevant local regressions and obtain independent acceptance review.
   Resolve critical findings before tagging. Record physical-device gaps honestly.
-- [ ] For an all-platform release only, confirm the exact branch revision passes native Windows MSVC compilation,
+- [ ] For a Windows or all-platform release, confirm the exact branch revision passes native Windows MSVC compilation,
   persistence/media tests, browser tests, x64 NSIS generation/extraction, and
   disposable hosted install/update/uninstall with app-data retention.
-- [ ] Confirm the release revision passes macOS regressions, arm64 app/DMG creation,
+- [ ] For a macOS or all-platform release, confirm the release revision passes macOS regressions, arm64 app/DMG creation,
   signature/resource inspection and browser tests.
 - [ ] Inspect all selected-platform artifact manifests: version, revision, workflow run, expected
   names, nonempty sizes and SHA-256. Never mix artifacts from different runs.
 - [ ] Push a new version tag only after validation. Require all selected tagged platform
   jobs to pass again before the publisher can run.
-- [ ] Verify the draft has the macOS `.dmg` and app
-  archive plus `SHA256SUMS` (and Windows `.exe` only for all-platform releases); verify uploaded names/sizes before publishing.
+- [ ] Verify the draft has the Windows `.exe` plus `SHA256SUMS` (and the macOS `.dmg` and app
+  archive only for macOS or all-platform releases, with no `.exe` for macOS-only); verify uploaded names/sizes before publishing.
 - [ ] After publication, download assets without authentication and compare their
   SHA-256 hashes to the validated manifests. Confirm the public release URL.
 

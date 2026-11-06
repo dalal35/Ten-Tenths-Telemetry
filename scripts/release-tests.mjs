@@ -5,7 +5,7 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {createHash} from 'node:crypto';
 import {verifyVersion} from './verify-release-version.mjs';
-import {verifyArtifacts,verifyWindowsBinary} from './verify-release-artifacts.mjs';
+import {releasePlatforms,verifyArtifacts,verifyWindowsBinary} from './verify-release-artifacts.mjs';
 import {publishRelease} from './publish-release.mjs';
 import {detachDiskImage} from './macos-disk-image.mjs';
 
@@ -53,6 +53,29 @@ test('branch push validates package versions without requiring a release tag',t=
  assert.throws(()=>verifyVersion(root,{...tagEnv,GITHUB_REF_NAME:'v0.2.0'}),/Tag/);
 });
 
+test('Windows-only artifact verification requires the installer without Mac assets',t=>{
+ const root=sandbox(t);seedArtifacts(root);rmSync(join(root,'macos'),{recursive:true});
+ assert.deepEqual(releasePlatforms('windows'),['windows']);
+ assert.deepEqual(verifyArtifacts(root,'0.1.0',{platforms:releasePlatforms('windows')}).map(f=>f.name),['Ten-Tenths-Telemetry_0.1.0_x64-setup.exe']);
+ assert.throws(()=>verifyArtifacts(root,'0.1.0'),/ENOENT/);
+ rmSync(join(root,'windows/Ten-Tenths-Telemetry_0.1.0_x64-setup.exe'));
+ assert.throws(()=>verifyArtifacts(root,'0.1.0',{platforms:['windows']}),/ENOENT|Unexpected staged files/);
+});
+test('Windows-only publisher uploads only the verified installer and checksums',t=>{
+ const root=sandbox(t);seedArtifacts(root);rmSync(join(root,'macos'),{recursive:true});const calls=[];
+ writeFileSync(join(root,'source-notes.md'),'Complete Windows feature release.\n');
+ publishRelease(root,'0.1.0',releaseEnv(root,{RELEASE_PLATFORMS:'windows'}),args=>{
+  calls.push(args);
+  if(args[1]==='view')return JSON.stringify({isDraft:true,assets:[...verifyArtifacts(root,'0.1.0',{platforms:['windows']}).map(f=>({name:f.name,size:f.size})),{name:'SHA256SUMS',size:statSync(join(root,'SHA256SUMS')).size}]});
+ });
+ assert.deepEqual(calls.map(c=>c[1]),['create','upload','view','edit']);
+ assert.deepEqual(calls[1].slice(3,calls[1].indexOf('--repo')).map(arg=>arg.split(/[\\/]/).at(-1)).sort(),['SHA256SUMS','Ten-Tenths-Telemetry_0.1.0_x64-setup.exe']);
+ assert.match(readFileSync(join(root,'release-notes.md'),'utf8'),/Complete Windows feature release/);
+});
+test('macOS and all-platform selections remain available',()=>{
+ assert.deepEqual(releasePlatforms('macos'),['macos']);
+ assert.deepEqual(releasePlatforms('all'),['macos','windows']);
+});
 test('macOS-only artifact verification requires both Mac assets without Windows',t=>{
  const root=sandbox(t);seedArtifacts(root);rmSync(join(root,'windows'),{recursive:true});
  assert.equal(verifyArtifacts(root,'0.1.0',{platforms:['macos']}).length,2);

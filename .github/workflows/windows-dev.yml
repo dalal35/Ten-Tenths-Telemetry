@@ -1,7 +1,7 @@
 name: Windows development
 
-# Dispatch explicitly after a Windows-only push with [skip ci]. This leaves the
-# production release workflow intact without starting its macOS push job.
+# Dispatch explicitly after a push with [skip ci] for targeted Windows checks.
+# This runs selected suites without starting the release workflow's push job.
 on:
   workflow_dispatch:
     inputs:

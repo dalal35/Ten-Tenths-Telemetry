@@ -194,11 +194,11 @@ Use Edit boundaries on the circuit trace to adjust the automatic section boundar
 
 Follow the [release preflight and failure-handling checklist](docs/release-preflight.md) before tagging or publishing.
 
-The [release workflow](.github/workflows/release.yml) defaults to macOS-only validation and publication. A new matching `v*` tag builds the complete Apple Silicon application and DMG, verifies the exact artifact set and checksums, uploads a draft, verifies uploaded assets, and publishes a stable release. Windows does not gate macOS releases. Set the repository variable `RELEASE_PLATFORMS=all` for future cross-platform tag releases; both jobs must then succeed. Manual dispatch supports macOS or all-platform build validation and never publishes.
+The [release workflow](.github/workflows/release.yml) defaults to Windows-only validation and publication. A new matching `v*` tag builds the x64 NSIS installer, runs the hosted install, update and uninstall checks, verifies the exact artifact set and checksums, uploads a draft, verifies uploaded assets, and publishes a stable release. macOS does not gate Windows releases. Set the repository variable `RELEASE_PLATFORMS` to `macos` or `all` to resume those tag releases; with `all`, both jobs must succeed. Manual dispatch supports Windows, macOS or all-platform build validation and never publishes.
 
-Versions must match across package/lockfiles, Cargo and Tauri metadata. Existing releases and tags are never overwritten. The publisher requires assets from the same revision and workflow run. Build jobs have read-only contents access; only the gated publisher can write releases. Ad-hoc signing remains in use without Apple notarization. No automatic updater is configured.
+Versions must match across package/lockfiles, Cargo and Tauri metadata. Existing releases and tags are never overwritten. The publisher requires assets from the same revision and workflow run. Build jobs have read-only contents access; only the gated publisher can write releases. Windows builds are unsigned; macOS builds use ad-hoc signing without Apple notarization. No automatic updater is configured.
 
-Private XRK integration suites run locally; fixture-independent tests run in hosted CI. Browser IPC simulation and Rust media tests supplement packaged native acceptance. Release notes document exact coverage and remaining limits. Windows source, its native tests and packaging automation remain intact; this macOS release does not claim new Windows acceptance.
+Private XRK integration suites run locally; fixture-independent tests run in hosted CI. Browser IPC simulation and Rust media tests supplement packaged native acceptance. Release notes document exact coverage and remaining limits. macOS source, its native tests and packaging automation remain intact; a Windows-only release does not claim new macOS acceptance, and hosted Windows checks do not replace physical Windows GUI acceptance.
 
 ## Advanced analysis
 
