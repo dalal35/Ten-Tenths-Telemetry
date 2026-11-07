@@ -2,10 +2,11 @@ import {LayoutGroup,motion,useReducedMotion} from 'motion/react';
 import AdvancedChannelSelect from './AdvancedChannelSelect';
 import {advancedComputationKey} from './advancedPresentation';
 import {SelectionHighlight} from './motion';
+import {runWorkspaceCascade} from './workspaceCascade';
 import {channelSourceLabel,lapDisplayNumber,lapSourceLabel} from './merging';
 import {inspectableAdvancedPosition} from './advancedIntegration';
 import './advanced.css';
-import {useCallback,useEffect,useMemo,useRef,useState} from 'react';
+import {useCallback,useEffect,useLayoutEffect,useMemo,useRef,useState} from 'react';
 import {analyzeAdvanced,validateFormulas} from './bridge';
 import {applyPreset,boundedAdvanced,changeTool,defaultAdvanced,removePreset,savePreset} from './advancedState';
 import type {AdvancedConfig,AdvancedState,Formula,Tool} from './advancedState';
@@ -26,6 +27,14 @@ export default function Advanced({session,analysis,axis,state,cursor,zoom,onChan
  const config=state.config,tool=config.tool;
  const [setup,setSetup]=useState(()=>typeof window==='undefined'||window.innerWidth>900);
  const reduced=useReducedMotion();
+ // Each analysis tool is a page of its own: changing tool rebuilds the panel beneath the tabs.
+ const studio=useRef<HTMLElement>(null),builtTool=useRef(tool);
+ useLayoutEffect(()=>{
+  if(builtTool.current===tool)return;
+  builtTool.current=tool;
+  const panel=studio.current?.querySelector<HTMLElement>('.advanced-fieldset');
+  return panel?runWorkspaceCascade(panel):undefined;
+ },[tool]);
  const computationKey=advancedComputationKey(config);
  const inspectPosition=useCallback((lapId:string,position:number|null)=>inspectableAdvancedPosition(lapId,position,analysis),[analysis]);
  const displayedResult=useMemo(()=>result?displayAdvancedResult(result):null,[result]);
@@ -58,7 +67,7 @@ export default function Advanced({session,analysis,axis,state,cursor,zoom,onChan
  const events=(result?.laps.flatMap(l=>l.events)??[]).sort((a,b)=>((a[sort]??-Infinity)-(b[sort]??-Infinity))*(descending?-1:1));
  const sortBy=(key:typeof sort)=>{setDescending(sort===key?!descending:false);setSort(key);};
  const setAxisRange=(key:'xRange'|'yRange',index:number,value:string)=>{if(!value){update({[key]:null});return;}const parsed=Number(value)/(key==='xRange'?xFactor:yFactor);const r:[number,number]=config[key]?[...config[key]!]:[0,1];r[index]=parsed;if(Number.isFinite(parsed)&&r[1]>r[0]&&(config[key==='xRange'?'xScale':'yScale']!=='log'||r[0]>0))update({[key]:r});};
- return <section className="advanced-workspace" aria-label="Advanced Analysis">
+ return <section ref={studio} className="advanced-workspace" aria-label="Advanced Analysis">
  <header className="advanced-heading"><div><h2>Analysis Studio</h2><p>{session.channels.length} sensor channels · Original timestamps</p></div><div className="preset-select"><label htmlFor="analysis-preset">Workspace preset</label><div><select id="analysis-preset" aria-label="Analysis preset" disabled={state.readOnly} value={state.lastPreset} onChange={e=>presetAction(()=>applyPreset(state,e.target.value))}>{state.presets.map(p=><option key={p.id} value={p.id}>{p.name}{state.defaultPreset===p.id?' · default':''}</option>)}</select><button aria-label="Manage presets" aria-expanded={manage} aria-controls="preset-manager" disabled={state.readOnly} onClick={()=>{setManage(!manage);setPresetName(state.presets.find(p=>p.id===state.lastPreset)?.name??'');}}>•••</button></div></div></header>
  <div className="advanced-nav"><LayoutGroup id="analysis-tools"><div className="tool-tabs" role="tablist" aria-label="Analysis tools">{(Object.keys(labels) as Tool[]).map(t=><button key={t} id={`tool-${t}`} role="tab" aria-label={labels[t]} aria-selected={tool===t} aria-controls="advanced-tool-panel" tabIndex={tool===t?0:-1} disabled={state.readOnly} onKeyDown={e=>{const keys=Object.keys(labels) as Tool[],index=keys.indexOf(t),next=e.key==='ArrowRight'?keys[(index+1)%keys.length]:e.key==='ArrowLeft'?keys[(index+keys.length-1)%keys.length]:e.key==='Home'?keys[0]:e.key==='End'?keys[keys.length-1]:null;if(next){e.preventDefault();try{onChange(changeTool(state,next));document.getElementById(`tool-${next}`)?.focus();}catch(err){setError(String(err));}}}} onClick={()=>{try{onChange(changeTool(state,t));}catch(e){setError(String(e));}}}>{tool===t&&<SelectionHighlight group="tool-selection"/>}<ToolIcon tool={t}/><span>{shortLabels[t]}</span></button>)}</div></LayoutGroup></div>
  {state.readOnly&&<div className="error-banner">This advanced workspace uses a newer schema. Its saved data is preserved; update Ten Tenths Telemetry to edit it.</div>}

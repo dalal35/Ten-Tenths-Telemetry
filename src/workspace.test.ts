@@ -1,5 +1,5 @@
 import {describe,it,expect} from 'vitest';
-import {restoreWorkspace,compatibleZoom,moveBoundary,displayAnalysis,serializeWorkspace} from './workspace';
+import {restoreWorkspace,compatibleZoom,carriedZoom,pendingAnalysis,zoomExtent,moveBoundary,displayAnalysis,serializeWorkspace} from './workspace';
 import type {Session,Analysis} from './types';
 const session:Session={id:'one',source:'a.xrk',name:'a',driver:'',track:'',recordedAt:'',warnings:[],laps:[{id:'a',number:1,start:0,end:10,duration:10,complete:true},{id:'b',number:2,start:10,end:22,duration:12,complete:true}],channels:[{id:'speed',name:'GPS Speed',unit:'km/h',times:[],values:[]},{id:'rpm',name:'RPM',unit:'rpm',times:[],values:[]}]};
 describe('workspace recovery',()=>{
@@ -12,6 +12,33 @@ describe('workspace recovery',()=>{
     const restored=restoreWorkspace(changed,saved,'v1');
     expect(restored).toMatchObject({primary:'a',comparison:null,channels:['speed']});
     expect(compatibleZoom(restored)).toBeNull();
+  });
+  it('carries a real zoom across lap and reference changes on the same axis',()=>{
+    const w={...restoreWorkspace(session,null),zoom:{primary:'a',comparison:null,axis:'distance' as const,min:10,max:40}};
+    const carried=carriedZoom(w,{min:0,max:100},'b',null);
+    expect(carried).toEqual({primary:'b',comparison:null,axis:'distance',min:10,max:40});
+    expect(compatibleZoom({...w,primary:'b',zoom:carried})).toEqual({min:10,max:40});
+    expect(carriedZoom({...w,axis:'time'},{min:0,max:100},'b',null)).toBeNull();
+  });
+  it('does not carry a range that shows the whole chart, which would crop a longer lap',()=>{
+    const w={...restoreWorkspace(session,null),zoom:{primary:'a',comparison:null,axis:'distance' as const,min:0,max:100}};
+    expect(carriedZoom(w,{min:0,max:100},'b',null)).toBeNull();
+    expect(carriedZoom(w,null,'b',null)).toBeNull();
+  });
+  it('gives pending charts structure for the new selection and no previous values',()=>{
+    const series=[{channelId:'speed',name:'Speed',unit:'mph',x:[0,50],values:[10,20],gaps:[[1,2]] as [number,number][]}];
+    const lap={lapId:'a',duration:90,length:100,mapping:[{meters:0,time:0}],track:[{x:0,y:0,position:0,speed:10}],warnings:['old'],series};
+    const previous={primary:lap,comparison:{...lap,lapId:'b'},alignment:{method:'spatial',referenceLength:100,positionUncertaintyM:1,timingUncertaintyS:1,coverage:1,notes:['old']},segments:[{id:'s'}],delta:{x:[0,50],values:[.1,.2],method:'spatial',uncertaintySeconds:.1},warnings:['old']} as unknown as Analysis;
+    const pending=pendingAnalysis(previous,'c','d');
+    expect([pending.primary.lapId,pending.comparison?.lapId]).toEqual(['c','d']);
+    expect(pending.primary.series[0]).toMatchObject({channelId:'speed',name:'Speed',unit:'mph',x:[],values:[],gaps:[]});
+    expect(pending.comparison?.series[0]).toMatchObject({x:[],values:[]});
+    expect(pending.delta).toMatchObject({x:[],values:[]});
+    expect(pending.segments).toEqual([]);
+    expect(JSON.stringify(pending)).not.toMatch(/old|\b90\b/);
+    expect(pendingAnalysis(previous,'c',null).comparison).toBeNull();
+    expect(pendingAnalysis(previous,'c',null).delta).toBeNull();
+    expect(zoomExtent(previous)).toEqual({min:0,max:50});
   });
   it('restores zoom only for matching laps and axis with finite bounds',()=>{const w=restoreWorkspace(session,null);const zoom={primary:'a',comparison:null,axis:'distance' as const,min:10,max:40};expect(compatibleZoom({...w,zoom})).toEqual({min:10,max:40});expect(compatibleZoom({...w,zoom,axis:'time'})).toBeNull();expect(compatibleZoom({...w,zoom:{...zoom,max:Infinity}})).toBeNull();});
   it('clamps track boundaries to ordered reference meters',()=>{expect(moveBoundary([100,200,300],1,400,400)).toEqual([100,298,300]);expect(moveBoundary([100,200,300],0,-10,400)).toEqual([2,200,300]);});

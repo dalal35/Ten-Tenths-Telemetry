@@ -87,3 +87,11 @@
   .app.premium [data-workspace]:not([data-workspace=telemetry]) .plots .plot-title {font-size:14px}
   .app.premium [data-workspace]:not([data-workspace=telemetry]) .plots .readout {font-size:12px;gap:10px}
 }
+/* While the next analysis is pending the charts stay mounted, empty and inert. */
+.plots{position:relative}
+.plots-status{position:absolute;z-index:2;top:clamp(48px,28%,160px);left:50%;translate:-50% 0;display:inline-flex;align-items:center;gap:10px;max-width:calc(100% - 32px);padding:8px 14px;border-radius:var(--radius-control);background:var(--raised);border:1px solid var(--border);color:var(--ink);font-size:12px;line-height:1.35;white-space:nowrap;pointer-events:none}
+.plots-status .loading-line{flex:none;width:14px;height:14px}
+.plots[data-pending] [data-plot]{pointer-events:none}
+.plots[data-pending] .uplot{opacity:0}
+.plots:not([data-pending]) .uplot{transition:opacity 160ms ease-out}
+@media(prefers-reduced-motion:reduce){.plots:not([data-pending]) .uplot{transition:none}}

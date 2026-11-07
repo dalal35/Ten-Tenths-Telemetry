@@ -1,0 +1,17 @@
+/* Floats over the workspace without blocking it, below the import receipt and modal sheets. */
+.update-prompt{position:fixed;z-index:44;right:20px;bottom:40px;width:340px;max-width:calc(100vw - 40px);padding:16px;display:grid;gap:10px;box-sizing:border-box;color:var(--text-primary);font-family:var(--font-sans);font-size:var(--text-body);background:var(--glass-floating-fill);backdrop-filter:blur(var(--glass-floating-blur));border:1px solid var(--glass-floating-border);border-radius:var(--radius-surface);box-shadow:var(--glass-floating-shadow);animation:update-prompt-in var(--surface-duration) var(--ease-settle)}
+.update-prompt h2{margin:0;font-size:14px;font-weight:600;letter-spacing:0;color:var(--text-primary)}
+.update-prompt p{margin:0;line-height:1.45;color:var(--text-secondary);overflow-wrap:anywhere;max-height:120px;overflow-y:auto}
+.update-progress{height:4px;overflow:hidden;border-radius:var(--radius-pill);background:var(--grid)}
+.update-progress span{display:block;height:100%;background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform var(--feedback-duration) linear}
+.update-progress span[data-indeterminate]{width:40%;animation:update-progress-slide 1.4s ease-in-out infinite;transform:none}
+.update-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:2px}
+.update-actions button{height:30px;padding:0 12px;font:inherit;font-weight:500;color:var(--text-primary);background:transparent;border:1px solid var(--border);border-radius:var(--radius-control);cursor:pointer;transition:background var(--feedback-duration),border-color var(--feedback-duration)}
+.update-actions button:hover{background:var(--hover)}
+.update-actions button:focus-visible{outline:2px solid var(--accent-focus);outline-offset:2px}
+.update-actions .update-primary{color:var(--accent-ink);background:var(--accent);border-color:var(--accent)}
+.update-actions .update-primary:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
+.update-actions .update-primary:active{background:var(--accent-pressed);border-color:var(--accent-pressed)}
+@keyframes update-prompt-in{from{opacity:0;transform:translateY(8px)}}
+@keyframes update-progress-slide{from{transform:translateX(-100%)}to{transform:translateX(250%)}}
+@media (prefers-reduced-motion:reduce){.update-prompt{animation:none}.update-progress span{transition:none}.update-progress span[data-indeterminate]{animation:none;width:100%;opacity:.5}}

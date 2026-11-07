@@ -14,13 +14,15 @@ export function createWorkspaceNavigator({commit,start,reduced,fallback}:{
 }){
   let generation=0,disposed=false,pending=false;
   let active:WorkspaceTransition|null=null;
+  let applyPending:(()=>void)|null=null;
   const skip=()=>{active?.skipTransition();active=null;};
   return {
     navigate(update:()=>void){
       if(disposed)return;
       const ticket=++generation;
       skip();pending=true;
-      const apply=()=>{if(disposed||ticket!==generation)return;pending=false;commit(update);};
+      const apply=()=>{if(disposed||ticket!==generation||!pending)return;pending=false;applyPending=null;commit(update);};
+      applyPending=apply;
       const native=start();
       if(reduced()||!native){apply();if(!reduced())fallback();return;}
       try{
@@ -31,8 +33,10 @@ export function createWorkspaceNavigator({commit,start,reduced,fallback}:{
       }catch{apply();fallback();}
     },
     skip,
+    /** Input must land on the workspace the user asked for, even while its capture is pending. */
+    flush(){applyPending?.();},
     animating:()=>active!==null,
     pending:()=>pending,
-    dispose(){disposed=true;++generation;pending=false;skip();},
+    dispose(){disposed=true;++generation;pending=false;applyPending=null;skip();},
   };
 }

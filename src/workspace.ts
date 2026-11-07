@@ -27,6 +27,23 @@ export function serializeWorkspace(w:Workspace):Record<string,unknown> {
   return saved;
 }
 export function compatibleZoom(w:Workspace):{min:number;max:number}|null {const z=w.zoom;return z&&z.primary===w.primary&&z.comparison===w.comparison&&z.axis===w.axis&&Number.isFinite(z.min)&&Number.isFinite(z.max)&&z.min>=0&&z.max>z.min?{min:z.min,max:z.max}:null;}
+/** The x range the first chart auto-fits to, which is also the range it reports before any zoom gesture. */
+export function zoomExtent(a:Analysis):{min:number;max:number}|null {
+  const first=a.primary.series[0]??a.comparison?.series[0];if(!first)return null;
+  const xs=[first,...(a.comparison?.series.filter(s=>s.channelId===first.channelId)??[])].flatMap(s=>s.x.length?[s.x[0],s.x[s.x.length-1]]:[]);
+  return xs.length?{min:Math.min(...xs),max:Math.max(...xs)}:null;
+}
+/** Keep a real zoom across a lap or reference change on the same axis. A range covering the whole chart is not a zoom, and carrying one would crop a longer lap. */
+export function carriedZoom(w:Workspace,extent:{min:number;max:number}|null,primary:string,comparison:string|null):Zoom|null {
+  const range=compatibleZoom(w);
+  if(!range||!extent||(range.min<=extent.min&&range.max>=extent.max))return null;
+  return {...range,primary,comparison,axis:w.axis};
+}
+/** What charts may show while the next analysis is pending: channel names and units for the new selection, with no sample or metric from the previous one. */
+export function pendingAnalysis(previous:Analysis,primary:string,comparison:string|null):Analysis {
+  const lap=(view:Analysis['primary'],lapId:string):Analysis['primary']=>({lapId,duration:0,length:null,mapping:[],track:[],warnings:[],series:view.series.map(s=>({...s,x:[],values:[],gaps:[]}))});
+  return {primary:lap(previous.primary,primary),comparison:comparison?lap(previous.comparison??previous.primary,comparison):null,alignment:{...previous.alignment,method:'unavailable',referenceLength:null,positionUncertaintyM:null,timingUncertaintyS:null,coverage:0,notes:[]},segments:[],delta:comparison&&previous.delta?{...previous.delta,x:[],values:[]}:null,warnings:[]};
+}
 export function moveBoundary(boundaries:number[],index:number,meters:number,length:number):number[]{return boundaries.map((v,i)=>i===index?Math.max((boundaries[i-1]??0)+2,Math.min((boundaries[i+1]??length)-2,meters)):v);}
 export function displayAnalysis(a:Analysis):Analysis {
   const series=(s:Series):Series=>{const factor=speedFactor(s.unit);return displaySpeedUnit(s.unit)==='mph'?{...s,unit:'mph',values:factor===1?s.values:s.values.map(v=>v*factor)}:s;};

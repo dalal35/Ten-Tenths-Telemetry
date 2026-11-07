@@ -26,16 +26,30 @@ successful selected-platform jobs from that tag's workflow run. The default rele
   names, nonempty sizes and SHA-256. Never mix artifacts from different runs.
 - [ ] Push a new version tag only after validation. Require all selected tagged platform
   jobs to pass again before the publisher can run.
-- [ ] Verify the draft has the Windows `.exe` plus `SHA256SUMS` (and the macOS `.dmg` and app
+- [ ] Verify the draft has the Windows `.exe` plus `SHA256SUMS` and `latest.json` (and the macOS `.dmg` and app
   archive only for macOS or all-platform releases, with no `.exe` for macOS-only); verify uploaded names/sizes before publishing.
 - [ ] After publication, download assets without authentication and compare their
   SHA-256 hashes to the validated manifests. Confirm the public release URL.
 
 The Windows build uses Tauri's `--no-binary-patching`: this application ships
-only NSIS on Windows and has no updater plugin requiring a per-format bundle
-marker. This keeps the raw, embedded and installed executables byte-identical,
+only NSIS on Windows, so the in-app updater finds it through the plain
+`windows-x86_64` entry in `latest.json` and needs no per-format bundle marker. This keeps the raw, embedded and installed executables byte-identical,
 which the artifact inspector and installer smoke test enforce. The pinned CLI
 supports this flag; keep macOS bundling unchanged.
+
+## In-app updates
+
+On launch, installed apps read `latest.json` from the latest stable GitHub release.
+The publisher signs each installer and writes that file. It stops before creating a
+release if the signature does not match the public key in `tauri.conf.json`.
+
+- Set the `TAURI_SIGNING_PRIVATE_KEY` repository secret to the contents of the private
+  key, and `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` if the key has a password.
+- Keep a backup of the private key. Installed apps only accept updates signed by it, so
+  losing it means users must reinstall manually.
+- Windows users are only offered a release built with `RELEASE_PLATFORMS=all`. A
+  macOS-only release becomes the latest one and leaves Windows with no update to find.
+- Prereleases are never offered, because GitHub's latest release excludes them.
 
 ## Safe failure handling
 

@@ -3,10 +3,11 @@ import assert from 'node:assert/strict';
 import {mkdtempSync,mkdirSync,writeFileSync,readFileSync,rmSync,statSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
-import {createHash} from 'node:crypto';
+import {createHash,generateKeyPairSync,sign as edSign} from 'node:crypto';
 import {verifyVersion} from './verify-release-version.mjs';
 import {releasePlatforms,verifyArtifacts,verifyWindowsBinary} from './verify-release-artifacts.mjs';
 import {publishRelease} from './publish-release.mjs';
+import {buildUpdaterManifest,verifyUpdaterSignature,configuredPublicKey} from './updater-manifest.mjs';
 import {detachDiskImage} from './macos-disk-image.mjs';
 
 test('disk image detach succeeds without retry or forcing the volume',async()=>{
@@ -32,6 +33,14 @@ test('disk image detach stops after three busy attempts and reports the failure'
  assert.equal(attempts,3);
 });
 
+// A real minisign-format key, so tests exercise the same check that guards publication.
+function testUpdater(id=1){
+ const {publicKey,privateKey}=generateKeyPairSync('ed25519'),keyId=Buffer.alloc(8,id);
+ const raw=publicKey.export({format:'der',type:'spki'}).subarray(-32);
+ const encoded=(comment,bytes)=>Buffer.from(`untrusted comment: ${comment}\n${bytes.toString('base64')}\n`).toString('base64');
+ return {publicKey:encoded('public key',Buffer.concat([Buffer.from('Ed'),keyId,raw])),sign:path=>encoded('signature',Buffer.concat([Buffer.from('ED'),keyId,edSign(null,createHash('blake2b512').update(readFileSync(path)).digest(),privateKey)]))};
+}
+const latestAsset=root=>({name:'latest.json',size:statSync(join(root,'latest.json')).size});
 function sandbox(t){const root=mkdtempSync(join(tmpdir(),'apex-release-'));t.after(()=>rmSync(root,{recursive:true,force:true}));return root;}
 function seedVersion(root){mkdirSync(join(root,'src-tauri'));writeFileSync(join(root,'package.json'),JSON.stringify({version:'0.1.0'}));writeFileSync(join(root,'package-lock.json'),JSON.stringify({version:'0.1.0',packages:{'':{version:'0.1.0'}}}));writeFileSync(join(root,'src-tauri/tauri.conf.json'),JSON.stringify({version:'0.1.0'}));writeFileSync(join(root,'src-tauri/Cargo.toml'),'[package]\nname = "apex-telemetry"\nversion = "0.1.0"\n');}
 function seedArtifacts(root){writeFileSync(join(root,'source-notes.md'),'Complete platform release notes.\n');for(const platform of ['macos','windows']){const dir=join(root,platform);mkdirSync(dir);const names=platform==='macos'?['Ten-Tenths-Telemetry_0.1.0_aarch64.dmg','Ten-Tenths-Telemetry_0.1.0_aarch64.app.tar.gz']:['Ten-Tenths-Telemetry_0.1.0_x64-setup.exe'];const assets=names.map(name=>{const bytes=Buffer.from(`synthetic ${name}`);writeFileSync(join(dir,name),bytes);return {name,size:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex')};});writeFileSync(join(dir,'manifest.json'),JSON.stringify({schema:1,platform,target:platform==='macos'?'aarch64-apple-darwin':'x86_64-pc-windows-msvc',version:'0.1.0',revision:'a'.repeat(40),runId:'42',assets}));}}
@@ -42,9 +51,9 @@ test('Windows PE must be x64 GUI subsystem',()=>{const pe=Buffer.alloc(512);pe.w
 const tagEnv={GITHUB_EVENT_NAME:'push',GITHUB_REF:'refs/tags/v0.1.0',GITHUB_REF_NAME:'v0.1.0',GITHUB_REPOSITORY:'test/repo',GITHUB_SHA:'a'.repeat(40),GITHUB_RUN_ID:'42'};
 function releaseEnv(root,overrides={}){return {...tagEnv,RELEASE_NOTES_FILE:join(root,'source-notes.md'),...overrides};}
 test('dispatch and partial artifacts never call release operations',t=>{const root=sandbox(t),calls=[];assert.throws(()=>publishRelease(root,'0.1.0',releaseEnv(root,{GITHUB_EVENT_NAME:'workflow_dispatch'}),args=>calls.push(args)),/tag push/);assert.throws(()=>publishRelease(root,'0.1.0',releaseEnv(root),args=>calls.push(args)));assert.equal(calls.length,0);});
-test('failed upload leaves a draft, and publication follows complete upload',t=>{const root=sandbox(t);seedArtifacts(root);const calls=[];assert.throws(()=>publishRelease(root,'0.1.0',releaseEnv(root),args=>{calls.push(args);if(args[1]==='upload')throw Error('upload failed');}),/upload failed/);assert.equal(calls.length,2);assert(calls[0].includes('--draft'));assert(!calls.some(c=>c[1]==='edit'));calls.length=0;publishRelease(root,'0.1.0',releaseEnv(root),args=>{calls.push(args);if(args[1]==='view')return JSON.stringify({isDraft:true,assets:[...verifyArtifacts(root,'0.1.0').map(f=>({name:f.name,size:f.size})),{name:'SHA256SUMS',size:statSync(join(root,'SHA256SUMS')).size}]});});assert.deepEqual(calls.map(c=>c[1]),['create','upload','view','edit']);assert(calls[3].includes('--draft=false'));});
-test('remote incomplete upload is not published even if upload command succeeds',t=>{const root=sandbox(t);seedArtifacts(root);const calls=[];assert.throws(()=>publishRelease(root,'0.1.0',releaseEnv(root),args=>{calls.push(args);if(args[1]==='view')return JSON.stringify({isDraft:true,assets:[]});}),/incomplete/);assert(!calls.some(c=>c[1]==='edit'));});
-test('existing release creation failure never uploads or overwrites',t=>{const root=sandbox(t);seedArtifacts(root);const calls=[];assert.throws(()=>publishRelease(root,'0.1.0',releaseEnv(root),args=>{calls.push(args);throw Error('already exists');}),/already exists/);assert.equal(calls.length,1);assert(!calls.flat().includes('--clobber'));});
+test('failed upload leaves a draft, and publication follows complete upload',t=>{const root=sandbox(t);seedArtifacts(root);const calls=[];assert.throws(()=>publishRelease(root,'0.1.0',releaseEnv(root),args=>{calls.push(args);if(args[1]==='upload')throw Error('upload failed');},testUpdater()),/upload failed/);assert.equal(calls.length,2);assert(calls[0].includes('--draft'));assert(!calls.some(c=>c[1]==='edit'));calls.length=0;publishRelease(root,'0.1.0',releaseEnv(root),args=>{calls.push(args);if(args[1]==='view')return JSON.stringify({isDraft:true,assets:[...verifyArtifacts(root,'0.1.0').map(f=>({name:f.name,size:f.size})),{name:'SHA256SUMS',size:statSync(join(root,'SHA256SUMS')).size},latestAsset(root)]});},testUpdater());assert.deepEqual(calls.map(c=>c[1]),['create','upload','view','edit']);assert(calls[3].includes('--draft=false'));});
+test('remote incomplete upload is not published even if upload command succeeds',t=>{const root=sandbox(t);seedArtifacts(root);const calls=[];assert.throws(()=>publishRelease(root,'0.1.0',releaseEnv(root),args=>{calls.push(args);if(args[1]==='view')return JSON.stringify({isDraft:true,assets:[]});},testUpdater()),/incomplete/);assert(!calls.some(c=>c[1]==='edit'));});
+test('existing release creation failure never uploads or overwrites',t=>{const root=sandbox(t);seedArtifacts(root);const calls=[];assert.throws(()=>publishRelease(root,'0.1.0',releaseEnv(root),args=>{calls.push(args);throw Error('already exists');},testUpdater()),/already exists/);assert.equal(calls.length,1);assert(!calls.flat().includes('--clobber'));});
 
 test('branch push validates package versions without requiring a release tag',t=>{
  const root=sandbox(t);seedVersion(root);
@@ -88,8 +97,8 @@ test('macOS-only publisher uploads only verified Mac assets and describes the se
  writeFileSync(join(root,'source-notes.md'),'Complete Apple Silicon feature release.\n');
  publishRelease(root,'0.1.0',releaseEnv(root,{RELEASE_PLATFORMS:'macos'}),args=>{
   calls.push(args);
-  if(args[1]==='view')return JSON.stringify({isDraft:true,assets:[...verifyArtifacts(root,'0.1.0',{platforms:['macos']}).map(f=>({name:f.name,size:f.size})),{name:'SHA256SUMS',size:statSync(join(root,'SHA256SUMS')).size}]});
- });
+  if(args[1]==='view')return JSON.stringify({isDraft:true,assets:[...verifyArtifacts(root,'0.1.0',{platforms:['macos']}).map(f=>({name:f.name,size:f.size})),{name:'SHA256SUMS',size:statSync(join(root,'SHA256SUMS')).size},latestAsset(root)]});
+ },testUpdater());
  assert.deepEqual(calls.map(c=>c[1]),['create','upload','view','edit']);
  assert.doesNotMatch(readFileSync(join(root,'release-notes.md'),'utf8'),/Download the x64|Windows releases/);
  assert.match(readFileSync(join(root,'release-notes.md'),'utf8'),/Complete Apple Silicon feature release/);
@@ -116,10 +125,45 @@ test('GitHub filename sanitization leaves portable release assets and checksums 
  // server-side result rather than simply echoing the local upload names.
  publishRelease(root,'0.1.0',releaseEnv(root),args=>{
   calls.push(args);
-  if(args[1]==='view')return JSON.stringify({isDraft:true,assets:[...verifyArtifacts(root,'0.1.0').map(f=>({name:f.name.replaceAll(' ','.'),size:f.size})),{name:'SHA256SUMS',size:statSync(join(root,'SHA256SUMS')).size}]});
- });
+  if(args[1]==='view')return JSON.stringify({isDraft:true,assets:[...verifyArtifacts(root,'0.1.0').map(f=>({name:f.name.replaceAll(' ','.'),size:f.size})),{name:'SHA256SUMS',size:statSync(join(root,'SHA256SUMS')).size},latestAsset(root)]});
+ },testUpdater());
  const files=verifyArtifacts(root,'0.1.0');
  for(const file of files)assert.match(file.name,/^Ten-Tenths-Telemetry_0\.1\.0_[a-z0-9.\-]+$/);
  assert(readFileSync(join(root,'SHA256SUMS'),'utf8').includes('Ten-Tenths-Telemetry_0.1.0_aarch64.dmg'));
  assert(calls.at(-1).includes('--draft=false'));
+});
+
+test('published update manifest points each platform at its signed installer',t=>{
+ const root=sandbox(t);seedArtifacts(root);const updater=testUpdater(),calls=[];
+ publishRelease(root,'0.1.0',releaseEnv(root),args=>{calls.push(args);if(args[1]==='view')return JSON.stringify({isDraft:true,assets:[...verifyArtifacts(root,'0.1.0').map(f=>({name:f.name,size:f.size})),{name:'SHA256SUMS',size:statSync(join(root,'SHA256SUMS')).size},latestAsset(root)]});},updater);
+ const latest=JSON.parse(readFileSync(join(root,'latest.json'),'utf8')),repository=releaseEnv(root).GITHUB_REPOSITORY;
+ assert.equal(latest.version,'0.1.0');
+ assert.match(latest.notes,/release notes/);
+ assert(!Number.isNaN(Date.parse(latest.pub_date)));
+ assert.deepEqual(Object.keys(latest.platforms).sort(),['darwin-aarch64','windows-x86_64']);
+ assert.equal(latest.platforms['windows-x86_64'].url,`https://github.com/${repository}/releases/download/v0.1.0/Ten-Tenths-Telemetry_0.1.0_x64-setup.exe`);
+ verifyUpdaterSignature(readFileSync(join(root,'windows/Ten-Tenths-Telemetry_0.1.0_x64-setup.exe')),latest.platforms['windows-x86_64'].signature,updater.publicKey);
+ assert(calls.find(c=>c[1]==='upload').includes(join(root,'latest.json')));
+});
+test('a signing key the app does not trust stops publication before any remote operation',t=>{
+ const root=sandbox(t);seedArtifacts(root);
+ assert.throws(()=>publishRelease(root,'0.1.0',releaseEnv(root),()=>assert.fail('must not publish'),{sign:testUpdater(1).sign,publicKey:testUpdater(2).publicKey}),/different key/);
+});
+test('a tampered installer fails signature verification',t=>{
+ const root=sandbox(t),file=join(root,'installer.exe'),updater=testUpdater();
+ writeFileSync(file,'original');const signature=updater.sign(file);
+ verifyUpdaterSignature(readFileSync(file),signature,updater.publicKey);
+ assert.throws(()=>verifyUpdaterSignature(Buffer.from('tampered'),signature,updater.publicKey),/does not verify/);
+});
+test('a missing signing key stops publication before any remote operation',t=>{
+ const root=sandbox(t);seedArtifacts(root);
+ assert.throws(()=>publishRelease(root,'0.1.0',releaseEnv(root,{TAURI_SIGNING_PRIVATE_KEY:''}),()=>assert.fail('must not publish')),/TAURI_SIGNING_PRIVATE_KEY/);
+});
+test('the app is configured to read signed updates from this repository',()=>{
+ const config=JSON.parse(readFileSync(new URL('../src-tauri/tauri.conf.json',import.meta.url),'utf8')),capability=JSON.parse(readFileSync(new URL('../src-tauri/capabilities/default.json',import.meta.url),'utf8'));
+ assert.deepEqual(config.plugins.updater.endpoints,['https://github.com/dalal35/ten-tenths-telemetry/releases/latest/download/latest.json']);
+ assert.equal(config.plugins.updater.windows.installMode,'passive');
+ assert.equal(Buffer.from(Buffer.from(configuredPublicKey(),'base64').toString().split('\n')[1],'base64').length,42);
+ assert.notEqual(config.bundle.createUpdaterArtifacts,true,'Signing belongs to the publisher, so ordinary builds need no private key');
+ for(const permission of ['updater:default','process:allow-restart'])assert(capability.permissions.includes(permission));
 });

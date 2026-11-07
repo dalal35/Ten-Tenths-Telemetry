@@ -197,9 +197,13 @@ jobs:
           path: release-artifacts/windows
       - name: Verify complete artifact set from this revision and run
         run: node scripts/verify-release-artifacts.mjs release-artifacts "${GITHUB_REF_NAME#v}"
-      - name: Draft, upload, verify, then publish stable release
+      - name: Install the pinned Tauri signer without running package scripts
+        run: npm ci --ignore-scripts
+      - name: Sign updates, then draft, upload, verify and publish stable release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         run: |
           node scripts/check-youtube-redistribution.mjs
           node scripts/publish-release.mjs release-artifacts

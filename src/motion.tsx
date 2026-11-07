@@ -1,6 +1,7 @@
 import {useCallback,useId,useLayoutEffect,useRef} from 'react';
 import {flushSync} from 'react-dom';
 import {createWorkspaceNavigator} from './workspaceNavigation';
+import {runWorkspaceCascade} from './workspaceCascade';
 import {LayoutGroup,motion,useIsPresent,useReducedMotion} from 'motion/react';
 import type {HTMLMotionProps} from 'motion/react';
 import type {RefObject} from 'react';
@@ -35,8 +36,9 @@ export function SelectionRail({group,value}:{group:string;value:string}){
   return <motion.span aria-hidden="true" className="selection-rail" layoutId={group} layoutDependency={value} transition={motionTokens.spring}/>;
 }
 
-export function SelectionHighlight({group}:{group:string}){
-  return <motion.span aria-hidden="true" className="control-selection" layoutId={group} transition={motionTokens.spring}/>;
+// `dependency` scopes the glide to real selection changes: revealing a hidden workspace is not one.
+export function SelectionHighlight({group,dependency}:{group:string;dependency?:string}){
+  return <motion.span aria-hidden="true" className="control-selection" layoutId={group} layoutDependency={dependency} transition={motionTokens.spring}/>;
 }
 
 // Matches --radius-control. Motion corrects border radius during layout animation only from inline styles.
@@ -57,7 +59,7 @@ export function AxisTabs({value,onChange}:{value:'distance'|'time';onChange:(axi
   const scope=useId();
   return <LayoutGroup id={`horizontal-axis-${scope}`}><div className="segmented axis-switch" aria-label="Horizontal axis">
     {(['distance','time'] as const).map(axis=><button key={axis} className={value===axis?'active':''} aria-pressed={value===axis} onClick={()=>onChange(axis)}>
-      {value===axis&&<SelectionHighlight group="axis-selection"/>}{axis==='distance'?'Distance':'Time'}
+      {value===axis&&<SelectionHighlight group="axis-selection" dependency={value}/>}{axis==='distance'?'Distance':'Time'}
     </button>)}
   </div></LayoutGroup>;
 }
@@ -71,7 +73,7 @@ export function WorkspaceTabs({value,onChange,inert=false}:{value:WorkspaceView;
   </nav></LayoutGroup>;
 }
 
-// Navigation changes application state immediately; only the selected tab moves.
+// Navigation changes application state immediately; the tab glides and the page builds around live content.
 export function useWorkspaceMotion(viewport:RefObject<HTMLElement|null>,view:WorkspaceView,sessionId:string,available=true){
   const requested=useRef(view);
   const navigator=useRef<ReturnType<typeof createWorkspaceNavigator>|null>(null);
@@ -81,12 +83,23 @@ export function useWorkspaceMotion(viewport:RefObject<HTMLElement|null>,view:Wor
     requested.current=view;
     const controller=createWorkspaceNavigator({
       commit:update=>flushSync(update),
-      start:()=>undefined,
-      reduced:()=>true,
+      // The outgoing page alone is captured, so it dissolves over a live incoming page that takes input at once.
+      start:()=>{
+        const host=viewport.current;
+        if(!host||typeof document.startViewTransition!=='function')return undefined;
+        return update=>{
+          host.style.viewTransitionName='workspace-content';
+          return document.startViewTransition(()=>{host.style.viewTransitionName='';update();});
+        };
+      },
+      reduced:()=>matchMedia('(prefers-reduced-motion: reduce)').matches,
       fallback:()=>{},
     });
     navigator.current=controller;
-    return()=>{controller.dispose();navigator.current=null;};
+    const flush=()=>controller.flush();
+    const inputs=['keydown','pointerdown','wheel'] as const;
+    for(const input of inputs)window.addEventListener(input,flush,{capture:true,passive:true});
+    return()=>{for(const input of inputs)window.removeEventListener(input,flush,{capture:true});controller.dispose();navigator.current=null;};
   },[viewport,sessionId,available]);
   useLayoutEffect(()=>{
     if(!navigator.current?.pending())requested.current=view;
@@ -113,6 +126,15 @@ export function useWorkspaceMotion(viewport:RefObject<HTMLElement|null>,view:Wor
       host.removeEventListener('pointerdown',interrupt);host.removeEventListener('keydown',interrupt);
       resize.disconnect();mutations.disconnect();
     };
+  },[viewport,view,sessionId,available]);
+  // After scroll restoration, so the build covers what the user will actually see.
+  const builtSession=useRef('');
+  useLayoutEffect(()=>{
+    const host=viewport.current;
+    if(!host||!available)return;
+    const countSummary=builtSession.current!==sessionId;
+    builtSession.current=sessionId;
+    return runWorkspaceCascade(host,{countSummary});
   },[viewport,view,sessionId,available]);
   return useCallback((next:WorkspaceView,update:()=>void,semantic=false)=>{
     if(next===requested.current&&!semantic)return;
