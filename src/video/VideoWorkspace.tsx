@@ -252,7 +252,7 @@ export function VideoWorkspace(props:VideoWorkspaceProps) {
       else if(['ArrowLeft','ArrowRight'].includes(event.key)){event.preventDefault();seekRelative(event.key==='ArrowLeft'?-5:5);}
     }} aria-label={active?"Video synchronization":undefined}>
     <div className="video-surfaces" hidden={!active}>
-    <header className="video-studio-heading"><div><span className="video-kicker">RACE CONTROL / ONBOARD</span><h2>Onboard Analysis</h2></div>
+    <header className="video-studio-heading"><div><h2>Onboard Analysis</h2></div>
       <LayoutGroup id={`video-view-${session.id}`}><div className="video-view-switch" aria-label="Video layout">{[false,true].map(value=><button key={String(value)} aria-pressed={focus===value} onClick={()=>setFocus(value)}>{focus===value&&<motion.span className="video-view-selection" layoutId="view" transition={reduced?{duration:0}:motionTokens.spring}/>}<span>{value?'Focus video':'Show analysis'}</span></button>)}</div></LayoutGroup>
     </header>
     <div className="video-feedback">
@@ -264,15 +264,16 @@ export function VideoWorkspace(props:VideoWorkspaceProps) {
     {(error||sample.error||props.syncError)&&<p role="alert" className="video-error">{error||sample.error||props.syncError} {state.source?.type==='local'?'If this file cannot decode, try a supported H.264 MP4 / MOV export.':''}</p>}
 </div><div className="video-studio-grid">
     <div ref={sticky} className="video-sticky-player">
-      <div className="video-section-title video-canvas-heading"><div><span className="video-camera-index">01</span><span className="video-source-label" title={state.source?.type==='local'?state.source.path:state.source?.url}>{fileName??'Onboard footage'}</span></div><span className="video-status" role="status">{!state.source?'No footage':nativeYouTube?'Download required':usable?sample.state:'Footage unavailable'}</span><button className="video-attach" disabled={busy} onClick={()=>void choose(false)}>Attach footage</button><details className="video-help"><summary aria-label="Playback notes and shortcuts" title="Playback notes and shortcuts">?</summary><div className="video-help-panel">
+      <div className="video-section-title video-canvas-heading"><div><span className="video-source-label" title={state.source?.type==='local'?state.source.path:state.source?.url}>{fileName??'Onboard footage'}</span></div><span className="video-status" role="status">{!state.source?'No footage':nativeYouTube?'Download required':usable?sample.state:'Footage unavailable'}</span>{state.source&&<button className="video-attach" disabled={busy} onClick={()=>void choose(false)}>Attach footage</button>}<details className="video-help"><summary aria-label="Playback notes and shortcuts" title="Playback notes and shortcuts">?</summary><div className="video-help-panel">
       {state.source?.type==='youtube'&&<p className="video-note">{isNative?'Playing the cached copy. The original YouTube URL and verified media identity are saved.':'YouTube synchronization uses approximate asynchronous timing. Native YouTube controls remain available in the player.'}</p>}
       {state.source?.type==='local'&&<p className="video-note">Timing follows media timestamps and manual alignment; frame accuracy is not guaranteed.</p>}
       <p className="video-note video-shortcuts"><kbd>K</kbd> play / pause <span>·</span> <kbd>← →</kbd> seek 5s <span>·</span> <kbd>Esc</kbd> leave focus view</p>
       </div></details></div>
 
-      {!usable||needsYouTubeDownload?<div className="video-placeholder"><svg viewBox="0 0 64 48" width="64" height="48" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true"><rect x="2" y="2" width="60" height="44" rx="3"/><path d="m27 16 13 8-13 8Z"/></svg>
+      {!usable||needsYouTubeDownload?<div className="video-placeholder">
         <strong>{state.source?.type==='youtube'&&isNative?'Download footage for desktop playback':state.source?'Footage unavailable':'Bring your onboard footage alongside telemetry'}</strong>
         <p>{nativeYouTube?'Download this YouTube video to play an authorized local copy.':currentAvailability==='missing'?'The saved file is missing. Locate it to preserve your segments.':currentAvailability==='changed'?'The file metadata changed. Confirm that the existing mappings still apply.':currentAvailability==='error'?'The video reference could not be checked. Locate the file or replace the footage.':'Attach a local MP4 / MOV or paste a YouTube link. Files stay on your computer.'}</p>
+        {!state.source&&<button className="video-primary video-attach-primary" disabled={busy} onClick={()=>void choose(false)}>Attach footage</button>}
       </div>:<div className="video-player-space" style={height===DEFAULT_PANEL_HEIGHT?undefined:{height}}><div className="video-viewport">
         {state.source?.type==='local'||isNative&&state.source?.type==='youtube'?<video ref={video} controls={nativeControls} playsInline preload="metadata" aria-label="Onboard video"/>:<div ref={host} className="video-youtube-host"/>}
       </div></div>}

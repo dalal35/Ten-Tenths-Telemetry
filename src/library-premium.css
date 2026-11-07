@@ -25,7 +25,7 @@
 .merge-dialog .library-dialog-intro { margin:0 0 18px; color:var(--muted); line-height:1.6; }
 .merge-dialog .recording-summary { margin:0 0 20px; border:1px solid var(--border); background:var(--bg); }
 .merge-dialog .recording-summary-source { display:flex; flex-direction:column; gap:5px; min-width:0; padding:12px 14px; border-bottom:1px solid var(--border); }
-.merge-dialog .recording-summary-source>span,.merge-dialog .merge-source-heading { color:var(--muted); font:11px/1.4 var(--font-mono); letter-spacing:.04em; text-transform:uppercase; }
+.merge-dialog .recording-summary-source>span,.merge-dialog .merge-source-heading { color:var(--muted); font:11px/1.4 var(--font-mono); }
 .merge-dialog .recording-summary-source strong { overflow-wrap:anywhere; font-size:12px; font-weight:600; }
 .merge-dialog .recording-summary-stats,.merge-dialog .merge-overview { display:flex; flex-wrap:wrap; gap:9px 22px; padding:10px 14px; color:var(--muted); font-size:11px; }
 .merge-dialog .recording-summary-stats strong,.merge-dialog .merge-overview strong { color:var(--ink); font-weight:600; }

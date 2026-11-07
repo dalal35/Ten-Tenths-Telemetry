@@ -108,7 +108,7 @@
 .app .formula-editor,.app .formula-picker{min-width:0;max-width:100%}
 .app .formula-editor h2{font-size:17px;line-height:1.4;margin:0 0 20px;font-weight:500}
 .app .formula-editor>label{margin-bottom:16px}
-.app .formula-editor textarea{font:13px/1.8 var(--font-mono,monospace);min-height:135px;resize:vertical;padding:12px}
+.app .formula-editor textarea{font:13px/1.8 var(--font-code,monospace);min-height:135px;resize:vertical;padding:12px}
 .app .formula-actions{display:flex;gap:8px;margin:12px 0 18px;flex-wrap:wrap}
 .app:not(.premium) .formula-actions button{min-height:34px;padding:8px 12px;border:1px solid var(--control);border-radius:3px;color:var(--ink)}
 .app.premium .formula-actions button{min-height:34px;padding:8px 12px;border:1px solid var(--control);border-radius:var(--radius-control);color:var(--ink)}
@@ -120,7 +120,7 @@
 .app .saved-formulas h3,.app .formula-picker h3{display:flex;justify-content:space-between;gap:12px;font-size:12px;font-weight:500;color:var(--ink);margin:0 0 14px}
 .app .saved-formulas h3 span,.app .formula-picker h3 span{color:var(--muted);font-weight:400}
 .app .saved-formulas>div{border-top:1px solid var(--border);padding:14px 0;display:flex;flex-direction:column;gap:10px}
-.app .saved-formulas code{font:11px/1.7 var(--font-mono,monospace);color:var(--muted);overflow-wrap:anywhere}
+.app .saved-formulas code{font:11px/1.7 var(--font-code,monospace);color:var(--muted);overflow-wrap:anywhere}
 .app .saved-formulas>div>div{display:flex;gap:10px;flex-wrap:wrap}
 .app .saved-formulas button{color:var(--muted);min-height:28px}
 .app .formula-picker{padding:0 0 0 20px;border-left:1px solid var(--border);max-height:600px;overflow:auto;overscroll-behavior:contain}
@@ -241,22 +241,22 @@ body:has(.advanced-tab),.main:has(.advanced-tab){min-width:0}
 .app:is(.premium,:not(.premium)) .advanced-workspace .preset-select>label{white-space:nowrap}
 .app:is(.premium,:not(.premium)) .advanced-workspace .preset-select>div{min-width:200px}
 .app:is(.premium,:not(.premium)) .advanced-workspace .advanced-nav{padding:0;margin:0 0 8px;border:0}
-.app:is(.premium,:not(.premium)) .advanced-workspace .advanced-nav .tool-tabs{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;padding:4px;background:var(--surface);border:1px solid var(--border);border-radius:16px}
-.app:is(.premium,:not(.premium)) .advanced-workspace .advanced-nav .tool-tabs button{min-height:36px;border-radius:12px;white-space:normal;font-size:12px}
-.app:is(.premium,:not(.premium)) .advanced-workspace .advanced-nav .tool-tabs button .control-selection{inset:0;height:auto;background:var(--raised);border:1px solid var(--border);border-radius:12px}
-.app:is(.premium,:not(.premium)) .advanced-workspace .advanced-fieldset{border:1px solid var(--border);border-radius:16px;background:var(--panel);overflow:hidden}
+.app:is(.premium,:not(.premium)) .advanced-workspace .advanced-nav .tool-tabs{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;padding:4px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-surface,16px)}
+.app:is(.premium,:not(.premium)) .advanced-workspace .advanced-nav .tool-tabs button{min-height:36px;border-radius:var(--radius-control,12px);white-space:normal;font-size:12px}
+.app:is(.premium,:not(.premium)) .advanced-workspace .advanced-nav .tool-tabs button .control-selection{inset:0;height:auto;background:var(--raised);border:1px solid var(--border);border-radius:var(--radius-control,12px)}
+.app:is(.premium,:not(.premium)) .advanced-workspace .advanced-fieldset{border:1px solid var(--border);border-radius:var(--radius-surface,16px);background:var(--panel);overflow:hidden}
 .app:is(.premium,:not(.premium)) .advanced-workspace .analysis-panel-heading{background:transparent;padding:3px 12px;border-bottom:1px solid var(--border);min-height:36px;box-sizing:border-box}
 .app:is(.premium,:not(.premium)) .advanced-workspace .analysis-panel-heading h3{font-size:13px;font-weight:600}
 .app:is(.premium,:not(.premium)) .advanced-workspace .analysis-panel-heading p{display:none}
 .app:is(.premium,:not(.premium)) .advanced-workspace .analysis-layout{grid-template-columns:240px minmax(0,1fr);padding:8px;gap:10px}
 .app:is(.premium,:not(.premium)) .advanced-workspace .analysis-layout[data-setup=false],.app:is(.premium,:not(.premium)) .advanced-workspace .analysis-layout.math-layout{grid-template-columns:minmax(0,1fr)}
-.app:is(.premium,:not(.premium)) .advanced-workspace .analysis-setup{padding:12px;border:1px solid var(--border);border-radius:12px;background:var(--surface);max-height:max(290px,calc(100vh - 454px));overflow:auto;overscroll-behavior:contain}
+.app:is(.premium,:not(.premium)) .advanced-workspace .analysis-setup{padding:12px;border:1px solid var(--border);border-radius:var(--radius-control,12px);background:var(--surface);max-height:max(290px,calc(100vh - 454px));overflow:auto;overscroll-behavior:contain}
 .app:is(.premium,:not(.premium)) .advanced-workspace .analysis-setup .analysis-filters,.app:is(.premium,:not(.premium)) .advanced-workspace .analysis-setup .analysis-controls{gap:8px}
 .app:is(.premium,:not(.premium)) .advanced-workspace .analysis-output{padding:0;min-width:0}
-.app:is(.premium,:not(.premium)) .advanced-workspace :is(select,input:not([type=checkbox]),textarea){border-radius:12px}
+.app:is(.premium,:not(.premium)) .advanced-workspace :is(select,input:not([type=checkbox]),textarea){border-radius:var(--radius-control,12px)}
 .app:is(.premium,:not(.premium)) .advanced-workspace .analysis-legend{padding:2px 0 6px}
-.app:is(.premium,:not(.premium)) .advanced-workspace .analysis-surface{position:relative;border-radius:12px}
-.app:is(.premium,:not(.premium)) .advanced-workspace .analysis-statistics{border-radius:12px;max-height:max(276px,calc(100vh - 454px));overflow:auto;overscroll-behavior:contain}
+.app:is(.premium,:not(.premium)) .advanced-workspace .analysis-surface{position:relative;border-radius:var(--radius-control,12px)}
+.app:is(.premium,:not(.premium)) .advanced-workspace .analysis-statistics{border-radius:var(--radius-control,12px);max-height:max(276px,calc(100vh - 454px));overflow:auto;overscroll-behavior:contain}
 .app:is(.premium,:not(.premium)) .advanced-workspace .analysis-statistics section{padding:10px 12px}
 .app:is(.premium,:not(.premium)) .advanced-workspace .analysis-statistics strong{font-weight:600}
 .app:is(.premium,:not(.premium)) .advanced-workspace .analysis-statistics .primary-stat strong{color:var(--cyan)}
@@ -296,3 +296,7 @@ body:has(.advanced-tab),.main:has(.advanced-tab){min-width:0}
 .app:is(.premium,:not(.premium)) .advanced-workspace .analysis-setup :is(select,input:not([type=checkbox])){min-height:32px;padding-block:5px}
 .app:is(.premium,:not(.premium)) .advanced-workspace .analysis-surface{margin:0}
 .app:is(.premium,:not(.premium)) .advanced-workspace .panel-resizer{height:8px}
+
+/* The busy state uses the app's one progress line instead of a static square. */
+.app.premium .analysis-busy{flex-direction:column;gap:12px}
+.app.premium .analysis-busy:before{content:none}

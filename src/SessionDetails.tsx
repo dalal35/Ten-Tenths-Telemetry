@@ -35,7 +35,7 @@ export default function SessionDetails({entry,onSave,onClose}:Props){
     initial={reduced?false:{scale:.985,y:6,opacity:0}} animate={{scale:1,y:0,opacity:1}} exit={reduced?{opacity:0,transition:{duration:0}}:{scale:.995,y:2,opacity:0,transition:{duration:.12}}} transition={reduced?{duration:0}:motionTokens.spring}
     onKeyDown={e=>{e.stopPropagation();}} onCancel={e=>{e.preventDefault();if(!busy)onClose();}}>
     <form onSubmit={e=>{e.preventDefault();void save();}}>
-      <div className="library-dialog-kicker">SESSION LIBRARY <span> / </span> DETAILS</div>
+      
       <h2 id="session-details-title">Edit session details</h2>
       <p className="library-dialog-intro">Keep the details in your library easy to recognize. Your original recording stays in place.</p>
       <div className="recording-summary" aria-label="Recording summary">

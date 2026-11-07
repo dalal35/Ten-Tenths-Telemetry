@@ -18,12 +18,12 @@
   --border:#474c57;--divider:var(--border);--line:var(--divider);--control:#7c8492;--grid:#373c45;--hover:#FFFFFF0A;
   --text-primary:#f4f5f8;--text-secondary:#c5c8d0;--text-tertiary:#b3b7c2;
   --ink:var(--text-primary);--text:var(--ink);--muted:var(--text-secondary);--subtle:var(--text-tertiary);
-  --accent:#FF6049;--accent-hover:#FF806B;--accent-pressed:#F45B45;--accent-focus:#FF9B89;--accent-ink:#101113;
+  --accent:#6ee2f5;--accent-hover:#93eaf8;--accent-pressed:#52d3e8;--accent-focus:#93eaf8;--accent-ink:#101113;
   --trace-primary:#6ee2f5;--trace-comparison:#ffc064;--delta-ahead:#69e6c6;--delta-behind:#f398da;--delta-trace:#d5a2f6;
   --cyan:var(--trace-primary);--amber:var(--trace-comparison);--positive:var(--delta-ahead);--negative:var(--delta-behind);--soft:var(--surface-3);
   --space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:20px;--space-6:24px;--space-8:32px;--space-10:40px;
   --text-body:12px;--text-label:11px;--text-data:12px;--text-title:28px;
-  --radius-control:10px;--radius-surface:16px;--radius-floating:20px;--radius-pill:999px;
+  --radius-small:6px;--radius-control:10px;--radius-surface:16px;--radius-floating:20px;--radius-pill:999px;
   --radius-tab:14px;--radius-chart:16px;--radius-instrument:16px;
   --radius-panel:var(--radius-surface);--radius-sheet:var(--radius-floating);
   --layer-base:var(--surface-0);--layer-raised:var(--surface-2);--layer-focused:var(--surface-3);
@@ -39,7 +39,7 @@
   --surface-0:#edf0f3;--surface-1:#fff;--surface-2:#f3f5f8;--surface-3:#e2e6ee;--surface-4:#d6dce5;
   --border:#b7bfcd;--control:#65717c;--grid:#d9dee6;--hover:#10111308;
   --text-primary:#19232c;--text-secondary:#414b59;--text-tertiary:#505c6b;
-  --accent:#B72E1D;--accent-hover:#9F2517;--accent-pressed:#892013;--accent-focus:#B72E1D;--accent-ink:#FFFFFF;
+  --accent:#006396;--accent-hover:#00537e;--accent-pressed:#004467;--accent-focus:#006396;--accent-ink:#FFFFFF;
   --trace-primary:#006396;--trace-comparison:#805000;--delta-ahead:#00695C;--delta-behind:#9F2577;--delta-trace:#74419C;
   --shadow-surface:0 1px 2px #19232C10;--shadow-floating:0 16px 48px #19232C24;
   --edge-raised:#FFFFFF;--edge-focused:#FFFFFF;
@@ -52,7 +52,7 @@ body{font-family:var(--font-sans);color:var(--ink)}
 button,input,select,textarea{font-family:inherit;font-size:inherit}
 button{touch-action:manipulation}
 button,input,select,textarea{transition:background-color var(--feedback-duration) var(--ease-settle),color var(--feedback-duration) var(--ease-settle),border-color var(--feedback-duration) var(--ease-settle)}
-button:disabled{opacity:.46;cursor:default}
+button:disabled{opacity:.68;cursor:default}
 button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent-focus);outline-offset:3px}
 ::selection{background:color-mix(in srgb,var(--accent) 30%,transparent)}
 *{scrollbar-width:thin;scrollbar-color:var(--border) transparent}
@@ -77,7 +77,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .app.premium .channel-menu label>span{flex:1;min-width:0}
 .app.premium .channel-menu label small{font-size:11px}
 .app.premium .channel-menu label button{width:28px;height:28px;flex-shrink:0}
-.app.premium .error-banner{background:color-mix(in srgb,var(--amber) 8%,var(--panel));border-color:color-mix(in srgb,var(--amber) 30%,var(--border));border-radius:4px;font-size:12px;margin-bottom:16px}
+.app.premium .error-banner{background:color-mix(in srgb,var(--amber) 8%,var(--panel));border-color:color-mix(in srgb,var(--amber) 30%,var(--border));border-radius:var(--radius-small);font-size:12px;margin-bottom:16px}
 .app.premium .merge-dialog,.app.premium .session-details{background:var(--surface);border-color:var(--border);border-radius:var(--radius-floating);box-shadow:var(--shadow-floating)}
 .app.premium .session-details input,.app.premium .merge-dialog input{font-size:13px}
 .app.premium .session-details input{color-scheme:inherit}
@@ -130,8 +130,18 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .app.premium .chart-tools .channel-control>button {min-height:40px;padding:8px 16px;font-size:14px;border:1px solid var(--glass-interactive-border)}
 .app.premium .channel-control>button span {background:transparent;font:inherit;margin-inline:10px;padding:0}
 .app.premium .workspace-heading p>span {color:var(--muted)}
-.app.premium .titlebar .import-button kbd {font-family:var(--font-code)}
+.app.premium .titlebar .import-button kbd {font-family:inherit;letter-spacing:0;word-spacing:.15em}
 @media(max-width:700px) {
   .app.premium .axis-switch.segmented button {width:76px;font-size:12px}
   .app.premium .chart-tools .channel-control>button {font-size:12px;padding-inline:10px;min-height:36px}
 }
+
+/* Shared glyphs: size comes from Icon, optical position from here. */
+.ui-icon{display:inline-block;flex:none;vertical-align:-3px}
+
+/* Headlines balance so no line ends on one stranded word; running text avoids orphans. */
+.app.premium :is(h1,h2,h3,h4,.coach-opportunity-copy strong,.video-placeholder strong){text-wrap:balance}
+.app.premium :is(p,.coach-why,.coach-action p){text-wrap:pretty}
+
+/* Every digit in the app lines up. The font shorthand resets this property, so it must be important here. */
+.app.premium,.app.premium *,.merge-dialog,.merge-dialog *,.session-details,.session-details *{font-variant-numeric:tabular-nums!important}

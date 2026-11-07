@@ -1,17 +1,18 @@
 import {motion,useReducedMotion} from 'motion/react';
 import './onboarding.css';
+import Icon from './Icon';
 
 const workspaces=[
- ['01','Telemetry','See the lap. Find the difference.','Overlay laps, trace your line and follow where time is gained or lost.'],
- ['02','Advanced','Go deeper into the data.','Explore channels, distributions and events in a connected analysis canvas.'],
- ['03','Video','Put every input in context.','Connect onboard footage to your telemetry with manual alignment.'],
- ['04','AI Coach','Turn evidence into a next step.','Review driving insights from your recording, with optional local AI explanations.'],
+ ['Telemetry','See the lap. Find the difference.','Overlay laps, trace your line and follow where time is gained or lost.'],
+ ['Advanced','Go deeper into the data.','Explore channels, distributions and events in a connected analysis canvas.'],
+ ['Video','Put every input in context.','Connect onboard footage to your telemetry with manual alignment.'],
+ ['AI Coach','Turn evidence into a next step.','Review driving insights from your recording, with optional local AI explanations.'],
 ] as const;
 export default function Welcome({onImport,busy,hasLibrary}:{onImport:()=>void;busy:boolean;hasLibrary:boolean}) {
  const reduced=useReducedMotion();
  return <section className="launch-workspace" aria-labelledby="launch-title">
   <motion.div className="launch-intro" initial={reduced?false:{opacity:0,y:8}} animate={{opacity:1,y:0}} transition={{duration:reduced?0:.35}}>
-   <div className="launch-kicker"><span aria-hidden="true"/> Ten Tenths Telemetry</div>
+   
    <h1 id="launch-title">Every lap.<br/>A little <motion.em initial={reduced?false:{opacity:0}} animate={{opacity:1}} transition={{duration:reduced?0:.4,delay:reduced?0:.05}}>closer.</motion.em></h1>
    <p className="launch-lead">Your line. Your inputs. Your next tenth.<br/>Bring the whole lap into focus.</p>
    <div className="launch-import">
@@ -22,9 +23,9 @@ export default function Welcome({onImport,busy,hasLibrary}:{onImport:()=>void;bu
    </div>
   </motion.div>
   <div className="launch-guide">
-   <div className="launch-guide-heading"><span>One recording. Four perspectives.</span><span aria-hidden="true">TTT / 01</span></div>
+   <div className="launch-guide-heading"><span>One recording. Four perspectives.</span></div>
    <div className="launch-racing-line" aria-hidden="true"><svg viewBox="0 0 520 165" fill="none"><path className="launch-road" d="M-20 129h150c70 0 54-92 116-92h57c66 0 36 94 111 94h126"/><motion.path className="launch-line" d="M-20 130h152c65 0 60-91 116-91h53c55 0 44 93 111 93h128" initial={reduced?false:{pathLength:0}} animate={{pathLength:1}} transition={{duration:reduced?0:.85,ease:'easeOut'}}/><path d="M244 19v40M260 19v40" stroke="currentColor" strokeDasharray="3 4"/></svg><span>Find your next tenth.</span></div>
-   <div className="launch-perspectives">{workspaces.map(([number,title,lead,text],index)=><motion.details key={title} initial={reduced?false:{opacity:0,y:5}} animate={{opacity:1,y:0}} transition={{duration:reduced?0:.25,delay:reduced?0:index*.035}}><summary><span className="launch-number">{number}</span><span><strong>{title}</strong><small>{lead}</small></span><span className="launch-expand" aria-hidden="true">＋</span></summary><p>{text}</p></motion.details>)}</div>
+   <div className="launch-perspectives">{workspaces.map(([title,lead,text],index)=><motion.details key={title} initial={reduced?false:{opacity:0,y:5}} animate={{opacity:1,y:0}} transition={{duration:reduced?0:.25,delay:reduced?0:index*.035}}><summary><span><strong>{title}</strong><small>{lead}</small></span><span className="launch-expand" aria-hidden="true"><Icon name="plus"/></span></summary><p>{text}</p></motion.details>)}</div>
    <p className="launch-guide-note">Import a recording to unlock your workspaces.<br/>Your lap selections and analysis are saved locally as you go.</p>
   </div>
  </section>;

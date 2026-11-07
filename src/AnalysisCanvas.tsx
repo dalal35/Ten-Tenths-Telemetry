@@ -42,7 +42,7 @@ export default function AnalysisCanvas({result,primaryLapId,xLabel,yLabel,config
   const manualX=config.xRange?.map(v=>transform(v,'x')),manualY=config.yRange?.map(v=>transform(v,'y'));
   const b=view??[manualX?.[0]??xmin,manualX?.[1]??xmax,manualY?.[0]??ymin,manualY?.[1]??ymax];if(b.some(v=>!Number.isFinite(v)))return;bounds.current=b;
   const {left,top,right,bottom}=analysisPlotRect(w,h,b,result.tool==='traction'&&config.xScale==='linear'&&config.yScale==='linear');plotRect.current={left,top,right,bottom};const px=(v:number)=>left+(transform(v,'x')-b[0])/(b[1]-b[0])*(right-left),py=(v:number)=>bottom-(transform(v,'y')-b[2])/(b[3]-b[2])*(bottom-top);
-  ctx.font='11px "IBM Plex Mono", monospace';ctx.textAlign='center';ctx.lineWidth=1;
+  ctx.font=`11px ${getComputedStyle(el).fontFamily}`;ctx.textAlign='center';ctx.lineWidth=1;
   for(let i=0;i<=5;i++){const x=left+(right-left)*i/5,y=bottom-(bottom-top)*i/5;ctx.strokeStyle=grid;ctx.beginPath();ctx.moveTo(x,top);ctx.lineTo(x,bottom);ctx.moveTo(left,y);ctx.lineTo(right,y);ctx.stroke();ctx.fillStyle=ink;ctx.fillText(fmt(inverse(b[0]+(b[1]-b[0])*i/5,'x')),x,bottom+18);ctx.textAlign='right';ctx.fillText(fmt(inverse(b[2]+(b[3]-b[2])*i/5,'y')),left-8,y+3);ctx.textAlign='center';}
   ctx.save();ctx.beginPath();ctx.rect(left,top,right-left,bottom-top);ctx.clip();
   if(result.tool==='traction'&&config.grid>0){ctx.strokeStyle=grid;for(let g=config.grid;g<=Math.max(b[1],b[3])*2&&g<100;g+=config.grid){ctx.beginPath();ctx.ellipse(px(0),py(0),Math.abs(px(g)-px(0)),Math.abs(py(g)-py(0)),0,0,Math.PI*2);ctx.stroke();}}

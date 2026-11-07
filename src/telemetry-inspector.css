@@ -19,7 +19,7 @@
 .premium .delta-instrument{border-left:1px solid var(--border);padding-left:14px}
 .premium .delta-instrument strong{font:400 21px/1.4 var(--font-mono);letter-spacing:-.8px;color:var(--cyan);white-space:nowrap}
 .premium .delta-instrument strong small{font:400 11px var(--font-sans);margin-left:4px;color:var(--muted)}
-.premium .track-map-frame{background:var(--panel);border:1px solid var(--border);border-radius:4px 4px 0 0;overflow:hidden}
+.premium .track-map-frame{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-small) 4px 0 0;overflow:hidden}
 .app.premium .track{display:block;height:155px;width:100%;margin:0;padding:6px;overflow:visible}
 .premium .track-underlay{stroke:var(--raised);stroke-width:9}
 .premium .primary-line{stroke:var(--cyan);stroke-width:1.8}
@@ -47,7 +47,7 @@
 .premium .track-rpm strong{font-size:13px;color:var(--ink);font-weight:400}
 .premium .track-rpm small{font-family:var(--font-sans);font-size:11px;color:var(--muted)}
 .app.premium .corner-controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;padding:0}
-.app.premium .corner-controls button{font-size:11px;padding:5px 8px;min-height:28px;border:1px solid var(--border);border-radius:4px;color:var(--muted)}
+.app.premium .corner-controls button{font-size:11px;padding:5px 8px;min-height:28px;border:1px solid var(--border);border-radius:var(--radius-small);color:var(--muted)}
 .app.premium .corner-controls button:hover:not(:disabled){background:var(--raised);color:var(--ink)}
 .app.premium .segment-section{display:flex;flex-direction:column;margin-top:12px;padding-top:12px}
 .premium .section-finding{display:flex;order:3;gap:10px;padding-top:12px;color:var(--cyan)}

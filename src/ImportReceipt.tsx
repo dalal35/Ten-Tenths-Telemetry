@@ -1,3 +1,4 @@
+import Icon from './Icon';
 import {displaySessionName,displayTrack} from './sessionNames';
 import {motion,useIsPresent,useReducedMotion} from 'motion/react';
 import type {ImportReceipt} from './importExperience';
@@ -12,7 +13,7 @@ export default function ImportReceiptPanel({receipt,onClose,onImport,onSelect,di
  return <motion.aside className="import-receipt" role="region" aria-label="Telemetry import" tabIndex={-1} hidden={blocked} inert={blocked||!present} aria-hidden={blocked||!present||undefined}
   initial={reduced?false:{opacity:0,y:8}} animate={{opacity:1,y:0}} exit={{opacity:0,transition:{duration:reduced?0:.12}}} transition={{duration:reduced?0:.22}}
   onKeyDown={event=>{if(event.key==='Escape'&&complete){event.stopPropagation();onClose();}}}>
-  <header><div><span className="receipt-kicker">XRK / LOCAL IMPORT</span><h2>{title}</h2></div>{complete&&<button className="receipt-dismiss" aria-label="Dismiss import summary" onClick={onClose}>×</button>}</header>
+  <header><div><h2>{title}</h2></div>{complete&&<button className="receipt-dismiss" aria-label="Dismiss import summary" onClick={onClose}><Icon name="close"/></button>}</header>
   <p className="receipt-status" role="status" aria-live="polite">{receipt.phase==='choosing'?'Select one or more AiM XRK files in the file picker.':complete?`${finished-failures} ready${failures?` · ${failures} failed`:''}${warnings?' · review data notes below':''}`:`${finished} of ${receipt.total} files processed · reading locally`}</p>
   {!complete&&receipt.phase==='reading'&&<progress aria-label="Files processed" value={finished} max={receipt.total}/>}
   <div className="receipt-results">{receipt.rows.map(row=><article className="receipt-row" key={row.index} data-status={row.status}>

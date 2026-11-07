@@ -182,3 +182,31 @@
 /* One select treatment everywhere; the native menu and keyboard behaviour stay intact. */
 .app.premium select{appearance:none;-webkit-appearance:none;padding-right:28px!important;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none' stroke='%23929b9f' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m1 1 4 4 4-4'/%3E%3C/svg%3E")!important;background-repeat:no-repeat!important;background-position:right 10px center!important}
 .app.premium select option{background:var(--panel);color:var(--ink)}
+
+/* One primary action per view, in the one accent. */
+.app.premium :is(.coach-overview>.import-button,.video-premium .video-primary,.launch-import .launch-import-button):not(:disabled),
+.merge-dialog .merge-actions .import-button:not(:disabled),
+.session-details .merge-actions button[type=submit]:not(:disabled){background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600;box-shadow:none}
+.app.premium :is(.coach-overview>.import-button,.video-premium .video-primary,.launch-import .launch-import-button):hover:not(:disabled),
+.merge-dialog .merge-actions .import-button:hover:not(:disabled),
+.session-details .merge-actions button[type=submit]:hover:not(:disabled){background:var(--accent-hover);border-color:var(--accent-hover);color:var(--accent-ink);filter:none}
+.app.premium :is(.coach-overview>.import-button,.video-premium .video-primary,.launch-import .launch-import-button):active:not(:disabled),
+.merge-dialog .merge-actions .import-button:active:not(:disabled),
+.session-details .merge-actions button[type=submit]:active:not(:disabled){background:var(--accent-pressed);border-color:var(--accent-pressed)}
+.app.premium .video-placeholder .video-attach-primary{min-height:40px;padding:8px 20px;margin-top:8px}
+
+/* Feedback that reports a state change. Global reduced-motion rules remove the travel. */
+@keyframes ember-notice-in{from{opacity:0;translate:0 -6px}to{opacity:1;translate:0 0}}
+.app.premium .error-banner,.app.premium .video-error,.merge-dialog .merge-error,.session-details .merge-error{animation:ember-notice-in var(--surface-duration) var(--ease-settle) both}
+.ui-disclosure{transition:rotate var(--surface-duration) var(--ease-settle)}
+.ui-disclosure.is-closed{rotate:-90deg}
+[aria-expanded=true]>.ui-disclosure{rotate:180deg}
+.session-group-heading[aria-expanded=true]>.ui-disclosure{rotate:none}
+.app.premium :is(.video-primary,.coach-overview>.import-button):active:not(:disabled){scale:.97}
+
+/* Nesting rule: inner radius = outer radius - the padding between them. */
+.app.premium :is([data-workspace],.telemetry-options-panel) .axis-switch.segmented :is(button,button.active,.control-selection){border-radius:calc(var(--radius-control) - 2px)}
+.app.premium .video-view-selection,.app.premium .video-view-switch button{border-radius:calc(var(--radius-control) - 3px)}
+.app.premium [data-workspace] .plots .plot-row,.app.premium [data-workspace] .plots .plot-row:first-child{border-radius:var(--radius-small)}
+.app.premium [data-workspace] .track-map-frame{border-radius:var(--radius-small) var(--radius-small) 0 0}
+.app.premium .coach-opportunity-list button,.app.premium .coach-action{border-radius:var(--radius-small)}
