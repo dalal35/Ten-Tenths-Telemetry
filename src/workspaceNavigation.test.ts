@@ -21,6 +21,21 @@ describe('workspace transition ownership',()=>{
     const s=setup(),update=vi.fn();s.navigator.navigate(update);s.navigator.skip();s.updates[0]();
     expect(s.handles[0].skipTransition).toHaveBeenCalledOnce();expect(update).toHaveBeenCalledOnce();
   });
+  it('commits a pending navigation the moment input arrives, exactly once',()=>{
+    const s=setup(),update=vi.fn();s.navigator.navigate(update);
+    expect(update).not.toHaveBeenCalled();
+    s.navigator.flush();
+    expect(update).toHaveBeenCalledOnce();expect(s.navigator.pending()).toBe(false);
+    s.updates[0]();s.navigator.flush();
+    expect(update).toHaveBeenCalledOnce();
+  });
+  it('flush cannot apply a superseded or disposed navigation',()=>{
+    const s=setup(),first=vi.fn(),latest=vi.fn();
+    s.navigator.navigate(first);s.navigator.navigate(latest);s.navigator.flush();
+    expect(first).not.toHaveBeenCalled();expect(latest).toHaveBeenCalledOnce();
+    const later=vi.fn();s.navigator.navigate(later);s.navigator.dispose();s.navigator.flush();
+    expect(later).not.toHaveBeenCalled();
+  });
   it('commits immediately under reduced motion without starting an animation',()=>{
     const s=setup(true),update=vi.fn();s.navigator.navigate(update);
     expect(update).toHaveBeenCalledOnce();expect(s.start).not.toHaveBeenCalled();expect(s.fallback).not.toHaveBeenCalled();

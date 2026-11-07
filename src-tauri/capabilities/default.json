@@ -1,1 +1,1 @@
-{"identifier":"default", "description":"Main telemetry workspace", "windows":["main"], "permissions":["core:default", "dialog:allow-open", "core:window:allow-start-dragging"]}
+{"identifier":"default", "description":"Main telemetry workspace", "windows":["main"], "permissions":["core:default", "dialog:allow-open", "core:window:allow-start-dragging", "updater:default", "process:allow-restart"]}

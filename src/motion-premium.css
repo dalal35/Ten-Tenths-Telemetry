@@ -45,13 +45,49 @@
    Standalone controls only. Tabs and segmented items stay put because their
    selection plate is measured against them. Transforms use the individual
    translate/scale properties so they compose with Motion's own transform. */
-.app.premium :where(.channel-control>button,.titlebar .import-button,.titlebar .icon-button,.setup-toggle,.analysis-setup button,.video-marker-list button,.coach-overview>.import-button,.corner-controls button,.import-receipt footer button,.explorer-icon,.compare-toggle,.coach-opportunity-list button:not(.selected)):not(:disabled){
+.app.premium :where(.channel-control>button,.titlebar .import-button,.titlebar .icon-button,.setup-toggle,.analysis-setup button,.video-marker-list button,.coach-overview>.import-button,.corner-controls button,.import-receipt footer button,.explorer-icon,.compare-toggle,.coach-opportunity-list button:not(.selected),.segment-card):not(:disabled){
   transition:background-color var(--motion-fast) ease,color var(--motion-fast) ease,border-color var(--motion-fast) ease,translate var(--motion-settle) var(--motion-spring),scale var(--motion-settle) var(--motion-spring)}
-.app.premium :where(.channel-control>button,.titlebar .import-button,.setup-toggle,.analysis-setup button,.video-marker-list button,.coach-overview>.import-button,.corner-controls button,.import-receipt footer button,.coach-opportunity-list button:not(.selected)):hover:not(:disabled){translate:0 -1px}
-.app.premium :where(.channel-control>button,.titlebar .import-button,.titlebar .icon-button,.setup-toggle,.analysis-setup button,.video-marker-list button,.coach-overview>.import-button,.corner-controls button,.import-receipt footer button,.explorer-icon,.compare-toggle,.coach-opportunity-list button):active:not(:disabled){translate:0 0;scale:.97;transition-duration:70ms}
+.app.premium :where(.channel-control>button,.titlebar .import-button,.setup-toggle,.analysis-setup button,.video-marker-list button,.coach-overview>.import-button,.corner-controls button,.import-receipt footer button,.coach-opportunity-list button:not(.selected),.segment-card):hover:not(:disabled){translate:0 -1px}
+.app.premium :where(.channel-control>button,.titlebar .import-button,.titlebar .icon-button,.setup-toggle,.analysis-setup button,.video-marker-list button,.coach-overview>.import-button,.corner-controls button,.import-receipt footer button,.explorer-icon,.compare-toggle,.coach-opportunity-list button,.segment-card):active:not(:disabled){translate:0 0;scale:.97;transition-duration:70ms}
 /* Floating surfaces arrive from the control that opened them. */
 .app.premium :is(.channel-menu,.telemetry-options-panel){transform-origin:top right}
 
 @media(prefers-reduced-motion:reduce){
   .app.premium :where(button):hover,.app.premium :where(button):active{translate:none!important;scale:none!important}
+}
+
+/* ---------- Workspace build: the outgoing page dissolves, the new one materialises ---------- */
+:root{view-transition-name:none}
+::view-transition{pointer-events:none}
+::view-transition-group(workspace-content){animation:none;pointer-events:none}
+::view-transition-image-pair(workspace-content){isolation:isolate;pointer-events:none}
+::view-transition-old(workspace-content){height:100%;width:100%;object-fit:fill;mix-blend-mode:normal;pointer-events:none;animation:workspace-dissolve 190ms cubic-bezier(.4,0,1,1) both}
+@keyframes workspace-dissolve{to{opacity:0;filter:blur(12px);transform:scale(.985)}}
+
+/* The travelling edge of light that leads a chart's traces as they draw. */
+.cascade-glint{position:absolute;z-index:4;width:2px;margin-left:-1px;pointer-events:none;opacity:0;border-radius:2px;background:linear-gradient(180deg,transparent,var(--trace-primary,var(--cyan)) 18%,var(--trace-primary,var(--cyan)) 82%,transparent);box-shadow:0 0 14px 2px color-mix(in srgb,var(--trace-primary,var(--cyan)) 55%,transparent),-18px 0 28px 4px color-mix(in srgb,var(--trace-primary,var(--cyan)) 16%,transparent)}
+
+/* ---------- Ambient light: a slow aurora behind the glass that shifts with each workspace ---------- */
+.app.premium::before{content:'';position:fixed;inset:-30%;z-index:-1;pointer-events:none;
+  background:radial-gradient(38% 34% at 24% 22%,color-mix(in srgb,var(--cyan) 42%,transparent),transparent 72%),radial-gradient(34% 40% at 78% 30%,color-mix(in srgb,#3f6fe0 44%,transparent),transparent 72%),radial-gradient(42% 32% at 58% 82%,color-mix(in srgb,#19b8a6 32%,transparent),transparent 74%);
+  transition:translate 1400ms cubic-bezier(.22,1,.36,1);animation:aurora-drift 42s ease-in-out infinite alternate;will-change:transform}
+.app.premium:has(.workspace-viewport[data-workspace=advanced])::before{translate:9% -5%}
+.app.premium:has(.workspace-viewport[data-workspace=video])::before{translate:-8% 7%}
+.app.premium:has(.workspace-viewport[data-workspace=coach])::before{translate:6% 9%}
+@keyframes aurora-drift{from{transform:rotate(-5deg) scale(1)}to{transform:rotate(7deg) scale(1.12)}}
+.app.premium{isolation:isolate}
+.app.premium .workspace-viewport{background:transparent}
+:root[data-glass-quality=static] .app.premium::before{animation:none;will-change:auto}
+
+/* Dark glass lets the light through; text keeps its own contrast against the darkened fills. */
+:root:not([data-theme=light]){--glass-panel-fill:linear-gradient(125deg,#ffffff0e,transparent 47%,#ffffff05),#181c23a6;--glass-raised-fill:linear-gradient(135deg,#ffffff12,transparent 62%),#242832bd;--glass-plot-fill:#191d24a8}
+:root[data-theme=light] .app.premium::before{opacity:.5}
+
+/* ---------- Cards answer the pointer ---------- */
+.app.premium :where(.segment-card,.coach-stat,.video-instrument,.analysis-statistics>section,.coach-opportunity-list button:not(.selected)){transition:background-color var(--motion-fast) ease,border-color var(--motion-fast) ease,box-shadow var(--motion-settle) ease,translate var(--motion-settle) var(--motion-spring),scale var(--motion-settle) var(--motion-spring)}
+.app.premium :where(.segment-card,.coach-stat,.video-instrument,.analysis-statistics>section,.coach-opportunity-list button:not(.selected)):hover:not(:disabled){translate:0 -3px}
+
+@media(prefers-reduced-motion:reduce){
+  .app.premium::before{animation:none;transition:none;will-change:auto}
+  .app.premium :where(.segment-card,.coach-stat,.video-instrument,.analysis-statistics>section):hover{translate:none!important}
 }

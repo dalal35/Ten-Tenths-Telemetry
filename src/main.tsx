@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+import {UpdatePrompt} from './UpdatePrompt';
 import {MotionConfig} from 'motion/react';
 import {motionTokens} from './motion';
 import {GlassDefinitions,initializeGlassMaterials} from './GlassMaterials';
@@ -13,5 +14,6 @@ import './shell.css';
 import './telemetry-reference.css';
 import './glass-materials.css';
 import './motion-premium.css';
+import './update-prompt.css';
 initializeGlassMaterials();
-ReactDOM.createRoot(document.getElementById('root')!).render(<React.StrictMode><GlassDefinitions/><MotionConfig reducedMotion="user" transition={motionTokens.spring}><App premium /></MotionConfig></React.StrictMode>);
+ReactDOM.createRoot(document.getElementById('root')!).render(<React.StrictMode><GlassDefinitions/><MotionConfig reducedMotion="user" transition={motionTokens.spring}><App premium /><UpdatePrompt/></MotionConfig></React.StrictMode>);

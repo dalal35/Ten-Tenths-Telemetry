@@ -7,8 +7,9 @@ import {fileURLToPath} from 'node:url';
 import {verifyArtifacts,writeChecksums,releasePlatforms} from './verify-release-artifacts.mjs';
 import {verifyVersion} from './verify-release-version.mjs';
 import {assertYoutubeRedistribution} from './check-youtube-redistribution.mjs';
+import {buildUpdaterManifest,configuredPublicKey,tauriSigner} from './updater-manifest.mjs';
 
-export function publishRelease(root,version,env=process.env,run=args=>execFileSync('gh',args,{encoding:'utf8',stdio:['ignore','pipe','inherit']})){
+export function publishRelease(root,version,env=process.env,run=args=>execFileSync('gh',args,{encoding:'utf8',stdio:['ignore','pipe','inherit']}),updater={}){
  assert(env.GITHUB_EVENT_NAME==='push'&&env.GITHUB_REF===`refs/tags/v${version}`&&env.GITHUB_REF_NAME===`v${version}`,'Publication requires the matching tag push');
  assert.match(env.GITHUB_REPOSITORY??'',/^[\w.-]+\/[\w.-]+$/,'Missing repository');
  assert.match(env.GITHUB_SHA??'',/^[a-f0-9]{40}$/,'Missing workflow revision');
@@ -20,13 +21,16 @@ export function publishRelease(root,version,env=process.env,run=args=>execFileSy
  assert(sourceNotes.trim().length>0,'Release notes must not be empty');
  writeFileSync(notes,`${sourceNotes.trim()}\n\nBuild revision: ${env.GITHUB_SHA}\nWorkflow run: ${env.GITHUB_RUN_ID}\n`);
  const tag=env.GITHUB_REF_NAME,repo=['--repo',env.GITHUB_REPOSITORY];
+ // Signing happens before any remote operation, so a bad key can never leave a partial release.
+ const latest=join(root,'latest.json');
+ writeFileSync(latest,JSON.stringify(buildUpdaterManifest({files,platforms,version,repository:env.GITHUB_REPOSITORY,tag,notes:sourceNotes.trim(),sign:updater.sign??tauriSigner(env),publicKey:updater.publicKey??configuredPublicKey()}),null,2)+'\n');
  // Existing releases (including stale drafts) fail safely; never clobber assets.
  run(['release','create',tag,'--draft','--verify-tag','--title',`Ten Tenths Telemetry v${version}`,'--notes-file',notes,...repo]);
- const upload=[...files.map(f=>f.path),checksum];
+ const upload=[...files.map(f=>f.path),checksum,latest];
  run(['release','upload',tag,...upload,...repo]);
  const remote=JSON.parse(run(['release','view',tag,'--json','isDraft,assets',...repo]));
  assert.equal(remote.isDraft,true,'Release must still be a draft before complete-set verification');
- const expected=[...files.map(f=>({name:f.name,size:f.size})),{name:'SHA256SUMS',size:statSync(checksum).size}].sort((a,b)=>a.name.localeCompare(b.name));
+ const expected=[...files.map(f=>({name:f.name,size:f.size})),{name:'SHA256SUMS',size:statSync(checksum).size},{name:'latest.json',size:statSync(latest).size}].sort((a,b)=>a.name.localeCompare(b.name));
  const actual=remote.assets.map(a=>({name:a.name,size:a.size})).sort((a,b)=>a.name.localeCompare(b.name));
  assert.deepEqual(actual,expected,'Remote upload is incomplete; retaining draft');
  run(['release','edit',tag,'--draft=false','--prerelease=false','--latest=true',...repo]);

@@ -37,3 +37,9 @@ test('main pushes validate without publishing and Windows is opt-in',()=>{
  assert.match(publish,/github\.event_name == 'push' && startsWith\(github\.ref, 'refs\/tags\/'\)/);
  for(const ref of ['refs/heads/main','refs/heads/feature'])assert.equal(ref.startsWith('refs/tags/'),false);
 });
+test('only the tag-gated publisher can reach the update signing key',()=>{
+ const publish=workflow.indexOf('  publish:');
+ assert.equal(workflow.slice(0,publish).includes('TAURI_SIGNING_PRIVATE_KEY'),false);
+ assert.match(workflow.slice(publish),/TAURI_SIGNING_PRIVATE_KEY: \$\{\{ secrets\.TAURI_SIGNING_PRIVATE_KEY \}\}/);
+ assert.match(workflow.slice(publish),/npm ci --ignore-scripts/);
+});
