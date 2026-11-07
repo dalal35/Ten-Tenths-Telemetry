@@ -22,11 +22,11 @@
     "test:cascade": "node scripts/verify-cascade.mjs",
     "test:library:premium": "node scripts/verify-library-premium.mjs",
     "test:workflow": "node scripts/verify-workflow.mjs",
-    "test:advanced": "node scripts/verify-advanced.mjs",
-    "test:coach": "node scripts/verify-coach.mjs",
+    "test:advanced": "node scripts/verify-advanced-premium.mjs",
     "test:coach:premium": "node scripts/verify-coach-premium.mjs",
     "test:canvas": "node scripts/verify-canvas.mjs",
-    "test:video": "node scripts/verify-video.mjs && node scripts/verify-video-integration.mjs"
+    "test:video": "node scripts/verify-video.mjs",
+    "test:video:premium": "node scripts/verify-video-premium.mjs"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.8.0",

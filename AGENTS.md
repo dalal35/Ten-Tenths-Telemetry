@@ -92,7 +92,8 @@ Private coaching acceptance is explicit: `npm run test:native:recordings` prefli
 both local XRKs and discovers exactly 15 tests before running every original
 assertion. Public `--lib` checks skip those labeled private-fixture tests.
 Full `cargo test` includes integrations needing specific ignored `data/` XRKs;
-`test:plots`, `test:advanced`, `test:coach` also need private recordings/native
+`test:plots`, `test:advanced` (with `ADVANCED_PREPARE=1` and `ADVANCED_TARGET_DIR`),
+`test:coach:premium` (`COACH_UI_DATA`) and `test:video:premium` (`VIDEO_UI_DATA`) also need private recordings/native
 examples. Inspect each test's inputs first. Missing private fixtures are not
 proof of a code regression. Keep real recordings out of Git and hosted CI.
 Synthetic parity fixtures and checked-in Windows media provide public coverage.

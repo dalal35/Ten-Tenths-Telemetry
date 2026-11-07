@@ -78,7 +78,7 @@ A fresh local Gemma 3 1B run on 0362 completed in 55.0 seconds. It returned thre
 cargo test --offline --manifest-path src-tauri/Cargo.toml --lib
 npm test -- --run src/coach src/workspace.test.ts src/video
 npm run build
-npm run test:coach
+npm run test:coach:premium
 cargo run --offline --manifest-path src-tauri/Cargo.toml --example physics_validate -- \
   'data/yash dalal_59_PURDUE GP IN_Warm-up_a_0361.xrk' \
   'data/yash dalal_59_PURDUE GP IN_Warm-up_a_0362.xrk'

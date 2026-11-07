@@ -154,10 +154,6 @@
 .app.premium .main>.workspace-heading {padding:0;min-height:84px}
 .app.premium .main>.workspace-heading .active-recording {font-size:13px;margin:0 0 4px;color:var(--muted)}
 .app.premium .main>.workspace-heading h1 {font-size:32px;font-weight:600;letter-spacing:-.6px;margin:0 0 3px;line-height:1.2}
-/* Past Telemetry the session is context, not the subject: its title steps down so the workspace gets the height. */
-.app.premium .main:has(>.workspace-viewport:not([data-workspace=telemetry]))>.workspace-heading{min-height:0}
-.app.premium .main:has(>.workspace-viewport:not([data-workspace=telemetry]))>.workspace-heading h1{font-size:22px;letter-spacing:-.3px;margin:0}
-.app.premium .main:has(>.workspace-viewport:not([data-workspace=telemetry]))>.workspace-heading .active-recording{margin:0}
 .app.premium .main>.workspace-heading p {font-size:13px;margin-top:2px}
 .app.premium .main>.lap-summary {width:100%;height:66px;min-height:66px;margin:12px 0 8px;padding:0;gap:32px;border:0;flex-wrap:nowrap}
 .app.premium .main .lap-chip {align-items:flex-start;gap:14px;position:relative;min-width:200px}

@@ -160,7 +160,7 @@ Open **AI Driving Coach** in a recording for **How to Improve Your Fastest Lap**
 
 The bundled Gemma 3 1B model runs through embedded llama.cpp, without Ollama, Python, accounts, API keys or network access. Review and accept the bundled model terms in the coach to enable local explanations. All measurements, gain ranges and confidence classifications remain deterministic. Gemma compares and orders bounded telemetry-grounded interpretations; Rust supplies approved wording and all numerical estimates. These are coaching hypotheses, not validated causal diagnoses. Cancellation, progress, bounded caching and a computed-report fallback keep inspection available. Cross-recording merged coaching is currently unsupported; select an original recording.
 
-Build hosts additionally need CMake, libclang and a C/C++ compiler. Provision the pinned model once using `node scripts/prepare-coach-model.mjs --download`; packaging verifies its digest and includes the model and redistribution terms. End users need none of these build tools and perform no model download. See [architecture, model distribution and benchmarks](docs/offline-coach-runtime.md) and run `npm run test:coach` for the real-recording-backed browser workflow.
+Build hosts additionally need CMake, libclang and a C/C++ compiler. Provision the pinned model once using `node scripts/prepare-coach-model.mjs --download`; packaging verifies its digest and includes the model and redistribution terms. End users need none of these build tools and perform no model download. See [architecture, model distribution and benchmarks](docs/offline-coach-runtime.md) and run `npm run test:coach:premium` for the real-recording-backed browser workflow.
 
 ### Windows development and production builds
 
