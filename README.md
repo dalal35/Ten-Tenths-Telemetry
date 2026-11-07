@@ -28,7 +28,6 @@
 
 One moment. Every channel. The same point on the circuit.
 
-<a href="website/assets/telemetry.webp"><img src="website/assets/telemetry.webp" width="1440" alt="Actual Ten Tenths Telemetry interface with a session explorer, overlaid speed and RPM plots, time delta, GPS circuit map and corner comparison panel. Captured using synthetic demo data." /></a>
 
 <sub>Actual application interface, captured from the browser demo with synthetic session data. Click to view at full resolution. The desktop app imports your local XRK recordings.</sub>
 
@@ -44,7 +43,6 @@ One moment. Every channel. The same point on the circuit.
 <details>
 <summary>View the Advanced workspace</summary>
 
-![Actual Advanced workspace with G-G traction, distributions and linked GPS map; synthetic demo data](website/assets/advanced.webp)
 
 <sub>Actual interface with synthetic demo data.</sub>
 
@@ -83,7 +81,7 @@ Rust handles decoding and full-precision calculations. React and TypeScript pres
 
 ## Documentation
 
-[Release preflight](docs/release-preflight.md) · [macOS validation](docs/macos-release-validation.md) · [Windows feature parity](docs/windows-feature-parity.md) · [Progress & limitations](PROGRESS.md) · [Brand assets](docs/branding/README.md) · [Third-party notices](THIRD_PARTY_NOTICES.md)
+[Release preflight](docs/release-preflight.md) · [macOS validation](docs/macos-release-validation.md) · [Windows feature parity](docs/windows-feature-parity.md) · [Brand assets](docs/branding/README.md) · [Third-party notices](THIRD_PARTY_NOTICES.md)
 
 <details>
 <summary><strong>Installation, development & technical reference</strong></summary>
@@ -228,15 +226,6 @@ The session explorer provides persisted expanded, compact and hidden navigation,
 
 At narrow widths navigation becomes a keyboard-accessible modal drawer. Telemetry, Advanced and Video layouts adapt to available space down to the 600×500 native window minimum. Sidebar changes and resizing retain session/lap selections, chart zoom, channels, analysis settings and video mappings.
 
-## Website live demo
-
-Run `npm run build:website` to produce the GitHub Pages site in `dist-website/`; serve that directory with any static HTTP server. `npm run test:website` exercises the built site beneath a project subdirectory using Playwright. The homepage is static and its Download buttons scroll to the installer section. The standalone React demo remains available at `demo/index.html`, without an embedded homepage preview.
-
-The demo reuses the desktop `App`, session explorer, uPlot charts, track map, Advanced workspace and styles. `vite.website.config.ts` substitutes browser-only bridge and video adapters from `website/demo/`; the desktop entry and native bridge are unchanged. Two synthetic sessions share deterministic channels, lap clocks, GPS, segments and analysis data. Video is a labeled animated illustration with synchronized playback rather than recorded footage. Native file/library operations and unsupported formula evaluation are unavailable; the demo does not import XRK files or persist a user library. The Pages workflow builds this artifact whenever the website or reused frontend changes.
-
-</details>
-
----
 
 ## Managed YouTube downloads
 

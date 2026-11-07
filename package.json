@@ -26,9 +26,7 @@
     "test:coach": "node scripts/verify-coach.mjs",
     "test:coach:premium": "node scripts/verify-coach-premium.mjs",
     "test:canvas": "node scripts/verify-canvas.mjs",
-    "test:video": "node scripts/verify-video.mjs && node scripts/verify-video-integration.mjs",
-    "build:website": "tsc -p tsconfig.website.json && node scripts/build-website.mjs",
-    "test:website": "node scripts/verify-website.mjs"
+    "test:video": "node scripts/verify-video.mjs && node scripts/verify-video-integration.mjs"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.8.0",

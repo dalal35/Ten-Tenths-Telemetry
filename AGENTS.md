@@ -33,7 +33,7 @@ may be ahead of published releases. Start setup with
 | Area | Owner and responsibilities |
 | --- | --- |
 | Desktop UI | `src/App.tsx`, React 19/TypeScript, Vite 6, uPlot, Motion. `workspace.ts`, `advancedState.ts`, `workspaceNavigation.ts` own view/state transitions. |
-| IPC | `src/bridge.ts` calls commands registered by `src-tauri/src/lib.rs`. Keep Rust Serde camelCase payloads, frontend types and test/demo adapters consistent. Blocking parsing, hashing, disk work and inference belong off the WebView thread. |
+| IPC | `src/bridge.ts` calls commands registered by `src-tauri/src/lib.rs`. Keep Rust Serde camelCase payloads, frontend types and test adapters consistent. Blocking parsing, hashing, disk work and inference belong off the WebView thread. |
 | Library and storage | `library.rs`, `persistence.rs`: source references, content hashes/versions, session cache, workspace persistence and recoverable file replacement. Original recordings stay in place; removing a library entry must never delete an XRK. Preserve missing/changed/Locate/Refresh behavior. |
 | Parsing and analysis | `telemetry/mod.rs` uses pinned `libxrk` revision from Cargo.toml. `spatial.rs` aligns GPS laps and computes section metrics; `advanced.rs` and `expressions.rs` own analysis/formula validation. |
 | Merging | Rust `merging.rs` and frontend `merging.ts` compose recording references. Preserve source-qualified identities, channels, lap timing and saved-format compatibility. |
@@ -42,7 +42,6 @@ may be ahead of published releases. Start setup with
 | Offline interpretation | `coach/runtime.rs`, `service.rs`, `commands.rs`: directly linked pinned llama.cpp binding and Gemma 3 1B Q4_K_M. Integrity-checked model, bounded validated output, cancellation, single active inference, cache and computed fallback. No cloud/Ollama service is required. |
 | Video | `src/video/`: HTML/YouTube players, sync controller, mappings and segments. Rust `video.rs` authorizes media; `video_analysis/` decodes frames. Automatic estimation lives on `feature/auto-video-sync`. |
 | Download cache | Rust `youtube/` manages validated URLs, bundled subprocesses, cancellation, protected cache references and leases. `scripts/prepare-youtube-tools.mjs` provisions pinned yt-dlp, Deno and source-built FFmpeg/ffprobe on the build host. |
-| Website | `website/`, `vite.website.config.ts`, `scripts/build-website.mjs`: static site and synthetic browser demo reusing the app with substituted bridge/plots/video. It does not exercise native IPC or inference. |
 
 Keep telemetry precision and original units in calculations; mph conversion is
 presentation. Preserve calibration, gaps, nonfinite/nonmonotonic rejection,
@@ -76,8 +75,6 @@ npm run test:sidebar
 npm run test:workflow
 npm run test:canvas
 npm run test:video
-npm run build:website
-npm run test:website
 ```
 
 Choose affected browser suites, rather than running all for every edit. Browser

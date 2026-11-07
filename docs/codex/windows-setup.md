@@ -260,7 +260,7 @@ App-managed built-ins should be obtained from the Windows app, not copied.
   root `AGENTS.md` and `$ttt-development` appear. Check `$search-first` and
   `$simplify-codebase` only if personally restored. Restart if discovery is stale.
 - [ ] `npm test`, `npm run build`, `npm run test:release` pass. For UI work run
-  relevant browser scripts; for website work run `build:website`/`test:website`.
+  relevant browser scripts.
 - [ ] Helper/model verification and the native command subset above pass.
   Full private-data tests run only after privately supplying expected recordings.
 - [ ] `npm run tauri dev` opens the native app; import a disposable recording,
