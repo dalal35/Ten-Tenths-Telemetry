@@ -9,11 +9,11 @@ const proven:Opportunity={id:'finding',priorityScore:1,sectionId:'turn-1',label:
 describe('fastest-lap coach presentation',()=>{
  it('presents automatic fastest-lap analysis without a comparison target selector',()=>{
   const html=renderToStaticMarkup(<Coach session={{id:'session',laps:[]} as unknown as Session} contentVersion="v" revision={0} active={false} onInspect={()=>{}}/>);
-  expect(html).toContain('How to Improve Your Fastest Lap');
+  expect(html).toContain('Your driving debrief');
   expect(html).not.toContain('<select');
   expect(html).not.toContain('Target lap time');
-  expect(html).toContain('RECORDED THEORETICAL BEST');
-  expect(html).toContain('MODELED LAP-TIME RANGE');
+  expect(html).toContain('Recorded composite');
+  expect(html).toContain('Modeled lap-time range');
   expect(html).toContain('Simulated from your laps');
   expect(html.match(/>Analyze<\/button>/g)).toHaveLength(1);
   expect(html).toContain('AI inactive');
@@ -151,5 +151,5 @@ it('presents merged recordings as one coaching session with explicit conditions'
  expect(html).toContain('2 recordings');
  expect(html).toContain('equivalent grip and conditions');
  expect(html).not.toContain('Choose an original recording');
- expect(html).toContain('RECORDED THEORETICAL BEST');
+ expect(html).toContain('Recorded composite');
 });

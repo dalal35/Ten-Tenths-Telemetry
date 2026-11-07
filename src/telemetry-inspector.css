@@ -1,13 +1,5 @@
 /* Measured circuit and section evidence, with instrument typography kept local. */
 /* The website's existing demo keeps its shell and needs only shared markup compatibility. */
-.app:not(.premium) .track-instruments,.app:not(.premium) .track-map-meta,.app:not(.premium) .track-position-control,.app:not(.premium) .map-section-labels{display:none}
-.app:not(.premium) .segment-overview{display:flex;align-items:center;gap:8px;width:100%}
-.app:not(.premium) .segment-index{display:none}
-.app:not(.premium) .segment-identity{display:flex;flex-direction:column;flex:1;min-width:0}
-.app:not(.premium) .segment-delta{white-space:nowrap;font-size:11px}
-.app:not(.premium) .section-finding{font-size:11px;color:var(--muted)}
-.app:not(.premium) .section-finding p{margin:8px 0}
-.app:not(.premium) .section-finding p>span{display:block}
 .app.premium .workspace-body{grid-template-columns:minmax(0,1fr) 300px;gap:20px}
 .app.premium .inspector{width:auto;padding:12px 0 0 20px;border-left:1px solid var(--border);background:transparent;min-width:0}
 .premium .track-section{min-width:0}

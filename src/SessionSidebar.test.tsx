@@ -23,7 +23,7 @@ describe('combined session explorer',()=>{
   const html=render([a,b,combined]);
   expect(html.match(/class="library-entry /g)).toHaveLength(1);
   expect(html).toContain('Session library <span>1</span>');
-  expect(html).toContain('Laps <span>2 total</span>');
+  expect(html).toContain('Laps <span>2</span>');
   expect(html).toContain('Compare lap 2');
   expect(html).not.toContain('lap-source');
   expect(html).not.toContain('Long recording filename');

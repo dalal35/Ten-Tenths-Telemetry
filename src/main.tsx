@@ -16,4 +16,4 @@ import './glass-materials.css';
 import './motion-premium.css';
 import './update-prompt.css';
 initializeGlassMaterials();
-ReactDOM.createRoot(document.getElementById('root')!).render(<React.StrictMode><GlassDefinitions/><MotionConfig reducedMotion="user" transition={motionTokens.spring}><App premium /><UpdatePrompt/></MotionConfig></React.StrictMode>);
+ReactDOM.createRoot(document.getElementById('root')!).render(<React.StrictMode><GlassDefinitions/><MotionConfig reducedMotion="user" transition={motionTokens.spring}><App /><UpdatePrompt/></MotionConfig></React.StrictMode>);
